@@ -13,3 +13,11 @@ No Render:
 
 Na primeira inicialização, a tabela chefe_telles_state é criada automaticamente.
 Pedidos, produtos, categorias, taxas, PIX e configurações passam a persistir no banco.
+
+
+V7 — PERSISTÊNCIA E ANÁLISE
+- O PostgreSQL mantém pedidos, produtos, categorias, taxas, PIX e configurações.
+- Pedidos não são apagados automaticamente.
+- Exclusão de pedido existe somente dentro do Painel do Dono autenticado.
+- Dashboard mantém análise diária e acrescenta pedidos do mês + faturamento do mês.
+- Impressão automática continua monitorando novos pedidos e evita duplicação no mesmo dispositivo.

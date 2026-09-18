@@ -186,6 +186,13 @@ async function api(req,res,pathname){
     if(req.method==='GET'&&pathname==='/api/orders')return send(res,200,(await read()).orders.slice().reverse());
     const om=pathname.match(/^\/api\/orders\/(\d+)$/);
     if(om&&req.method==='PUT'){const b=await body(req),d=await read(),o=d.orders.find(x=>String(x.id)===om[1]);if(!o)return send(res,404,{error:'Pedido não encontrado'});o.status=b.status||o.status;await write(d);return send(res,200,o);}
+    if(om&&req.method==='DELETE'){
+      const d=await read(),i=d.orders.findIndex(x=>String(x.id)===om[1]);
+      if(i<0)return send(res,404,{error:'Pedido não encontrado'});
+      const removed=d.orders.splice(i,1)[0];
+      await write(d);
+      return send(res,200,{ok:true,id:removed.id});
+    }
 
     if(req.method==='GET'&&pathname==='/api/categories') return send(res,200,(await read()).categories||[]);
     if(req.method==='POST'&&pathname==='/api/categories'){
