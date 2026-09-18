@@ -87,7 +87,7 @@ async function api(req,res,pathname){
     }
     if(req.method==='GET'&&pathname==='/api/store'){
       const d=read();
-      return send(res,200,{settings:{name:d.settings.name,whatsapp:d.settings.whatsapp},categories:d.categories,products:d.products.filter(p=>p.active),deliveryZones:d.deliveryZones.filter(z=>z.active!==false)});
+      return send(res,200,{settings:{name:d.settings.name,whatsapp:d.settings.whatsapp,pixKey:d.settings.pixKey||'',pixRecipient:d.settings.pixRecipient||'',pixType:d.settings.pixType||'',pixQr:d.settings.pixQr||'',botWhatsapp:d.settings.botWhatsapp||d.settings.whatsapp,botMessage:d.settings.botMessage||''},categories:d.categories,products:d.products.filter(p=>p.active),deliveryZones:d.deliveryZones.filter(z=>z.active!==false)});
     }
     if(req.method==='POST'&&pathname==='/api/login'){
       const b=await body(req),d=read();
@@ -193,11 +193,6 @@ function listenOnAvailablePort(server, port) {
     console.error('Não foi possível iniciar o servidor:', err.message);
     process.exitCode = 1;
   });
-
-// CHEFE TELLES V5 CONFIG
-const __v5fs=require('fs'),__v5path=require('path'),__v5file=__v5path.join(__dirname,'data.json');
-app.get('/api/config-v5',(req,res)=>{try{let d=JSON.parse(__v5fs.readFileSync(__v5file,'utf8'));res.json(d.configuracoes||{})}catch(e){res.json({})}});
-app.post('/api/config-v5',(req,res)=>{try{let d=JSON.parse(__v5fs.readFileSync(__v5file,'utf8'));d.configuracoes=d.configuracoes||{};Object.assign(d.configuracoes,req.body||{});__v5fs.writeFileSync(__v5file,JSON.stringify(d,null,2));res.json({ok:true})}catch(e){res.status(500).json({ok:false})}});
   server.listen(port,'0.0.0.0',()=>console.log(`\nCHEFE TELLES v2.0 — servidor online\nLoja:   http://localhost:${port}/\nDono:   http://localhost:${port}/admin\nThermer: http://localhost:${port}/thermer-test.html\n`));
 }
 listenOnAvailablePort(server, PORT);

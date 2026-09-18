@@ -12,7 +12,13 @@
     "adminPassword": "1234",
     "autoPrint": true,
     "printerPort": "COM11",
-    "printerBaud": 9600
+    "printerBaud": 9600,
+    "pixKey": "",
+    "pixRecipient": "",
+    "pixType": "",
+    "pixQr": "",
+    "botWhatsapp": "5573982451160",
+    "botMessage": "👋 Olá! Bem-vindo ao CHEFE TELLES FAST FOOD!\n\n🍔 Faça seu pedido pelo nosso site.\n\nAssim que finalizar, envie o comprovante PIX por aqui."
   },
   "products": [
     {
@@ -104,18 +110,18 @@
       "desc": "Refrigerante 350ml bem gelado.",
       "image": "",
       "active": true
+    },
+    {
+      "id": 1789695077869,
+      "name": "Açaí na Garrafa 300ml",
+      "cat": "Açaí na Garrafa",
+      "price": 12,
+      "emoji": "",
+      "desc": "Açaí cremoso servido na garrafa.",
+      "image": "",
+      "active": true
     }
   ],
   "deliveryZones": [],
-  "orders": [],
-  "configuracoes": {
-    "pix": {
-      "chave": "",
-      "recebedor": ""
-    },
-    "botWhatsApp": {
-      "numero": "",
-      "mensagem": ""
-    }
-  }
+  "orders": []
 }
