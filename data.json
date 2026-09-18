@@ -1,13 +1,121 @@
 {
+  "categories": [
+    "Hambúrgueres",
+    "Pizzas",
+    "Combos",
+    "Bebidas",
+    "Açaí na Garrafa"
+  ],
+  "settings": {
+    "name": "CHEFE TELLES",
+    "whatsapp": "5573982451160",
+    "adminPassword": "1234",
+    "autoPrint": true,
+    "printerPort": "COM11",
+    "printerBaud": 9600
+  },
+  "products": [
+    {
+      "id": 1,
+      "name": "X-Bacon",
+      "cat": "Hambúrgueres",
+      "price": 29.9,
+      "emoji": "🍔",
+      "desc": "Pão brioche, burger artesanal, queijo, bacon crocante e molho da casa.",
+      "image": "",
+      "active": true
+    },
+    {
+      "id": 2,
+      "name": "X-Salada",
+      "cat": "Hambúrgueres",
+      "price": 26.9,
+      "emoji": "🍔",
+      "desc": "Burger artesanal, queijo, alface, tomate e molho especial.",
+      "image": "",
+      "active": true
+    },
+    {
+      "id": 3,
+      "name": "X-Tudo",
+      "cat": "Hambúrgueres",
+      "price": 34.9,
+      "emoji": "🍔",
+      "desc": "Burger, queijo, bacon, calabresa, ovo, salada e molho.",
+      "image": "",
+      "active": true
+    },
+    {
+      "id": 4,
+      "name": "Combo X-Bacon",
+      "cat": "Combos",
+      "price": 39.9,
+      "emoji": "🍟",
+      "desc": "X-Bacon + batata frita crocante + refrigerante lata.",
+      "image": "",
+      "active": true
+    },
+    {
+      "id": 5,
+      "name": "Combo X-Tudo",
+      "cat": "Combos",
+      "price": 44.9,
+      "emoji": "🍟",
+      "desc": "X-Tudo + batata frita crocante + refrigerante lata.",
+      "image": "",
+      "active": true
+    },
+    {
+      "id": 6,
+      "name": "Pizza Calabresa",
+      "cat": "Pizzas",
+      "price": 39.9,
+      "emoji": "🍕",
+      "desc": "Molho de tomate, muçarela, calabresa e cebola.",
+      "image": "",
+      "active": true
+    },
+    {
+      "id": 7,
+      "name": "Pizza Frango com Catupiry",
+      "cat": "Pizzas",
+      "price": 44.9,
+      "emoji": "🍕",
+      "desc": "Frango desfiado, muçarela e catupiry cremoso.",
+      "image": "",
+      "active": true
+    },
+    {
+      "id": 8,
+      "name": "Pizza 4 Queijos",
+      "cat": "Pizzas",
+      "price": 46.9,
+      "emoji": "🍕",
+      "desc": "Muçarela, provolone, parmesão e catupiry.",
+      "image": "",
+      "active": true
+    },
+    {
+      "id": 9,
+      "name": "Coca-Cola Lata",
+      "cat": "Bebidas",
+      "price": 6,
+      "emoji": "🥤",
+      "desc": "Refrigerante 350ml bem gelado.",
+      "image": "",
+      "active": true
+    }
+  ],
+  "deliveryZones": [],
+  "orders": [],
   "configuracoes": {
     "pix": {
       "chave": "",
-      "recebedor": "",
-      "qrCode": ""
+      "recebedor": ""
     },
-    "whatsappBot": {
+    "botWhatsApp": {
       "numero": "",
-      "mensagem": "👋 Olá! Bem-vindo ao CHEFE TELLES FAST FOOD!"
+      "mensagem": ""
     }
   }
 }

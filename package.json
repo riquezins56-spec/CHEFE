@@ -1,1 +1,9 @@
-{"name":"chefe-telles-fast-food"}
+{
+  "name": "chefe-telles",
+  "version": "2.0.0",
+  "private": true,
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {}
+}
