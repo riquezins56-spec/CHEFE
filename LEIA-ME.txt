@@ -1,0 +1,57 @@
+CHEFE TELLES v2.0 — GUIA RÁPIDO
+
+1) INICIAR
+- Extraia o ZIP em uma pasta própria.
+- Execute somente INICIAR.bat.
+- Não abra admin/index.html ou index.html pelo duplo clique.
+- O CMD abre automaticamente a loja e o painel do dono.
+
+2) ENDEREÇOS
+- No PC: http://127.0.0.1:PORTA/
+- No celular: use o IP mostrado pelo CMD, por exemplo http://192.168.1.10:PORTA/
+- Painel do dono: mesmo endereço + /admin
+- PC e celular devem estar na mesma rede Wi-Fi.
+
+3) SENHA INICIAL DO PAINEL
+1234
+A senha pode ser alterada em Configurações.
+
+4) ENTREGA
+- O cliente escolhe Entrega ou Retirada.
+- Para entrega, digita bairro e rua.
+- A taxa cadastrada pelo dono é aplicada automaticamente.
+- Uma taxa com rua vazia vale para todo o bairro.
+- Uma taxa de rua específica pode sobrescrever a taxa do bairro.
+
+5) IMPRESSÃO
+ANDROID
+- Thermer Android configurado para ESC/POS / 2-inch / Bluetooth.
+- O sistema abre: my.bluetoothprint.scheme://<URL_DO_ENDPOINT>
+- Teste: /print/test
+- Pedido: /print/ID
+
+iPHONE
+- Mantém bprint:// para o fluxo do iPhone.
+
+PC WINDOWS
+- Mantém o fluxo QZ Tray / página de teste. A comunicação precisa ser configurada no computador da loja.
+
+6) REDE / FIREWALL
+- Permita Node.js no Firewall do Windows quando o Windows perguntar.
+- Se o celular não abrir, confirme que está na mesma Wi-Fi do PC.
+- Use o IP de rede exibido no CMD, nunca localhost ou 127.0.0.1 no celular.
+- Se necessário, no Firewall do Windows permita conexões de entrada para a porta exibida pelo CMD.
+
+7) PAINEL DO DONO
+- Dashboard
+- Pedidos
+- Produtos
+- Categorias
+- Taxas de entrega
+- Impressão
+- Configurações
+- Produtos permitem foto, preço, descrição e categoria.
+- Categorias podem ser criadas, editadas e excluídas quando não houver produtos ativos ligados a elas.
+
+8) EFEITO VISUAL
+A loja possui partículas discretas de brasa/fogo e cinzas, sem emojis e sem excesso.
