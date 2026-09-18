@@ -71,7 +71,7 @@ async function printEndpoint(req,res,pathname){
   const m=pathname.match(/^\/print\/(\d+)$/); if(!m)return false;
   const d=read(),o=d.orders.find(x=>String(x.id)===m[1]); if(!o)return send(res,404,{error:'Pedido não encontrado'});
   const e=[]; addText(e,'CHEFE TELLES',1,1,2); addText(e,'NOVO PEDIDO '+String(o.number).padStart(2,'0'),1,1,1); addText(e,'--------------------------------');
-  addText(e,'CLIENTE: '+(o.customer?.name||'')); if(o.customer?.phone)addText(e,'WHATSAPP: '+o.customer.phone); addText(e,'--------------------------------');
+  addText(e,'CLIENTE: '+(o.customer?.name||'')); if(o.customer?.phone)addText(e,'WHATSAPP: '+o.customer.phone); if(o.customer?.reference)addText(e,'PONTO DE REFERÊNCIA: '+o.customer.reference); addText(e,'--------------------------------');
   for(const i of (o.items||[])) addText(e,`${i.qty}x ${i.name} - R$ ${(Number(i.price||0)*Number(i.qty||0)).toFixed(2)}`);
   addText(e,'--------------------------------'); addText(e,'SUBTOTAL: R$ '+Number(o.subtotal||o.total||0).toFixed(2)); addText(e,'ENTREGA: R$ '+Number(o.deliveryFee||0).toFixed(2)); addText(e,'TOTAL: R$ '+Number(o.total||0).toFixed(2),1,0,1); addText(e,'PAGAMENTO: '+(o.customer?.payment||'')); addText(e,'ENDEREÇO: '+(o.customer?.address||'')); addText(e,'OBS: '+(o.customer?.note||'Nenhuma')); addText(e,' '); addText(e,' ');
   return send(res,200,JSON.parse(printJson(e)));
