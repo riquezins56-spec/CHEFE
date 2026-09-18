@@ -14,6 +14,29 @@ async function loadNetworkLinks(){const box=$('#serverLinks');if(!box)return;try
 function renderDashboard(){const today=new Date().toLocaleDateString('en-CA',{timeZone:'America/Sao_Paulo'}),os=(state.orders||[]).filter(o=>o.day===today);$('#statOrders').textContent=os.length;$('#statRevenue').textContent=money(os.reduce((s,o)=>s+Number(o.total||0),0));$('#statNew').textContent=os.filter(o=>o.status==='Novo').length;$('#statProducts').textContent=(state.products||[]).filter(p=>p.active!==false).length}
 async function loadOrders(){try{const os=await api('/api/orders');state.orders=os;renderDashboard();$('#ordersList').innerHTML=os.length?os.map(o=>`<article class="order"><div><h3>NOVO PEDIDO ${String(o.number).padStart(2,'0')}</h3><p><b>${esc(o.customer?.name||'Cliente')}</b> · ${esc(o.customer?.phone||'')}</p><p>${o.customer?.delivery==='Retirada'?'Retirada na loja':'Entrega · '+esc(o.customer?.address||'')}</p><p>${(o.items||[]).map(i=>`${i.qty}x ${esc(i.name)}`).join(' · ')}</p><p class="total">${money(o.total)} <span class="tag">${esc(o.customer?.payment||'')}</span></p></div><div class="order-actions"><select data-status="${o.id}">${['Novo','Em preparo','Pronto','Saiu para entrega','Entregue','Cancelado'].map(s=>`<option ${o.status===s?'selected':''}>${s}</option>`).join('')}</select><button class="btn" data-print="${o.id}">Imprimir</button></div></article>`).join(''):'<div class="panel">Nenhum pedido ainda.</div>';$$('[data-status]').forEach(s=>s.onchange=async()=>{await api('/api/orders/'+s.dataset.status,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({status:s.value})});await loadOrders()});$$('[data-print]').forEach(b=>b.onclick=()=>printOrder(b.dataset.print))}catch(err){if(token)$('#ordersList').innerHTML='<div class="panel error">'+esc(err.message)+'</div>'}}
 function printOrder(id){const u=location.origin+'/print/'+id,ua=navigator.userAgent.toLowerCase();if(/android/.test(ua))location.href='my.bluetoothprint.scheme://'+u;else if(/iphone|ipad|ipod/.test(ua))location.href='bprint://'+u;else window.open('/thermer-test.html?order='+id,'_blank')}
+
+// Impressão automática: monitora pedidos novos e dispara uma única vez por pedido.
+const AUTO_PRINT_KEY='chefeAutoPrintedOrdersV1';
+let autoPrintReady=false,autoPrintBusy=false;
+function autoPrintedIds(){try{return new Set(JSON.parse(localStorage.getItem(AUTO_PRINT_KEY)||'[]').map(String))}catch{return new Set()}}
+function saveAutoPrinted(ids){localStorage.setItem(AUTO_PRINT_KEY,JSON.stringify([...ids].slice(-300)))}
+async function autoPrintNewOrders(){
+  if(!token||autoPrintBusy||document.hidden)return;
+  autoPrintBusy=true;
+  try{
+    const os=await api('/api/orders'), ids=autoPrintedIds();
+    if(!autoPrintReady){os.forEach(o=>ids.add(String(o.id)));saveAutoPrinted(ids);autoPrintReady=true;return}
+    const novos=os.filter(o=>o.status==='Novo'&&!ids.has(String(o.id))).reverse();
+    for(const o of novos){
+      ids.add(String(o.id));saveAutoPrinted(ids);
+      printOrder(o.id);
+      await new Promise(r=>setTimeout(r,1800));
+    }
+    if(novos.length){state.orders=os;renderDashboard();}
+  }catch(e){}finally{autoPrintBusy=false}
+}
+setInterval(autoPrintNewOrders,5000);
+document.addEventListener('visibilitychange',()=>{if(!document.hidden)autoPrintNewOrders()});
 function fillCategorySelect(selected=''){const sel=$('#pCat');sel.innerHTML=(state.categories||[]).map(c=>`<option ${c===selected?'selected':''}>${esc(c)}</option>`).join('')}
 function adminFoodIcon(cat=''){const c=String(cat).normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();if(c.includes('pizza'))return '<span class="admin-icon">◉</span>';if(c.includes('bebida'))return '<span class="admin-icon">▱</span>';if(c.includes('acai'))return '<span class="admin-icon">◍</span>';if(c.includes('combo'))return '<span class="admin-icon">▣</span>';return '<span class="admin-icon">◆</span>';}
 async function loadProducts(){state=state.categories?state:await api('/api/admin');fillCategorySelect($('#pCat').value);const ps=state.products||[];$('#productsList').innerHTML=ps.map(p=>`<article><div>${p.image?`<img src="${esc(p.image)}" alt="">`:`<div class="thumb">${adminFoodIcon(p.cat)}</div>`}</div><div><h3>${esc(p.name)} <span class="tag">${esc(p.cat)}</span></h3><p>${esc(p.desc||'')}</p><strong>${money(p.price)}</strong></div><div class="actions"><button class="btn" data-edit="${p.id}">Editar</button><button class="btn" data-del="${p.id}">Excluir</button></div></article>`).join('');$$('[data-edit]').forEach(b=>b.onclick=()=>editProduct(b.dataset.edit));$$('[data-del]').forEach(b=>b.onclick=async()=>{if(confirm('Excluir este produto do cardápio?')){await api('/api/products/'+b.dataset.del,{method:'DELETE'});await refreshAll()}})}
