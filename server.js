@@ -4,6 +4,7 @@ const path = require('path');
 const { URL } = require('url');
 const crypto = require('crypto');
 const os = require('os');
+const { Pool } = require('pg');
 
 const DEFAULT_PORT = Number(process.env.PORT || 3000);
 let PORT = DEFAULT_PORT;
@@ -35,9 +36,68 @@ const seed = {
   orders: []
 };
 
-if (!fs.existsSync(DB)) fs.writeFileSync(DB, JSON.stringify(seed, null, 2));
-function read(){ try { const d=JSON.parse(fs.readFileSync(DB,'utf8')); let changed=false; if(!Array.isArray(d.categories)){d.categories=['Hambúrgueres','Pizzas','Combos','Bebidas','Açaí na Garrafa'];changed=true;} if(!d.categories.includes('Açaí na Garrafa')){d.categories.push('Açaí na Garrafa');changed=true;} if(!Array.isArray(d.deliveryZones)){d.deliveryZones=[];changed=true;} if(!Array.isArray(d.orders)){d.orders=[];changed=true;} if(!d.products.some(p=>p.cat==='Açaí na Garrafa')){d.products.push({id:Date.now()+17,name:'Açaí na Garrafa 300ml',cat:'Açaí na Garrafa',price:12,emoji:'',desc:'Açaí cremoso servido na garrafa.',image:'',active:true});changed=true;} if(changed) fs.writeFileSync(DB,JSON.stringify(d,null,2)); return d; } catch(e) { return JSON.parse(JSON.stringify(seed)); } }
-function write(d){ fs.writeFileSync(DB, JSON.stringify(d,null,2)); }
+const pool = process.env.DATABASE_URL ? new Pool({
+  connectionString: process.env.DATABASE_URL,
+  ssl: process.env.DATABASE_URL.includes('localhost') ? false : {rejectUnauthorized:false}
+}) : null;
+
+let dbReadyPromise=null;
+async function ensureDb(){
+  if(!pool)return;
+  if(!dbReadyPromise)dbReadyPromise=(async()=>{
+    await pool.query(`CREATE TABLE IF NOT EXISTS chefe_telles_state (
+      id INTEGER PRIMARY KEY,
+      data JSONB NOT NULL,
+      updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    )`);
+    const r=await pool.query('SELECT id FROM chefe_telles_state WHERE id=1');
+    if(!r.rowCount)await pool.query(
+      'INSERT INTO chefe_telles_state(id,data) VALUES(1,$1::jsonb)',
+      [JSON.stringify(seed)]
+    );
+  })();
+  return dbReadyPromise;
+}
+function normalizeData(d){
+  let changed=false;
+  if(!Array.isArray(d.categories)){d.categories=['Hambúrgueres','Pizzas','Combos','Bebidas','Açaí na Garrafa'];changed=true;}
+  if(!d.categories.includes('Açaí na Garrafa')){d.categories.push('Açaí na Garrafa');changed=true;}
+  if(!Array.isArray(d.deliveryZones)){d.deliveryZones=[];changed=true;}
+  if(!Array.isArray(d.orders)){d.orders=[];changed=true;}
+  if(!Array.isArray(d.products))d.products=[];
+  if(!d.products.some(p=>p.cat==='Açaí na Garrafa')){d.products.push({id:Date.now()+17,name:'Açaí na Garrafa 300ml',cat:'Açaí na Garrafa',price:12,emoji:'',desc:'Açaí cremoso servido na garrafa.',image:'',active:true});changed=true;}
+  return {d,changed};
+}
+async function read(){
+  try{
+    if(pool){
+      await ensureDb();
+      const r=await pool.query('SELECT data FROM chefe_telles_state WHERE id=1');
+      const n=normalizeData(r.rows[0]?.data || JSON.parse(JSON.stringify(seed)));
+      if(n.changed)await write(n.d);
+      return n.d;
+    }
+    if(!fs.existsSync(DB))fs.writeFileSync(DB,JSON.stringify(seed,null,2));
+    const n=normalizeData(JSON.parse(fs.readFileSync(DB,'utf8')));
+    if(n.changed)fs.writeFileSync(DB,JSON.stringify(n.d,null,2));
+    return n.d;
+  }catch(e){
+    console.error('Falha ao ler dados:',e.message);
+    return JSON.parse(JSON.stringify(seed));
+  }
+}
+async function write(d){
+  if(pool){
+    await ensureDb();
+    await pool.query(
+      `INSERT INTO chefe_telles_state(id,data,updated_at) VALUES(1,$1::jsonb,NOW())
+       ON CONFLICT(id) DO UPDATE SET data=EXCLUDED.data, updated_at=NOW()`,
+      [JSON.stringify(d)]
+    );
+    return;
+  }
+  fs.writeFileSync(DB,JSON.stringify(d,null,2));
+}
 function send(res,status,data,type='application/json'){
   res.writeHead(status, {'Content-Type':type,'Access-Control-Allow-Origin':'*','Cache-Control':'no-store'});
   res.end(type.startsWith('application/json') ? JSON.stringify(data) : data);
@@ -69,7 +129,7 @@ async function printEndpoint(req,res,pathname){
     return send(res,200,JSON.parse(printJson(e)));
   }
   const m=pathname.match(/^\/print\/(\d+)$/); if(!m)return false;
-  const d=read(),o=d.orders.find(x=>String(x.id)===m[1]); if(!o)return send(res,404,{error:'Pedido não encontrado'});
+  const d=await read(),o=d.orders.find(x=>String(x.id)===m[1]); if(!o)return send(res,404,{error:'Pedido não encontrado'});
   const e=[]; addText(e,'CHEFE TELLES',1,1,2); addText(e,'NOVO PEDIDO '+String(o.number).padStart(2,'0'),1,1,1); addText(e,'--------------------------------');
   addText(e,'CLIENTE: '+(o.customer?.name||'')); if(o.customer?.phone)addText(e,'WHATSAPP: '+o.customer.phone); if(o.customer?.reference)addText(e,'PONTO DE REFERÊNCIA: '+o.customer.reference); addText(e,'--------------------------------');
   for(const i of (o.items||[])) addText(e,`${i.qty}x ${i.name} - R$ ${(Number(i.price||0)*Number(i.qty||0)).toFixed(2)}`);
@@ -86,18 +146,18 @@ async function api(req,res,pathname){
       return send(res,200,{ips:[...new Set(ips)]});
     }
     if(req.method==='GET'&&pathname==='/api/store'){
-      const d=read();
+      const d=await read();
       return send(res,200,{settings:{name:d.settings.name,whatsapp:d.settings.whatsapp,pixKey:d.settings.pixKey||'',pixRecipient:d.settings.pixRecipient||'',pixType:d.settings.pixType||'',pixQr:d.settings.pixQr||'',botWhatsapp:d.settings.botWhatsapp||d.settings.whatsapp,botMessage:d.settings.botMessage||''},categories:d.categories,products:d.products.filter(p=>p.active),deliveryZones:d.deliveryZones.filter(z=>z.active!==false)});
     }
     if(req.method==='POST'&&pathname==='/api/login'){
-      const b=await body(req),d=read();
+      const b=await body(req),d=await read();
       if(String(b.password||'')!==String(d.settings.adminPassword)) return send(res,401,{ok:false,error:'Senha incorreta'});
       const token=crypto.randomBytes(24).toString('hex'); adminTokens.add(token); return send(res,200,{ok:true,token});
     }
     if(req.method==='POST'&&pathname==='/api/logout'){const h=req.headers.authorization||''; if(h.startsWith('Bearer '))adminTokens.delete(h.slice(7)); return send(res,200,{ok:true});}
 
     if(req.method==='POST'&&pathname==='/api/orders'){
-      const b=await body(req),d=read(),today=localDay();
+      const b=await body(req),d=await read(),today=localDay();
       const count=d.orders.filter(o=>o.day===today).length+1;
       const subtotal=Number(b.subtotal ?? b.total ?? 0);
       let deliveryFee=0;
@@ -110,61 +170,61 @@ async function api(req,res,pathname){
       }
       const customer={...(b.customer||{})};
       if(customer.delivery!=='Retirada'){
-        const street=String(customer.street||'').trim(), number=String(customer.number||'').trim(), complement=String(customer.complement||'').trim(), neighborhood=String(customer.neighborhood||'').trim();
-        customer.address=[street,number&&('Nº '+number),neighborhood,complement].filter(Boolean).join(', ');
+        const street=String(customer.street||'').trim(), number=String(customer.number||'').trim(), complement=String(customer.complement||'').trim(), neighborhood=String(customer.neighborhood||'').trim(), reference=String(customer.reference||'').trim();
+        customer.address=[street,number&&('Nº '+number),neighborhood,complement,reference&&('Referência: '+reference)].filter(Boolean).join(', ');
       }else customer.address='Retirada na loja';
       const order={...b,customer,id:Date.now(),day:today,number:count,status:'Novo',createdAt:new Date().toISOString(),subtotal,deliveryFee,total:subtotal+deliveryFee};
-      d.orders.push(order);write(d);return send(res,201,order);
+      d.orders.push(order);await write(d);return send(res,201,order);
     }
 
     if(!auth(req)) return send(res,401,{error:'Não autorizado'});
 
-    if(req.method==='GET'&&pathname==='/api/admin'){ const d=read(); return send(res,200,d); }
+    if(req.method==='GET'&&pathname==='/api/admin'){ const d=await read(); return send(res,200,d); }
     if(req.method==='PUT'&&pathname==='/api/settings'){
-      const b=await body(req),d=read();if(b.adminPassword!==undefined&&String(b.adminPassword).trim()==='') delete b.adminPassword; d.settings={...d.settings,...b}; write(d); return send(res,200,{ok:true});
+      const b=await body(req),d=await read();if(b.adminPassword!==undefined&&String(b.adminPassword).trim()==='') delete b.adminPassword; d.settings={...d.settings,...b}; await write(d); return send(res,200,{ok:true});
     }
-    if(req.method==='GET'&&pathname==='/api/orders')return send(res,200,read().orders.slice().reverse());
+    if(req.method==='GET'&&pathname==='/api/orders')return send(res,200,(await read()).orders.slice().reverse());
     const om=pathname.match(/^\/api\/orders\/(\d+)$/);
-    if(om&&req.method==='PUT'){const b=await body(req),d=read(),o=d.orders.find(x=>String(x.id)===om[1]);if(!o)return send(res,404,{error:'Pedido não encontrado'});o.status=b.status||o.status;write(d);return send(res,200,o);}
+    if(om&&req.method==='PUT'){const b=await body(req),d=await read(),o=d.orders.find(x=>String(x.id)===om[1]);if(!o)return send(res,404,{error:'Pedido não encontrado'});o.status=b.status||o.status;await write(d);return send(res,200,o);}
 
-    if(req.method==='GET'&&pathname==='/api/categories') return send(res,200,read().categories||[]);
+    if(req.method==='GET'&&pathname==='/api/categories') return send(res,200,(await read()).categories||[]);
     if(req.method==='POST'&&pathname==='/api/categories'){
-      const b=await body(req),d=read(); const name=String(b.name||'').trim();
+      const b=await body(req),d=await read(); const name=String(b.name||'').trim();
       if(!name)return send(res,400,{error:'Informe o nome da categoria'});
       if((d.categories||[]).some(c=>normalizeDeliveryText(c)===normalizeDeliveryText(name)))return send(res,409,{error:'Categoria já existe'});
-      d.categories.push(name); write(d); return send(res,201,{name});
+      d.categories.push(name); await write(d); return send(res,201,{name});
     }
     const cm=pathname.match(/^\/api\/categories\/(\d+)$/);
     if(cm&&req.method==='PUT'){
-      const b=await body(req),d=read(),idx=Number(cm[1]),old=d.categories[idx],name=String(b.name||'').trim();
+      const b=await body(req),d=await read(),idx=Number(cm[1]),old=d.categories[idx],name=String(b.name||'').trim();
       if(old===undefined)return send(res,404,{error:'Categoria não encontrada'});
       if(!name)return send(res,400,{error:'Informe o nome da categoria'});
       if(d.categories.some((c,i)=>i!==idx&&normalizeDeliveryText(c)===normalizeDeliveryText(name)))return send(res,409,{error:'Categoria já existe'});
-      d.categories[idx]=name; d.products.forEach(p=>{if(normalizeDeliveryText(p.cat)===normalizeDeliveryText(old))p.cat=name}); write(d); return send(res,200,{name});
+      d.categories[idx]=name; d.products.forEach(p=>{if(normalizeDeliveryText(p.cat)===normalizeDeliveryText(old))p.cat=name}); await write(d); return send(res,200,{name});
     }
     if(cm&&req.method==='DELETE'){
-      const d=read(),idx=Number(cm[1]),name=d.categories[idx];
+      const d=await read(),idx=Number(cm[1]),name=d.categories[idx];
       if(name===undefined)return send(res,404,{error:'Categoria não encontrada'});
       const used=d.products.some(p=>normalizeDeliveryText(p.cat)===normalizeDeliveryText(name)&&p.active!==false);
       if(used)return send(res,409,{error:'Não é possível excluir: existem produtos ativos nesta categoria. Edite ou mova os produtos primeiro.'});
-      d.categories.splice(idx,1); write(d); return send(res,200,{ok:true});
+      d.categories.splice(idx,1); await write(d); return send(res,200,{ok:true});
     }
 
     if(req.method==='POST'&&pathname==='/api/products'){
-      const b=await body(req),d=read();const p={id:Date.now(),active:true,emoji:'🍔',image:'',desc:'',...b,price:Number(b.price)||0};d.products.push(p);write(d);return send(res,201,p);
+      const b=await body(req),d=await read();const p={id:Date.now(),active:true,emoji:'🍔',image:'',desc:'',...b,price:Number(b.price)||0};d.products.push(p);await write(d);return send(res,201,p);
     }
     const pm=pathname.match(/^\/api\/products\/(\d+)$/);
-    if(pm&&req.method==='PUT'){const b=await body(req),d=read(),i=d.products.findIndex(x=>String(x.id)===pm[1]);if(i<0)return send(res,404,{error:'Produto não encontrado'});d.products[i]={...d.products[i],...b,price:Number(b.price)||0};write(d);return send(res,200,d.products[i]);}
-    if(pm&&req.method==='DELETE'){const d=read(),p=d.products.find(x=>x.id==pm[1]);if(p)p.active=false;write(d);return send(res,200,{ok:true});}
+    if(pm&&req.method==='PUT'){const b=await body(req),d=await read(),i=d.products.findIndex(x=>String(x.id)===pm[1]);if(i<0)return send(res,404,{error:'Produto não encontrado'});d.products[i]={...d.products[i],...b,price:Number(b.price)||0};await write(d);return send(res,200,d.products[i]);}
+    if(pm&&req.method==='DELETE'){const d=await read(),p=d.products.find(x=>x.id==pm[1]);if(p)p.active=false;await write(d);return send(res,200,{ok:true});}
 
     if(req.method==='POST'&&pathname==='/api/delivery-zones'){
-      const b=await body(req),d=read();const z={id:Date.now(),neighborhood:String(b.neighborhood||'').trim(),street:String(b.street||'').trim(),fee:Number(b.fee)||0,active:b.active!==false};
+      const b=await body(req),d=await read();const z={id:Date.now(),neighborhood:String(b.neighborhood||'').trim(),street:String(b.street||'').trim(),fee:Number(b.fee)||0,active:b.active!==false};
       if(!z.neighborhood)return send(res,400,{error:'Informe o bairro'});
-      d.deliveryZones.push(z);write(d);return send(res,201,z);
+      d.deliveryZones.push(z);await write(d);return send(res,201,z);
     }
     const zm=pathname.match(/^\/api\/delivery-zones\/(\d+)$/);
-    if(zm&&req.method==='PUT'){const b=await body(req),d=read(),i=d.deliveryZones.findIndex(x=>String(x.id)===zm[1]);if(i<0)return send(res,404,{error:'Taxa não encontrada'});d.deliveryZones[i]={...d.deliveryZones[i],...b,fee:Number(b.fee)||0};write(d);return send(res,200,d.deliveryZones[i]);}
-    if(zm&&req.method==='DELETE'){const d=read();d.deliveryZones=d.deliveryZones.filter(x=>String(x.id)!==zm[1]);write(d);return send(res,200,{ok:true});}
+    if(zm&&req.method==='PUT'){const b=await body(req),d=await read(),i=d.deliveryZones.findIndex(x=>String(x.id)===zm[1]);if(i<0)return send(res,404,{error:'Taxa não encontrada'});d.deliveryZones[i]={...d.deliveryZones[i],...b,fee:Number(b.fee)||0};await write(d);return send(res,200,d.deliveryZones[i]);}
+    if(zm&&req.method==='DELETE'){const d=await read();d.deliveryZones=d.deliveryZones.filter(x=>String(x.id)!==zm[1]);await write(d);return send(res,200,{ok:true});}
 
     return send(res,404,{error:'API não encontrada'});
   }catch(e){console.error(e);return send(res,500,{error:'Erro no servidor',detail:e.message});}

@@ -1,0 +1,15 @@
+CHEFE TELLES — BANCO ONLINE
+================================
+Esta versão usa PostgreSQL quando a variável DATABASE_URL estiver configurada.
+Sem DATABASE_URL, continua usando data.json localmente.
+
+No Render:
+1. Crie um banco PostgreSQL gratuito em um provedor compatível (ex.: Neon).
+2. Copie a connection string.
+3. Render > seu serviço > Environment > Add Environment Variable.
+4. Nome: DATABASE_URL
+5. Valor: cole a connection string.
+6. Salve/redeploy.
+
+Na primeira inicialização, a tabela chefe_telles_state é criada automaticamente.
+Pedidos, produtos, categorias, taxas, PIX e configurações passam a persistir no banco.
