@@ -11,8 +11,24 @@ async function refreshAll(){state=await api('/api/admin');renderDashboard();rend
 
 async function loadNetworkLinks(){const box=$('#serverLinks');if(!box)return;try{const d=await api('/api/network');const port=location.port||'3000';const ips=d.ips||[];box.innerHTML=ips.length?ips.map(ip=>`<div><span>ACESSO PELO CELULAR</span><b>http://${ip}:${port}/</b><br><small>PAINEL: http://${ip}:${port}/admin</small></div>`).join(''):'<div><span>REDE</span><b>IP não detectado</b></div>';}catch{box.innerHTML='<div><span>REDE</span><b>Execute o servidor pelo INICIAR.bat.</b></div>';}}
 
-function renderDashboard(){const today=new Date().toLocaleDateString('en-CA',{timeZone:'America/Sao_Paulo'}),os=(state.orders||[]).filter(o=>o.day===today);$('#statOrders').textContent=os.length;$('#statRevenue').textContent=money(os.reduce((s,o)=>s+Number(o.total||0),0));$('#statNew').textContent=os.filter(o=>o.status==='Novo').length;$('#statProducts').textContent=(state.products||[]).filter(p=>p.active!==false).length}
-async function loadOrders(){try{const os=await api('/api/orders');state.orders=os;renderDashboard();$('#ordersList').innerHTML=os.length?os.map(o=>`<article class="order"><div><h3>NOVO PEDIDO ${String(o.number).padStart(2,'0')}</h3><p><b>${esc(o.customer?.name||'Cliente')}</b> · ${esc(o.customer?.phone||'')}</p><p>${o.customer?.delivery==='Retirada'?'Retirada na loja':'Entrega · '+esc(o.customer?.address||'')}</p><p>${(o.items||[]).map(i=>`${i.qty}x ${esc(i.name)}`).join(' · ')}</p><p class="total">${money(o.total)} <span class="tag">${esc(o.customer?.payment||'')}</span></p></div><div class="order-actions"><select data-status="${o.id}">${['Novo','Em preparo','Pronto','Saiu para entrega','Entregue','Cancelado'].map(s=>`<option ${o.status===s?'selected':''}>${s}</option>`).join('')}</select><button class="btn" data-print="${o.id}">Imprimir</button></div></article>`).join(''):'<div class="panel">Nenhum pedido ainda.</div>';$$('[data-status]').forEach(s=>s.onchange=async()=>{await api('/api/orders/'+s.dataset.status,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({status:s.value})});await loadOrders()});$$('[data-print]').forEach(b=>b.onclick=()=>printOrder(b.dataset.print))}catch(err){if(token)$('#ordersList').innerHTML='<div class="panel error">'+esc(err.message)+'</div>'}}
+function renderDashboard(){
+ const now=new Date(),today=now.toLocaleDateString('en-CA',{timeZone:'America/Sao_Paulo'}),month=today.slice(0,7),all=state.orders||[];
+ const os=all.filter(o=>o.day===today),ms=all.filter(o=>String(o.day||'').slice(0,7)===month);
+ $('#statOrders').textContent=os.length;
+ $('#statRevenue').textContent=money(os.reduce((sum,o)=>sum+Number(o.total||0),0));
+ $('#statMonthOrders').textContent=ms.length;
+ $('#statMonthRevenue').textContent=money(ms.reduce((sum,o)=>sum+Number(o.total||0),0));
+ $('#statNew').textContent=os.filter(o=>o.status==='Novo').length;
+ $('#statProducts').textContent=(state.products||[]).filter(p=>p.active!==false).length;
+}
+async function loadOrders(){try{const os=await api('/api/orders');state.orders=os;renderDashboard();$('#ordersList').innerHTML=os.length?os.map(o=>`<article class="order"><div><h3>NOVO PEDIDO ${String(o.number).padStart(2,'0')}</h3><p><b>${esc(o.customer?.name||'Cliente')}</b> · ${esc(o.customer?.phone||'')}</p><p>${o.customer?.delivery==='Retirada'?'Retirada na loja':'Entrega · '+esc(o.customer?.address||'')}</p><p>${(o.items||[]).map(i=>`${i.qty}x ${esc(i.name)}`).join(' · ')}</p><p class="total">${money(o.total)} <span class="tag">${esc(o.customer?.payment||'')}</span></p></div><div class="order-actions"><select data-status="${o.id}">${['Novo','Em preparo','Pronto','Saiu para entrega','Entregue','Cancelado'].map(s=>`<option ${o.status===s?'selected':''}>${s}</option>`).join('')}</select><button class="btn" data-print="${o.id}">Imprimir</button><button class="btn" data-order-del="${o.id}">Excluir</button></div></article>`).join(''):'<div class="panel">Nenhum pedido ainda.</div>';$$('[data-status]').forEach(s=>s.onchange=async()=>{await api('/api/orders/'+s.dataset.status,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({status:s.value})});await loadOrders()});$$('[data-print]').forEach(b=>b.onclick=()=>printOrder(b.dataset.print));
+$$('[data-order-del]').forEach(b=>b.onclick=async()=>{
+ if(confirm('Excluir este pedido definitivamente? Somente o dono pode fazer isso.')){
+   await api('/api/orders/'+b.dataset.orderDel,{method:'DELETE'});
+   const ids=autoPrintedIds();ids.delete(String(b.dataset.orderDel));saveAutoPrinted(ids);
+   await refreshAll();
+ }
+})}catch(err){if(token)$('#ordersList').innerHTML='<div class="panel error">'+esc(err.message)+'</div>'}}
 function printOrder(id){
   const u=location.origin+'/print/'+id;
   const ua=navigator.userAgent.toLowerCase();
