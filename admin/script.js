@@ -13,7 +13,18 @@ async function loadNetworkLinks(){const box=$('#serverLinks');if(!box)return;try
 
 function renderDashboard(){const today=new Date().toLocaleDateString('en-CA',{timeZone:'America/Sao_Paulo'}),os=(state.orders||[]).filter(o=>o.day===today);$('#statOrders').textContent=os.length;$('#statRevenue').textContent=money(os.reduce((s,o)=>s+Number(o.total||0),0));$('#statNew').textContent=os.filter(o=>o.status==='Novo').length;$('#statProducts').textContent=(state.products||[]).filter(p=>p.active!==false).length}
 async function loadOrders(){try{const os=await api('/api/orders');state.orders=os;renderDashboard();$('#ordersList').innerHTML=os.length?os.map(o=>`<article class="order"><div><h3>NOVO PEDIDO ${String(o.number).padStart(2,'0')}</h3><p><b>${esc(o.customer?.name||'Cliente')}</b> · ${esc(o.customer?.phone||'')}</p><p>${o.customer?.delivery==='Retirada'?'Retirada na loja':'Entrega · '+esc(o.customer?.address||'')}</p><p>${(o.items||[]).map(i=>`${i.qty}x ${esc(i.name)}`).join(' · ')}</p><p class="total">${money(o.total)} <span class="tag">${esc(o.customer?.payment||'')}</span></p></div><div class="order-actions"><select data-status="${o.id}">${['Novo','Em preparo','Pronto','Saiu para entrega','Entregue','Cancelado'].map(s=>`<option ${o.status===s?'selected':''}>${s}</option>`).join('')}</select><button class="btn" data-print="${o.id}">Imprimir</button></div></article>`).join(''):'<div class="panel">Nenhum pedido ainda.</div>';$$('[data-status]').forEach(s=>s.onchange=async()=>{await api('/api/orders/'+s.dataset.status,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({status:s.value})});await loadOrders()});$$('[data-print]').forEach(b=>b.onclick=()=>printOrder(b.dataset.print))}catch(err){if(token)$('#ordersList').innerHTML='<div class="panel error">'+esc(err.message)+'</div>'}}
-function printOrder(id){const u=location.origin+'/print/'+id,ua=navigator.userAgent.toLowerCase();if(/android/.test(ua))location.href='my.bluetoothprint.scheme://'+u;else if(/iphone|ipad|ipod/.test(ua))location.href='bprint://'+u;else window.open('/thermer-test.html?order='+id,'_blank')}
+function printOrder(id){
+ const u=location.origin+'/print/'+id,ua=navigator.userAgent.toLowerCase();
+ if(/android/.test(ua)){
+   const f=document.createElement('iframe');f.style.display='none';f.src='my.bluetoothprint.scheme://'+u;
+   document.body.appendChild(f);setTimeout(()=>f.remove(),5000);
+ }else if(/iphone|ipad|ipod/.test(ua)){
+   const f=document.createElement('iframe');f.style.display='none';f.src='bprint://'+u;
+   document.body.appendChild(f);setTimeout(()=>f.remove(),5000);
+ }else{
+   window.open('/thermer-test.html?order='+encodeURIComponent(id),'chefePrint','width=520,height=720');
+ }
+}
 
 // Impressão automática: monitora pedidos novos e dispara uma única vez por pedido.
 const AUTO_PRINT_KEY='chefeAutoPrintedOrdersV1';
