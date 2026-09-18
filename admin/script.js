@@ -14,16 +14,34 @@ async function loadNetworkLinks(){const box=$('#serverLinks');if(!box)return;try
 function renderDashboard(){const today=new Date().toLocaleDateString('en-CA',{timeZone:'America/Sao_Paulo'}),os=(state.orders||[]).filter(o=>o.day===today);$('#statOrders').textContent=os.length;$('#statRevenue').textContent=money(os.reduce((s,o)=>s+Number(o.total||0),0));$('#statNew').textContent=os.filter(o=>o.status==='Novo').length;$('#statProducts').textContent=(state.products||[]).filter(p=>p.active!==false).length}
 async function loadOrders(){try{const os=await api('/api/orders');state.orders=os;renderDashboard();$('#ordersList').innerHTML=os.length?os.map(o=>`<article class="order"><div><h3>NOVO PEDIDO ${String(o.number).padStart(2,'0')}</h3><p><b>${esc(o.customer?.name||'Cliente')}</b> · ${esc(o.customer?.phone||'')}</p><p>${o.customer?.delivery==='Retirada'?'Retirada na loja':'Entrega · '+esc(o.customer?.address||'')}</p><p>${(o.items||[]).map(i=>`${i.qty}x ${esc(i.name)}`).join(' · ')}</p><p class="total">${money(o.total)} <span class="tag">${esc(o.customer?.payment||'')}</span></p></div><div class="order-actions"><select data-status="${o.id}">${['Novo','Em preparo','Pronto','Saiu para entrega','Entregue','Cancelado'].map(s=>`<option ${o.status===s?'selected':''}>${s}</option>`).join('')}</select><button class="btn" data-print="${o.id}">Imprimir</button></div></article>`).join(''):'<div class="panel">Nenhum pedido ainda.</div>';$$('[data-status]').forEach(s=>s.onchange=async()=>{await api('/api/orders/'+s.dataset.status,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({status:s.value})});await loadOrders()});$$('[data-print]').forEach(b=>b.onclick=()=>printOrder(b.dataset.print))}catch(err){if(token)$('#ordersList').innerHTML='<div class="panel error">'+esc(err.message)+'</div>'}}
 function printOrder(id){
- const u=location.origin+'/print/'+id,ua=navigator.userAgent.toLowerCase();
- if(/android/.test(ua)){
-   const f=document.createElement('iframe');f.style.display='none';f.src='my.bluetoothprint.scheme://'+u;
-   document.body.appendChild(f);setTimeout(()=>f.remove(),5000);
- }else if(/iphone|ipad|ipod/.test(ua)){
-   const f=document.createElement('iframe');f.style.display='none';f.src='bprint://'+u;
-   document.body.appendChild(f);setTimeout(()=>f.remove(),5000);
- }else{
-   window.open('/thermer-test.html?order='+encodeURIComponent(id),'chefePrint','width=520,height=720');
- }
+  const u=location.origin+'/print/'+id;
+  const ua=navigator.userAgent.toLowerCase();
+
+  // Mantém o Painel do Dono aberto. O protocolo é disparado fora da navegação da aba.
+  function abrirAppImpressao(protocolo){
+    let frame=document.getElementById('chefeSilentPrintFrame');
+    if(!frame){
+      frame=document.createElement('iframe');
+      frame.id='chefeSilentPrintFrame';
+      frame.name='chefeSilentPrintFrame';
+      frame.setAttribute('aria-hidden','true');
+      frame.style.cssText='position:fixed;width:1px;height:1px;opacity:0;pointer-events:none;border:0;left:-9999px;top:-9999px';
+      document.body.appendChild(frame);
+    }
+    frame.src='about:blank';
+    setTimeout(()=>{ frame.src=protocolo+u; },30);
+  }
+
+  if(/android/.test(ua)){
+    // Android: envia o pedido direto ao Thermer/Bluetooth Print sem trocar a página do painel.
+    abrirAppImpressao('my.bluetoothprint.scheme://');
+  }else if(/iphone|ipad|ipod/.test(ua)){
+    // iPhone: mantém o fluxo BPrint sem trocar a página do painel.
+    abrirAppImpressao('bprint://');
+  }else{
+    // PC: mantém o método já existente em janela separada.
+    window.open('/thermer-test.html?order='+encodeURIComponent(id),'chefePrint','width=520,height=720');
+  }
 }
 
 // Impressão automática: monitora pedidos novos e dispara uma única vez por pedido.
@@ -47,7 +65,8 @@ async function autoPrintNewOrders(){
   }catch(e){}finally{autoPrintBusy=false}
 }
 setInterval(autoPrintNewOrders,5000);
-document.addEventListener('visibilitychange',()=>{if(!document.hidden)autoPrintNewOrders()});
+document.addEventListener('visibilitychange',()=>{if(!document.hidden){autoPrintNewOrders();if(token)loadOrders().catch(()=>{})}});
+window.addEventListener('pageshow',()=>{if(token){showApp();loadOrders().catch(()=>{})}});
 function fillCategorySelect(selected=''){const sel=$('#pCat');sel.innerHTML=(state.categories||[]).map(c=>`<option ${c===selected?'selected':''}>${esc(c)}</option>`).join('')}
 function adminFoodIcon(cat=''){const c=String(cat).normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();if(c.includes('pizza'))return '<span class="admin-icon">◉</span>';if(c.includes('bebida'))return '<span class="admin-icon">▱</span>';if(c.includes('acai'))return '<span class="admin-icon">◍</span>';if(c.includes('combo'))return '<span class="admin-icon">▣</span>';return '<span class="admin-icon">◆</span>';}
 async function loadProducts(){state=state.categories?state:await api('/api/admin');fillCategorySelect($('#pCat').value);const ps=state.products||[];$('#productsList').innerHTML=ps.map(p=>`<article><div>${p.image?`<img src="${esc(p.image)}" alt="">`:`<div class="thumb">${adminFoodIcon(p.cat)}</div>`}</div><div><h3>${esc(p.name)} <span class="tag">${esc(p.cat)}</span></h3><p>${esc(p.desc||'')}</p><strong>${money(p.price)}</strong></div><div class="actions"><button class="btn" data-edit="${p.id}">Editar</button><button class="btn" data-del="${p.id}">Excluir</button></div></article>`).join('');$$('[data-edit]').forEach(b=>b.onclick=()=>editProduct(b.dataset.edit));$$('[data-del]').forEach(b=>b.onclick=async()=>{if(confirm('Excluir este produto do cardápio?')){await api('/api/products/'+b.dataset.del,{method:'DELETE'});await refreshAll()}})}
