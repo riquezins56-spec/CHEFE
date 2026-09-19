@@ -1,0 +1,12 @@
+CHEFE TELLES PRINT — ANDROID 58mm
+=================================
+No Render adicione uma variável de ambiente:
+PRINT_AGENT_KEY = crie uma senha longa e exclusiva.
+
+No aplicativo Android configure:
+1. URL do servidor (ex.: https://seusite.onrender.com)
+2. A mesma PRINT_AGENT_KEY
+3. Impressora Bluetooth pareada "Mobile Printer"
+
+O app usa serviço em primeiro plano para continuar verificando pedidos com a tela bloqueada.
+O Android mostrará uma notificação permanente enquanto a impressão automática estiver ativa.

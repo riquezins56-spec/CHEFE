@@ -137,8 +137,23 @@ async function printEndpoint(req,res,pathname){
   return send(res,200,JSON.parse(printJson(e)));
 }
 
+
+function printAgentAuthorized(req){
+  const configured=String(process.env.PRINT_AGENT_KEY||'').trim();
+  if(!configured)return false;
+  return String(req.headers['x-print-agent-key']||'')===configured;
+}
+
 async function api(req,res,pathname){
   try{
+
+    // CHEFE TELLES Print Android: leitura segura de pedidos para impressão.
+    if(req.method==='GET'&&pathname==='/api/print-agent/orders'){
+      if(!printAgentAuthorized(req))return send(res,401,{error:'Agente de impressão não autorizado'});
+      const d=await read();
+      return send(res,200,d.orders.slice().reverse());
+    }
+
     if(req.method==='GET'&&pathname==='/api/health')return send(res,200,{ok:true,store:'CHEFE TELLES',version:'2.0.0'});
     if(req.method==='GET'&&pathname==='/api/network'){
       const nets=os.networkInterfaces(), ips=[];
