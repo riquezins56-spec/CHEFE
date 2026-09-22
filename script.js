@@ -103,3 +103,112 @@ document.querySelector('#sendOrderWhatsapp')?.addEventListener('click',()=>{
   if(!window.lastOrderWhatsappUrl)return alert('Finalize o pedido primeiro.');
   window.location.href=window.lastOrderWhatsappUrl;
 });
+
+
+// V10.1 — busca, GPS e confirmação manual do ponto no mapa (OpenStreetMap/Leaflet + OSRM)
+let deliveryMap=null, deliveryMarker=null, mapQuoteTimer=null, searchTimer=null;
+
+function ensureDeliveryMap(lat,lng){
+  const wrap=document.querySelector('#deliveryMapWrap');
+  if(!wrap || typeof L==='undefined') return;
+  wrap.classList.add('show');
+  const y=Number(lat),x=Number(lng);
+  if(!deliveryMap){
+    deliveryMap=L.map('deliveryMap',{zoomControl:true}).setView([y,x],17);
+    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{
+      maxZoom:19, attribution:'© OpenStreetMap'
+    }).addTo(deliveryMap);
+    deliveryMarker=L.marker([y,x],{draggable:true}).addTo(deliveryMap);
+    deliveryMarker.on('dragend',()=>{
+      const p=deliveryMarker.getLatLng();
+      setConfirmedPoint(p.lat,p.lng,true);
+    });
+  }else{
+    deliveryMap.setView([y,x],17);
+    deliveryMarker.setLatLng([y,x]);
+  }
+  setTimeout(()=>deliveryMap.invalidateSize(),80);
+}
+
+async function reverseCustomerPoint(lat,lng){
+  const r=await fetch('/api/customer-location/reverse',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({lat,lng})});
+  const x=await r.json(); if(!r.ok)throw Error(x.error||'Não foi possível identificar o ponto.');
+  return x;
+}
+async function setConfirmedPoint(lat,lng,fromDrag=false){
+  document.querySelector('#customerLat').value=Number(lat).toFixed(7);
+  document.querySelector('#customerLng').value=Number(lng).toFixed(7);
+  ensureDeliveryMap(lat,lng);
+  const st=document.querySelector('#gpsStatus');
+  if(st)st.textContent=fromDrag?'Pino ajustado. Recalculando rota...':'Ponto localizado. Calculando rota...';
+  clearTimeout(mapQuoteTimer);
+  mapQuoteTimer=setTimeout(async()=>{
+    try{
+      const q=await quoteRoadDelivery(lat,lng);
+      document.querySelector('#deliveryFee').value=q.deliveryFee;
+      document.querySelector('#deliveryFeePreview').textContent=money(q.deliveryFee);
+      if(st)st.textContent=`Ponto confirmado • rota ${Number(q.distanceKm).toFixed(1)} km • taxa ${money(q.deliveryFee)}`;
+    }catch(e){
+      document.querySelector('#deliveryFee').value='0';
+      document.querySelector('#deliveryFeePreview').textContent='Fora da área';
+      if(st)st.textContent=e.message;
+    }
+  },250);
+}
+
+document.querySelector('#confirmMapPoint')?.addEventListener('click',async()=>{
+  if(!deliveryMarker)return;
+  const p=deliveryMarker.getLatLng();
+  try{
+    const rev=await reverseCustomerPoint(p.lat,p.lng);
+    const a=rev.address||{};
+    const road=a.road||a.pedestrian||a.residential||'';
+    const nb=a.suburb||a.neighbourhood||a.quarter||a.city_district||'';
+    const pc=String(a.postcode||'');
+    if(road)document.querySelector('#street').value=road;
+    if(nb)document.querySelector('#neighborhood').value=nb;
+    if(pc)document.querySelector('#cep').value=pc;
+    document.querySelector('[name=number]')?.dispatchEvent(new Event('input',{bubbles:true}));
+  }catch(e){}
+  await setConfirmedPoint(p.lat,p.lng,false);
+});
+
+const searchEl=document.querySelector('#addressSearch'), suggestions=document.querySelector('#addressSuggestions');
+searchEl?.addEventListener('input',()=>{
+  clearTimeout(searchTimer);
+  const q=searchEl.value.trim();
+  if(q.length<3){suggestions?.classList.remove('show');return;}
+  searchTimer=setTimeout(async()=>{
+    try{
+      const r=await fetch('/api/address-search?q='+encodeURIComponent(q));
+      const arr=await r.json(); if(!r.ok)throw Error(arr.error||'Erro na busca');
+      suggestions.innerHTML=arr.map((x,i)=>`<div class="address-suggestion" data-i="${i}"><b>${esc((x.label||'').split(',').slice(0,2).join(','))}</b><small>${esc((x.label||'').split(',').slice(2).join(','))}</small></div>`).join('');
+      suggestions.classList.toggle('show',arr.length>0);
+      suggestions.querySelectorAll('.address-suggestion').forEach(el=>el.onclick=async()=>{
+        const x=arr[Number(el.dataset.i)],a=x.address||{};
+        searchEl.value=x.label||q;suggestions.classList.remove('show');
+        const road=a.road||a.pedestrian||a.residential||'';
+        const nb=a.suburb||a.neighbourhood||a.quarter||a.city_district||'';
+        const num=a.house_number||'';
+        if(road)document.querySelector('#street').value=road;
+        if(nb)document.querySelector('#neighborhood').value=nb;
+        if(num)document.querySelector('[name=number]').value=num;
+        if(a.postcode)document.querySelector('#cep').value=a.postcode;
+        document.querySelector('[name=number]')?.dispatchEvent(new Event('input',{bubbles:true}));
+        await setConfirmedPoint(x.lat,x.lng,false);
+      });
+    }catch(e){suggestions.innerHTML='';suggestions.classList.remove('show');}
+  },350);
+});
+
+// Reforça o GPS: mostra o ponto obtido no mapa para o cliente corrigir se necessário.
+document.querySelector('#useLocation')?.addEventListener('click',()=>{
+  if(!navigator.geolocation)return;
+  navigator.geolocation.getCurrentPosition(async pos=>{
+    const {latitude:lat,longitude:lng,accuracy}=pos.coords;
+    ensureDeliveryMap(lat,lng);
+    await setConfirmedPoint(lat,lng,false);
+    const st=document.querySelector('#gpsStatus');
+    if(st)st.textContent += ` • precisão GPS ±${Math.round(accuracy)} m. Arraste o pino se necessário.`;
+  },()=>{}, {enableHighAccuracy:true,timeout:15000,maximumAge:0});
+},true);

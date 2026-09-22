@@ -48,3 +48,16 @@ body{overflow-x:hidden;overflow-y:auto}
 @keyframes ambientRise{0%{transform:translate3d(0,0,0) scale(.4);opacity:0}12%{opacity:.75}55%{transform:translate3d(8px,-42vh,0) scale(1);opacity:.45}100%{transform:translate3d(-12px,-108vh,0) scale(.65);opacity:0}}
 .food-placeholder{display:grid;place-items:center;color:#ffbd22;border:1px solid #352020}.food-placeholder svg{width:48px;height:48px;filter:drop-shadow(0 0 7px rgba(255,189,34,.18))}
 .admin-icon{font-size:34px;line-height:1;color:#ffbd22;text-shadow:0 0 12px rgba(255,189,34,.25)}
+
+/* Mapa de entrega sem chave paga */
+.address-suggestions{display:none;max-height:230px;overflow:auto;border:1px solid #333;border-radius:12px;background:#111;margin:6px 0 12px}
+.address-suggestions.show{display:block}
+.address-suggestion{padding:12px;border-bottom:1px solid #292929;cursor:pointer;color:#fff}
+.address-suggestion:last-child{border-bottom:0}
+.address-suggestion small{display:block;color:#aaa;margin-top:4px}
+.delivery-map-wrap{display:none;margin:12px 0;padding:10px;border:1px solid #333;border-radius:14px;background:#0d0d0d}
+.delivery-map-wrap.show{display:block}
+.map-title{display:flex;flex-direction:column;gap:3px;margin-bottom:8px}
+.map-title span{font-size:12px;color:#aaa}
+#deliveryMap{height:280px;width:100%;border-radius:10px;overflow:hidden;margin-bottom:9px}
+.leaflet-control-attribution{font-size:9px}

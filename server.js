@@ -316,6 +316,26 @@ async function api(req,res,pathname){
     }
     if(req.method==='POST'&&pathname==='/api/logout'){const h=req.headers.authorization||''; if(h.startsWith('Bearer '))adminTokens.delete(h.slice(7)); return send(res,200,{ok:true});}
 
+    if(req.method==='GET'&&pathname==='/api/address-search'){
+      const q=String(u.searchParams.get('q')||'').trim();
+      if(q.length<3)return send(res,200,[]);
+      try{
+        const d=await read();
+        const city=String(d.settings.storeCity||'').trim(),state=String(d.settings.storeState||'').trim();
+        const full=[q,city,state,'Brasil'].filter(Boolean).join(', ');
+        const url='https://nominatim.openstreetmap.org/search?format=jsonv2&addressdetails=1&limit=8&countrycodes=br&q='+encodeURIComponent(full);
+        const r=await fetch(url,{headers:{'User-Agent':'CHEFE-TELLES/10.1 (customer address search)','Accept-Language':'pt-BR'}});
+        if(!r.ok)throw Error('Busca de endereço indisponível.');
+        const arr=await r.json();
+        return send(res,200,arr.map(x=>({lat:Number(x.lat),lng:Number(x.lon),label:x.display_name,address:x.address||{}})));
+      }catch(e){return send(res,400,{error:e.message||'Não foi possível buscar endereços.'});}
+    }
+    if(req.method==='POST'&&pathname==='/api/customer-location/reverse'){
+      const b=await body(req);
+      try{return send(res,200,await reverseGeocodeBrazil(b.lat,b.lng));}
+      catch(e){return send(res,400,{error:e.message||'Não foi possível identificar o endereço desse ponto.'});}
+    }
+
     const cepMatch=pathname.match(/^\/api\/cep\/(\d{8})$/);
     if(req.method==='GET'&&cepMatch){try{return send(res,200,await lookupCep(cepMatch[1]));}catch(e){return send(res,404,{error:e.message});}}
     if(req.method==='POST'&&pathname==='/api/delivery-quote-address'){
