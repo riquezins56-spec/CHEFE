@@ -1,0 +1,8 @@
+V9.3
+- Configuracao da localizacao da loja fica somente no Painel do Dono.
+- Cadastro por CEP + rua + numero + bairro + cidade + estado.
+- Botao Buscar CEP para preenchimento automatico.
+- Botao Usar localizacao atual (GPS).
+- Botao Confirmar localizacao converte o endereco em coordenadas internas.
+- Latitude/longitude nao precisam mais ser digitadas manualmente.
+- Coordenadas continuam sendo usadas internamente no calculo da rota real e taxa por km.

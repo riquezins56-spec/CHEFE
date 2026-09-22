@@ -269,6 +269,12 @@ async function api(req,res,pathname){
 
     if(!auth(req)) return send(res,401,{error:'Não autorizado'});
 
+    if(req.method==='POST'&&pathname==='/api/store-location/resolve'){
+      const b=await body(req);
+      try{const geo=await geocodeBrazilAddress(b);return send(res,200,{lat:geo.lat,lng:geo.lng,addressFound:geo.displayName});}
+      catch(e){return send(res,400,{error:e.message||'Não foi possível localizar o endereço da loja.'});}
+    }
+
     if(req.method==='GET'&&pathname==='/api/admin'){ const d=await read(); return send(res,200,d); }
     if(req.method==='PUT'&&pathname==='/api/settings'){
       const b=await body(req),d=await read();if(b.adminPassword!==undefined&&String(b.adminPassword).trim()==='') delete b.adminPassword; d.settings={...d.settings,...b}; await write(d); return send(res,200,{ok:true});
