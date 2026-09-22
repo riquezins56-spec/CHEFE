@@ -1,0 +1,8 @@
+V10.0
+- Geocodificação reforçada: CEP + rua + número + bairro + cidade/UF.
+- Usa coordenada do CEP como referência e rejeita candidatos muito distantes.
+- Mantém rota real e taxa por distância/KM excedente.
+- Pedido é salvo no servidor antes do WhatsApp.
+- Após finalizar, aparece ENVIAR PEDIDO.
+- O botão abre WhatsApp no iPhone, Android ou PC com o pedido completo preenchido.
+Observação: WhatsApp não permite que um site envie silenciosamente uma mensagem em nome do cliente; o envio final ocorre no WhatsApp após a ação do usuário.

@@ -171,15 +171,75 @@ async function lookupCep(cep){
   return {cep:j.cep||c,street:j.logradouro||'',neighborhood:j.bairro||'',city:j.localidade||'',state:j.uf||''};
 }
 async function geocodeBrazilAddress(x){
-  const cep=String(x.cep||'').replace(/\D/g,''); let city='',state='';
-  if(cep.length===8){try{const c=await lookupCep(cep);city=c.city;state=c.state;if(!x.street)x.street=c.street;if(!x.neighborhood)x.neighborhood=c.neighborhood;}catch{}}
-  const parts=[x.street,x.number,x.neighborhood,city,state,cep,'Brasil'].filter(Boolean).join(', ');
-  const url='https://nominatim.openstreetmap.org/search?format=jsonv2&limit=1&countrycodes=br&q='+encodeURIComponent(parts);
-  const r=await fetch(url,{headers:{'User-Agent':'CHEFE-TELLES/9.2 (delivery geocoder)','Accept-Language':'pt-BR'}}); if(!r.ok) throw Error('Serviço de endereço indisponível.');
-  let j=await r.json();
-  if(!j.length && x.street){const fallback=[x.street,x.neighborhood,city,state,cep,'Brasil'].filter(Boolean).join(', ');const r2=await fetch('https://nominatim.openstreetmap.org/search?format=jsonv2&limit=1&countrycodes=br&q='+encodeURIComponent(fallback),{headers:{'User-Agent':'CHEFE-TELLES/9.2 (delivery geocoder)','Accept-Language':'pt-BR'}});j=await r2.json();}
-  if(!j.length) throw Error('Não encontramos esse endereço. Confira CEP, rua, bairro e número.');
-  return {lat:Number(j[0].lat),lng:Number(j[0].lon),displayName:j[0].display_name};
+  const cep=String(x.cep||'').replace(/\D/g,'');
+  let cepData={cep:'',street:'',neighborhood:'',city:'',state:''};
+  if(cep.length===8){
+    try{cepData=await lookupCep(cep)}catch{}
+  }
+  const street=String(x.street||cepData.street||'').trim();
+  const number=String(x.number||'').trim();
+  const neighborhood=String(x.neighborhood||cepData.neighborhood||'').trim();
+  const city=String(x.city||cepData.city||'').trim();
+  const state=String(x.state||cepData.state||'').trim();
+
+  // 1) tenta coordenadas do próprio CEP (BrasilAPI/OpenStreetMap), quando disponíveis.
+  // Isso evita aceitar um endereço homônimo em outro bairro/cidade.
+  let cepPoint=null;
+  if(cep.length===8){
+    try{
+      const br=await fetch(`https://brasilapi.com.br/api/cep/v2/${cep}`,{headers:{'User-Agent':'CHEFE-TELLES/10.0'}});
+      if(br.ok){
+        const bj=await br.json(), c=bj?.location?.coordinates||{};
+        const lat=Number(c.latitude),lng=Number(c.longitude);
+        if(Number.isFinite(lat)&&Number.isFinite(lng)&&lat&&lng)cepPoint={lat,lng};
+      }
+    }catch{}
+  }
+
+  const headers={'User-Agent':'CHEFE-TELLES/10.0 (delivery geocoder)','Accept-Language':'pt-BR'};
+  const queries=[
+    [street,number,neighborhood,city,state,cep,'Brasil'],
+    [street,number,city,state,cep,'Brasil'],
+    [street,neighborhood,city,state,cep,'Brasil'],
+    [street,city,state,cep,'Brasil']
+  ].map(v=>v.filter(Boolean).join(', ')).filter((v,i,a)=>v&&a.indexOf(v)===i);
+
+  let candidates=[];
+  for(const q of queries){
+    try{
+      const url='https://nominatim.openstreetmap.org/search?format=jsonv2&addressdetails=1&limit=8&countrycodes=br&q='+encodeURIComponent(q);
+      const r=await fetch(url,{headers}); if(!r.ok)continue;
+      const arr=await r.json(); candidates.push(...arr);
+      if(candidates.length>=8)break;
+    }catch{}
+  }
+  if(!candidates.length&&cepPoint){
+    return {lat:cepPoint.lat,lng:cepPoint.lng,displayName:[street,number,neighborhood,city,state,cep].filter(Boolean).join(', '),precision:'cep'};
+  }
+  if(!candidates.length)throw Error('Não encontramos esse endereço. Confira CEP, rua, bairro e número.');
+
+  const norm=v=>String(v||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().trim();
+  const hav=(a,b,c,d)=>{const R=6371,toRad=v=>v*Math.PI/180,dl=toRad(c-a),dn=toRad(d-b);const z=Math.sin(dl/2)**2+Math.cos(toRad(a))*Math.cos(toRad(c))*Math.sin(dn/2)**2;return 2*R*Math.asin(Math.sqrt(z));};
+  const scored=candidates.map(c=>{
+    const a=c.address||{}; let score=0;
+    const cCity=a.city||a.town||a.municipality||a.village||'';
+    const cNb=a.suburb||a.neighbourhood||a.quarter||a.city_district||'';
+    const cRoad=a.road||a.pedestrian||a.residential||'';
+    const cPost=String(a.postcode||'').replace(/\D/g,'');
+    if(city&&norm(cCity)===norm(city))score+=35;
+    if(neighborhood&&norm(cNb)===norm(neighborhood))score+=25;
+    if(street&&norm(cRoad)===norm(street))score+=30;
+    if(cep&&cPost===cep)score+=45;
+    const lat=Number(c.lat),lng=Number(c.lon);
+    if(cepPoint&&Number.isFinite(lat)&&Number.isFinite(lng)){
+      const km=hav(cepPoint.lat,cepPoint.lng,lat,lng);
+      if(km<1)score+=35; else if(km<3)score+=20; else if(km>10)score-=60;
+    }
+    return {c,score};
+  }).sort((a,b)=>b.score-a.score);
+  const best=scored[0]?.c;
+  if(!best)throw Error('Não encontramos esse endereço.');
+  return {lat:Number(best.lat),lng:Number(best.lon),displayName:best.display_name,precision:number?'address':'street'};
 }
 
 async function reverseGeocodeBrazil(lat,lng){
