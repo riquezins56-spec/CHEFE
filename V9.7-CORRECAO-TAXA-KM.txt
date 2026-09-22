@@ -1,0 +1,7 @@
+CHEFE TELLES V9.7 — CORREÇÃO TAXA POR KM
+
+- Corrigido conflito que mostrava “taxa não cadastrada” do modo bairro mesmo com entrega por km ativa.
+- No modo km, o checkout agora aguarda o endereço e calcula automaticamente a rota/taxa.
+- Ao confirmar a localização da loja, as coordenadas e o endereço são salvos imediatamente.
+- Ao finalizar um pedido por km, o servidor tenta localizar novamente o endereço se o navegador ainda não tiver coordenadas.
+- O servidor não cai mais indevidamente para a tabela de bairro quando o modo selecionado é km.

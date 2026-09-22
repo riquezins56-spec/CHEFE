@@ -269,9 +269,14 @@ async function api(req,res,pathname){
       if(b.customer?.delivery==='Retirada'){
         deliveryFee=0;
       }else{
-        if((d.settings.deliveryMode||'bairro')==='km' && b.customer?.lat && b.customer?.lng && d.settings.storeLat && d.settings.storeLng){
-          const route=await deliveryKm(d.settings,b.customer.lat,b.customer.lng); const resolved=resolveKmFee(d.deliveryKmRanges,route.km);
-          if(resolved===null)return send(res,400,{error:'Localização fora da área de entrega cadastrada.'}); deliveryFee=resolved; b.deliveryDistanceKm=Number(route.km.toFixed(2)); b.deliveryRouteType=route.source;
+        if((d.settings.deliveryMode||'bairro')==='km'){
+          if(!d.settings.storeLat||!d.settings.storeLng)return send(res,400,{error:'A localização da loja ainda não foi confirmada no painel do dono.'});
+          let lat=Number(b.customer?.lat),lng=Number(b.customer?.lng);
+          if(!Number.isFinite(lat)||!Number.isFinite(lng)||!lat||!lng){
+            try{const geo=await geocodeBrazilAddress(b.customer||{});lat=geo.lat;lng=geo.lng;b.customer.lat=lat;b.customer.lng=lng;}catch(e){return send(res,400,{error:e.message||'Não foi possível localizar o endereço para calcular a entrega.'});}
+          }
+          const route=await deliveryKm(d.settings,lat,lng); const resolved=resolveKmFee(d.deliveryKmRanges,route.km);
+          if(resolved===null)return send(res,400,{error:'Endereço fora da área de entrega cadastrada.',distanceKm:Number(route.km.toFixed(2))}); deliveryFee=resolved; b.deliveryDistanceKm=Number(route.km.toFixed(2)); b.deliveryRouteType=route.source;
         }else{
           const resolved=resolveDeliveryFee(d.deliveryZones,b.customer?.neighborhood,b.customer?.street);
           if(resolved===null)return send(res,400,{error:'Bairro/rua sem taxa de entrega cadastrada.'}); deliveryFee=resolved;
