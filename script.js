@@ -53,6 +53,47 @@ async function calculateByTypedAddress(){
   const st=document.querySelector('#gpsStatus'); st.textContent='Localizando endereço e calculando rota...';
   try{const x=await quoteAddressDelivery({});document.querySelector('#customerLat').value=x.lat;document.querySelector('#customerLng').value=x.lng;document.querySelector('#deliveryFee').value=x.deliveryFee;document.querySelector('#deliveryFeePreview').textContent=money(x.deliveryFee);st.textContent=`Endereço localizado • rota ${Number(x.distanceKm).toFixed(1)} km • taxa ${money(x.deliveryFee)}`;return x;}catch(e){document.querySelector('#deliveryFee').value='0';document.querySelector('#deliveryFeePreview').textContent='Confira o endereço';st.textContent=e.message;throw e;}
 }
-['#street','#neighborhood','[name=number]','#cep'].forEach(sel=>document.querySelector(sel)?.addEventListener('change',()=>{document.querySelector('#customerLat').value='';document.querySelector('#customerLng').value='';}));
-const oldLocationButton=document.querySelector('#useLocation');
-if(oldLocationButton){const typed=document.createElement('button');typed.type='button';typed.className='secondary full';typed.id='calculateAddressRoute';typed.textContent='🗺️ CALCULAR ENTREGA PELO ENDEREÇO';oldLocationButton.parentNode.insertBefore(typed,oldLocationButton);typed.addEventListener('click',calculateByTypedAddress);}
+// V9.6 — cálculo automático da entrega pelo endereço (sem botão manual)
+let autoDeliveryTimer=null;
+let autoCepTimer=null;
+let lastAutoAddress='';
+function clearAddressQuote(){
+  const lat=document.querySelector('#customerLat'),lng=document.querySelector('#customerLng');
+  if(lat)lat.value=''; if(lng)lng.value='';
+}
+function addressReadyForQuote(){
+  const cep=(document.querySelector('#cep')?.value||'').replace(/\D/g,'');
+  const street=(document.querySelector('#street')?.value||'').trim();
+  const nb=(document.querySelector('#neighborhood')?.value||'').trim();
+  const num=(document.querySelector('[name=number]')?.value||'').trim();
+  return cep.length===8 && street.length>=3 && nb.length>=2 && num.length>0;
+}
+function scheduleAutomaticDelivery(){
+  clearAddressQuote(); clearTimeout(autoDeliveryTimer);
+  if(store.settings?.deliveryMode!=='km' || !addressReadyForQuote()) return;
+  const key=[document.querySelector('#cep')?.value,document.querySelector('#street')?.value,document.querySelector('#neighborhood')?.value,document.querySelector('[name=number]')?.value].join('|');
+  autoDeliveryTimer=setTimeout(async()=>{
+    if(key===lastAutoAddress && document.querySelector('#customerLat')?.value) return;
+    const st=document.querySelector('#gpsStatus'); if(st)st.textContent='Calculando automaticamente a rota e a taxa...';
+    try{await calculateByTypedAddress();lastAutoAddress=key;}catch(e){}
+  },700);
+}
+['#street','#neighborhood','[name=number]'].forEach(sel=>document.querySelector(sel)?.addEventListener('input',scheduleAutomaticDelivery));
+document.querySelector('#cep')?.addEventListener('input',()=>{
+  clearAddressQuote(); clearTimeout(autoCepTimer); clearTimeout(autoDeliveryTimer);
+  const cep=document.querySelector('#cep'),clean=(cep?.value||'').replace(/\D/g,'');
+  if(clean.length!==8) return;
+  autoCepTimer=setTimeout(async()=>{
+    const st=document.querySelector('#cepStatus'); if(st)st.textContent='Buscando CEP automaticamente...';
+    try{
+      const x=await lookupCepValue(cep.value);
+      if(x.street)document.querySelector('#street').value=x.street;
+      if(x.neighborhood)document.querySelector('#neighborhood').value=x.neighborhood;
+      if(st)st.textContent='CEP encontrado. Confira o endereço e informe o número.';
+      document.querySelector('#street')?.dispatchEvent(new Event('input',{bubbles:true}));
+      document.querySelector('[name=number]')?.focus();
+      scheduleAutomaticDelivery();
+    }catch(e){if(st)st.textContent=e.message;}
+  },450);
+});
+// O GPS permanece como alternativa. O cálculo por endereço não exige botão.
