@@ -1,0 +1,1 @@
+V9.4: Corrigido checkout do cliente. O campo CEP agora aparece antes de Bairro/Rua, com botão BUSCAR CEP / PREENCHER ENDEREÇO. O cliente pode editar endereço e calcular a entrega pela rota ou usar GPS.
