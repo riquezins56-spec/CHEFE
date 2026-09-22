@@ -1,0 +1,1 @@
+V9.5: GPS da loja agora faz geocodificação reversa e preenche CEP, rua, número quando disponível, bairro, cidade e estado. Se o serviço de mapas não localizar o endereço digitado, os dados ainda podem ser salvos; coordenadas GPS são preservadas para cálculo por km.

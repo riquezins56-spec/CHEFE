@@ -171,6 +171,25 @@ async function geocodeBrazilAddress(x){
   return {lat:Number(j[0].lat),lng:Number(j[0].lon),displayName:j[0].display_name};
 }
 
+async function reverseGeocodeBrazil(lat,lng){
+  lat=Number(lat); lng=Number(lng);
+  if(!Number.isFinite(lat)||!Number.isFinite(lng)) throw Error('Coordenadas inválidas.');
+  const url='https://nominatim.openstreetmap.org/reverse?format=jsonv2&addressdetails=1&zoom=18&lat='+encodeURIComponent(lat)+'&lon='+encodeURIComponent(lng);
+  const r=await fetch(url,{headers:{'User-Agent':'CHEFE-TELLES/9.5 (store reverse geocoder)','Accept-Language':'pt-BR'}});
+  if(!r.ok) throw Error('Não foi possível consultar o endereço desta localização.');
+  const j=await r.json(); const a=j.address||{};
+  return {
+    lat, lng,
+    cep:a.postcode||'',
+    street:a.road||a.pedestrian||a.residential||a.footway||'',
+    number:a.house_number||'',
+    neighborhood:a.suburb||a.neighbourhood||a.quarter||a.city_district||'',
+    city:a.city||a.town||a.municipality||a.village||'',
+    state:a.state_code||a['ISO3166-2-lvl4']?.split('-').pop()||a.state||'',
+    addressFound:j.display_name||''
+  };
+}
+
 async function deliveryKm(settings,lat,lng){
   try{return await roadRouteKm(settings.storeLat,settings.storeLng,lat,lng)}
   catch(e){return {km:haversineKm(settings.storeLat,settings.storeLng,lat,lng),source:'fallback'}}
@@ -268,6 +287,12 @@ async function api(req,res,pathname){
     }
 
     if(!auth(req)) return send(res,401,{error:'Não autorizado'});
+
+    if(req.method==='POST'&&pathname==='/api/store-location/reverse'){
+      const b=await body(req);
+      try{return send(res,200,await reverseGeocodeBrazil(b.lat,b.lng));}
+      catch(e){return send(res,400,{error:e.message||'Não foi possível preencher o endereço pelo GPS.'});}
+    }
 
     if(req.method==='POST'&&pathname==='/api/store-location/resolve'){
       const b=await body(req);
