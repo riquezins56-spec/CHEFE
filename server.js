@@ -68,7 +68,9 @@ function normalizeData(d){
   if(!Array.isArray(d.deliveryZones)){d.deliveryZones=[];changed=true;}
   if(!Array.isArray(d.deliveryKmRanges)){d.deliveryKmRanges=[];changed=true;}
   if(!Array.isArray(d.drivers)){d.drivers=[];changed=true;}
-  if(!d.settings.deliveryMode){d.settings.deliveryMode='bairro';changed=true;}
+  if(d.settings.deliveryMode!=='route'){d.settings.deliveryMode='route';changed=true;}
+  if(d.settings.extraKmFee===undefined){d.settings.extraKmFee=0;changed=true;}
+  if(d.settings.maxDeliveryKm===undefined){d.settings.maxDeliveryKm=0;changed=true;}
   if(d.settings.storeLat===undefined)d.settings.storeLat='';
   if(d.settings.storeLng===undefined)d.settings.storeLng='';
   if(!Array.isArray(d.orders)){d.orders=[];changed=true;}
@@ -134,7 +136,16 @@ function resolveDeliveryFee(zones, neighborhood, street){
 
 
 function haversineKm(a,b,c,d){const R=6371,toRad=x=>Number(x)*Math.PI/180;const dLat=toRad(c-a),dLon=toRad(d-b);const q=Math.sin(dLat/2)**2+Math.cos(toRad(a))*Math.cos(toRad(c))*Math.sin(dLon/2)**2;return 2*R*Math.asin(Math.sqrt(q));}
-function resolveKmFee(ranges,km){const r=(ranges||[]).filter(x=>x.active!==false).sort((a,b)=>Number(a.maxKm)-Number(b.maxKm)).find(x=>km<=Number(x.maxKm));return r?Number(r.fee)||0:null;}
+function resolveKmFee(ranges,km,settings={}){
+  const list=(ranges||[]).filter(x=>x.active!==false&&Number(x.maxKm)>0).sort((a,b)=>Number(a.maxKm)-Number(b.maxKm));
+  if(!list.length)return null;
+  const distance=Number(km)||0, maxAllowed=Number(settings.maxDeliveryKm)||0;
+  if(maxAllowed>0&&distance>maxAllowed)return null;
+  const range=list.find(x=>distance<=Number(x.maxKm));
+  if(range)return Number(range.fee)||0;
+  const last=list[list.length-1], extraRate=Math.max(0,Number(settings.extraKmFee)||0);
+  return Number(last.fee||0)+(Math.max(0,distance-Number(last.maxKm))*extraRate);
+}
 
 // Distância real pelas ruas. Por padrão usa OSRM; em produção pode apontar ROUTING_BASE_URL para sua própria instância/provedor compatível.
 async function roadRouteKm(storeLat,storeLng,customerLat,customerLng){
@@ -236,7 +247,7 @@ async function api(req,res,pathname){
     }
     if(req.method==='GET'&&pathname==='/api/store'){
       const d=await read();
-      return send(res,200,{settings:{name:d.settings.name,whatsapp:d.settings.whatsapp,pixKey:d.settings.pixKey||'',pixRecipient:d.settings.pixRecipient||'',pixType:d.settings.pixType||'',pixQr:d.settings.pixQr||'',botWhatsapp:d.settings.botWhatsapp||d.settings.whatsapp,botMessage:d.settings.botMessage||'',deliveryMode:d.settings.deliveryMode||'bairro',storeLat:d.settings.storeLat||'',storeLng:d.settings.storeLng||''},categories:d.categories,products:d.products.filter(p=>p.active),deliveryZones:d.deliveryZones.filter(z=>z.active!==false),deliveryKmRanges:(d.deliveryKmRanges||[]).filter(z=>z.active!==false)});
+      return send(res,200,{settings:{name:d.settings.name,whatsapp:d.settings.whatsapp,pixKey:d.settings.pixKey||'',pixRecipient:d.settings.pixRecipient||'',pixType:d.settings.pixType||'',pixQr:d.settings.pixQr||'',botWhatsapp:d.settings.botWhatsapp||d.settings.whatsapp,botMessage:d.settings.botMessage||'',deliveryMode:'route',storeLat:d.settings.storeLat||'',storeLng:d.settings.storeLng||'',extraKmFee:Number(d.settings.extraKmFee)||0,maxDeliveryKm:Number(d.settings.maxDeliveryKm)||0},categories:d.categories,products:d.products.filter(p=>p.active),deliveryZones:d.deliveryZones.filter(z=>z.active!==false),deliveryKmRanges:(d.deliveryKmRanges||[]).filter(z=>z.active!==false)});
     }
     if(req.method==='POST'&&pathname==='/api/login'){
       const b=await body(req),d=await read();
@@ -248,16 +259,15 @@ async function api(req,res,pathname){
     const cepMatch=pathname.match(/^\/api\/cep\/(\d{8})$/);
     if(req.method==='GET'&&cepMatch){try{return send(res,200,await lookupCep(cepMatch[1]));}catch(e){return send(res,404,{error:e.message});}}
     if(req.method==='POST'&&pathname==='/api/delivery-quote-address'){
-      const b=await body(req),d=await read(); if((d.settings.deliveryMode||'bairro')!=='km')return send(res,400,{error:'Entrega por km não está ativa.'});
+      const b=await body(req),d=await read();
       if(!String(b.street||'').trim()||!String(b.number||'').trim())return send(res,400,{error:'Informe rua e número para calcular a entrega.'});
-      try{const geo=await geocodeBrazilAddress(b);const route=await deliveryKm(d.settings,geo.lat,geo.lng),fee=resolveKmFee(d.deliveryKmRanges,route.km);if(fee===null)return send(res,400,{error:'Endereço fora da área de entrega cadastrada.',distanceKm:Number(route.km.toFixed(2))});return send(res,200,{lat:geo.lat,lng:geo.lng,addressFound:geo.displayName,distanceKm:Number(route.km.toFixed(2)),deliveryFee:fee,routeType:route.source});}catch(e){return send(res,400,{error:e.message||'Não foi possível calcular a entrega pelo endereço.'});}
+      try{const geo=await geocodeBrazilAddress(b);const route=await deliveryKm(d.settings,geo.lat,geo.lng),fee=resolveKmFee(d.deliveryKmRanges,route.km,d.settings);if(fee===null)return send(res,400,{error:'Endereço fora da distância máxima de entrega.',distanceKm:Number(route.km.toFixed(2))});return send(res,200,{lat:geo.lat,lng:geo.lng,addressFound:geo.displayName,distanceKm:Number(route.km.toFixed(2)),deliveryFee:fee,routeType:route.source});}catch(e){return send(res,400,{error:e.message||'Não foi possível calcular a entrega pelo endereço.'});}
     }
     if(req.method==='POST'&&pathname==='/api/delivery-quote'){
       const b=await body(req),d=await read();
-      if((d.settings.deliveryMode||'bairro')!=='km')return send(res,400,{error:'Entrega por km não está ativa.'});
       if(!d.settings.storeLat||!d.settings.storeLng||!b.lat||!b.lng)return send(res,400,{error:'Localização da loja ou cliente não informada.'});
-      const route=await deliveryKm(d.settings,b.lat,b.lng), fee=resolveKmFee(d.deliveryKmRanges,route.km);
-      if(fee===null)return send(res,400,{error:'Localização fora da área de entrega cadastrada.',distanceKm:Number(route.km.toFixed(2))});
+      const route=await deliveryKm(d.settings,b.lat,b.lng), fee=resolveKmFee(d.deliveryKmRanges,route.km,d.settings);
+      if(fee===null)return send(res,400,{error:'Localização fora da distância máxima de entrega.',distanceKm:Number(route.km.toFixed(2))});
       return send(res,200,{distanceKm:Number(route.km.toFixed(2)),deliveryFee:fee,routeType:route.source});
     }
 
@@ -269,18 +279,14 @@ async function api(req,res,pathname){
       if(b.customer?.delivery==='Retirada'){
         deliveryFee=0;
       }else{
-        if((d.settings.deliveryMode||'bairro')==='km'){
-          if(!d.settings.storeLat||!d.settings.storeLng)return send(res,400,{error:'A localização da loja ainda não foi confirmada no painel do dono.'});
-          let lat=Number(b.customer?.lat),lng=Number(b.customer?.lng);
-          if(!Number.isFinite(lat)||!Number.isFinite(lng)||!lat||!lng){
-            try{const geo=await geocodeBrazilAddress(b.customer||{});lat=geo.lat;lng=geo.lng;b.customer.lat=lat;b.customer.lng=lng;}catch(e){return send(res,400,{error:e.message||'Não foi possível localizar o endereço para calcular a entrega.'});}
-          }
-          const route=await deliveryKm(d.settings,lat,lng); const resolved=resolveKmFee(d.deliveryKmRanges,route.km);
-          if(resolved===null)return send(res,400,{error:'Endereço fora da área de entrega cadastrada.',distanceKm:Number(route.km.toFixed(2))}); deliveryFee=resolved; b.deliveryDistanceKm=Number(route.km.toFixed(2)); b.deliveryRouteType=route.source;
-        }else{
-          const resolved=resolveDeliveryFee(d.deliveryZones,b.customer?.neighborhood,b.customer?.street);
-          if(resolved===null)return send(res,400,{error:'Bairro/rua sem taxa de entrega cadastrada.'}); deliveryFee=resolved;
+        if(!d.settings.storeLat||!d.settings.storeLng)return send(res,400,{error:'A localização da loja ainda não foi confirmada no painel do dono.'});
+        let lat=Number(b.customer?.lat),lng=Number(b.customer?.lng);
+        if(!Number.isFinite(lat)||!Number.isFinite(lng)||!lat||!lng){
+          try{const geo=await geocodeBrazilAddress(b.customer||{});lat=geo.lat;lng=geo.lng;b.customer.lat=lat;b.customer.lng=lng;}catch(e){return send(res,400,{error:e.message||'Não foi possível localizar o endereço para calcular a entrega.'});}
         }
+        const route=await deliveryKm(d.settings,lat,lng), resolved=resolveKmFee(d.deliveryKmRanges,route.km,d.settings);
+        if(resolved===null)return send(res,400,{error:'Endereço fora da distância máxima de entrega.',distanceKm:Number(route.km.toFixed(2))});
+        deliveryFee=Number(resolved.toFixed(2)); b.deliveryDistanceKm=Number(route.km.toFixed(2)); b.deliveryRouteType=route.source;
       }
       const customer={...(b.customer||{})};
       if(customer.delivery!=='Retirada'){
