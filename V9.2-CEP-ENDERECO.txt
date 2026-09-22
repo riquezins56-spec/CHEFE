@@ -1,0 +1,9 @@
+CHEFE TELLES V9.2
+- CEP com busca automática (ViaCEP)
+- Preenche rua e bairro quando disponíveis
+- Cliente pode corrigir/editar o endereço
+- Número, complemento e referência continuam editáveis
+- Cálculo da entrega por endereço sem exigir GPS
+- Endereço é geocodificado e a rota real é calculada pelo servidor
+- GPS continua disponível como alternativa
+- Servidor recalcula a taxa ao confirmar o pedido

@@ -1,0 +1,14 @@
+CHEFE TELLES V9
+- Mantém o site V8 existente.
+- Pedidos persistentes no PostgreSQL quando DATABASE_URL estiver configurada.
+- Backup automático das últimas 200 alterações no PostgreSQL.
+- Status: Novo, Em preparo, Pronto, Saiu para entrega, Entregue, Cancelado.
+- Cadastro de entregadores.
+- Tempo padrão estimado.
+- Entrega por bairro/rua ou faixas de distância por GPS.
+- Latitude/longitude da loja configuráveis no painel.
+- Cliente pode usar GPS no checkout.
+- Data/hora no pedido e impressão.
+- Android continua responsável pela impressão automática.
+- iPhone/PC continuam com painel e impressão manual.
+OBS: cálculo GPS desta versão usa distância geográfica. Para distância real por ruas/rotas, integrar API de rotas posteriormente.

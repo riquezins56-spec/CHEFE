@@ -1,7 +1,1 @@
-CHEFE TELLES v2.0 — versão final de teste
-
-Android: Thermer via my.bluetoothprint.scheme://
-iPhone: bprint://
-PC: QZ Tray / teste de impressão
-
-O INICIAR.bat abre automaticamente a loja e o painel do dono.
+CHEFE TELLES V9.1 - ENTREGA POR ROTA REAL

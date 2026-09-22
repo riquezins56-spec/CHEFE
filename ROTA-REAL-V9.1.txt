@@ -1,0 +1,8 @@
+CHEFE TELLES V9.1 — ENTREGA POR ROTA REAL
+
+- O cliente toca em USAR MINHA LOCALIZAÇÃO / CALCULAR ROTA.
+- O servidor calcula a distância dirigível pelas ruas e aplica a faixa de km cadastrada.
+- O servidor recalcula a rota ao criar o pedido, evitando alteração do valor pelo navegador.
+- Se o roteador externo estiver temporariamente indisponível, há fallback de distância geográfica para não derrubar o checkout.
+- Opcional: defina ROUTING_BASE_URL no Render para uma instância OSRM/provedor compatível controlado pela loja.
+- Para operação comercial de maior volume, use um provedor/instância de rotas com SLA próprio.

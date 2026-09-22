@@ -33,6 +33,8 @@ const seed = {
     {id:9,name:'Coca-Cola Lata',cat:'Bebidas',price:6,emoji:'🥤',desc:'Refrigerante 350ml bem gelado.',image:'',active:true}
   ],
   deliveryZones: [],
+  deliveryKmRanges: [],
+  drivers: [],
   orders: []
 };
 
@@ -50,6 +52,7 @@ async function ensureDb(){
       data JSONB NOT NULL,
       updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
     )`);
+    await pool.query(`CREATE TABLE IF NOT EXISTS chefe_telles_backups (id BIGSERIAL PRIMARY KEY, data JSONB NOT NULL, created_at TIMESTAMPTZ NOT NULL DEFAULT NOW())`);
     const r=await pool.query('SELECT id FROM chefe_telles_state WHERE id=1');
     if(!r.rowCount)await pool.query(
       'INSERT INTO chefe_telles_state(id,data) VALUES(1,$1::jsonb)',
@@ -63,6 +66,11 @@ function normalizeData(d){
   if(!Array.isArray(d.categories)){d.categories=['Hambúrgueres','Pizzas','Combos','Bebidas','Açaí na Garrafa'];changed=true;}
   if(!d.categories.includes('Açaí na Garrafa')){d.categories.push('Açaí na Garrafa');changed=true;}
   if(!Array.isArray(d.deliveryZones)){d.deliveryZones=[];changed=true;}
+  if(!Array.isArray(d.deliveryKmRanges)){d.deliveryKmRanges=[];changed=true;}
+  if(!Array.isArray(d.drivers)){d.drivers=[];changed=true;}
+  if(!d.settings.deliveryMode){d.settings.deliveryMode='bairro';changed=true;}
+  if(d.settings.storeLat===undefined)d.settings.storeLat='';
+  if(d.settings.storeLng===undefined)d.settings.storeLng='';
   if(!Array.isArray(d.orders)){d.orders=[];changed=true;}
   if(!Array.isArray(d.products))d.products=[];
   if(!d.products.some(p=>p.cat==='Açaí na Garrafa')){d.products.push({id:Date.now()+17,name:'Açaí na Garrafa 300ml',cat:'Açaí na Garrafa',price:12,emoji:'',desc:'Açaí cremoso servido na garrafa.',image:'',active:true});changed=true;}
@@ -89,6 +97,8 @@ async function read(){
 async function write(d){
   if(pool){
     await ensureDb();
+    await pool.query('INSERT INTO chefe_telles_backups(data) VALUES($1::jsonb)',[JSON.stringify(d)]);
+    await pool.query('DELETE FROM chefe_telles_backups WHERE id NOT IN (SELECT id FROM chefe_telles_backups ORDER BY id DESC LIMIT 200)');
     await pool.query(
       `INSERT INTO chefe_telles_state(id,data,updated_at) VALUES(1,$1::jsonb,NOW())
        ON CONFLICT(id) DO UPDATE SET data=EXCLUDED.data, updated_at=NOW()`,
@@ -122,6 +132,51 @@ function resolveDeliveryFee(zones, neighborhood, street){
   return bairro ? Number(bairro.fee)||0 : null;
 }
 
+
+function haversineKm(a,b,c,d){const R=6371,toRad=x=>Number(x)*Math.PI/180;const dLat=toRad(c-a),dLon=toRad(d-b);const q=Math.sin(dLat/2)**2+Math.cos(toRad(a))*Math.cos(toRad(c))*Math.sin(dLon/2)**2;return 2*R*Math.asin(Math.sqrt(q));}
+function resolveKmFee(ranges,km){const r=(ranges||[]).filter(x=>x.active!==false).sort((a,b)=>Number(a.maxKm)-Number(b.maxKm)).find(x=>km<=Number(x.maxKm));return r?Number(r.fee)||0:null;}
+
+// Distância real pelas ruas. Por padrão usa OSRM; em produção pode apontar ROUTING_BASE_URL para sua própria instância/provedor compatível.
+async function roadRouteKm(storeLat,storeLng,customerLat,customerLng){
+  const vals=[storeLat,storeLng,customerLat,customerLng].map(Number);
+  if(vals.some(v=>!Number.isFinite(v)))throw new Error('Coordenadas inválidas');
+  const [a,b,c,d]=vals;
+  const base=String(process.env.ROUTING_BASE_URL||'https://router.project-osrm.org').replace(/\/$/,'');
+  const url=`${base}/route/v1/driving/${b},${a};${d},${c}?overview=false&steps=false`;
+  const ctrl=new AbortController(); const timer=setTimeout(()=>ctrl.abort(),8000);
+  try{
+    const r=await fetch(url,{headers:{'User-Agent':'CHEFE-TELLES/1.0'},signal:ctrl.signal});
+    if(!r.ok)throw new Error('Roteador indisponível');
+    const j=await r.json(); const meters=Number(j?.routes?.[0]?.distance);
+    if(!Number.isFinite(meters))throw new Error('Rota não encontrada');
+    return {km:meters/1000,source:'road'};
+  } finally { clearTimeout(timer); }
+}
+
+async function lookupCep(cep){
+  const c=String(cep||'').replace(/\D/g,''); if(c.length!==8) throw Error('CEP inválido.');
+  const r=await fetch(`https://viacep.com.br/ws/${c}/json/`,{headers:{'User-Agent':'CHEFE-TELLES/9.2'}}); if(!r.ok) throw Error('Não foi possível consultar o CEP.');
+  const j=await r.json(); if(j.erro) throw Error('CEP não encontrado.');
+  return {cep:j.cep||c,street:j.logradouro||'',neighborhood:j.bairro||'',city:j.localidade||'',state:j.uf||''};
+}
+async function geocodeBrazilAddress(x){
+  const cep=String(x.cep||'').replace(/\D/g,''); let city='',state='';
+  if(cep.length===8){try{const c=await lookupCep(cep);city=c.city;state=c.state;if(!x.street)x.street=c.street;if(!x.neighborhood)x.neighborhood=c.neighborhood;}catch{}}
+  const parts=[x.street,x.number,x.neighborhood,city,state,cep,'Brasil'].filter(Boolean).join(', ');
+  const url='https://nominatim.openstreetmap.org/search?format=jsonv2&limit=1&countrycodes=br&q='+encodeURIComponent(parts);
+  const r=await fetch(url,{headers:{'User-Agent':'CHEFE-TELLES/9.2 (delivery geocoder)','Accept-Language':'pt-BR'}}); if(!r.ok) throw Error('Serviço de endereço indisponível.');
+  let j=await r.json();
+  if(!j.length && x.street){const fallback=[x.street,x.neighborhood,city,state,cep,'Brasil'].filter(Boolean).join(', ');const r2=await fetch('https://nominatim.openstreetmap.org/search?format=jsonv2&limit=1&countrycodes=br&q='+encodeURIComponent(fallback),{headers:{'User-Agent':'CHEFE-TELLES/9.2 (delivery geocoder)','Accept-Language':'pt-BR'}});j=await r2.json();}
+  if(!j.length) throw Error('Não encontramos esse endereço. Confira CEP, rua, bairro e número.');
+  return {lat:Number(j[0].lat),lng:Number(j[0].lon),displayName:j[0].display_name};
+}
+
+async function deliveryKm(settings,lat,lng){
+  try{return await roadRouteKm(settings.storeLat,settings.storeLng,lat,lng)}
+  catch(e){return {km:haversineKm(settings.storeLat,settings.storeLng,lat,lng),source:'fallback'}}
+}
+
+
 async function printEndpoint(req,res,pathname){
   if(req.method!=='GET') return false;
   if(pathname==='/print/test'){
@@ -130,10 +185,10 @@ async function printEndpoint(req,res,pathname){
   }
   const m=pathname.match(/^\/print\/(\d+)$/); if(!m)return false;
   const d=await read(),o=d.orders.find(x=>String(x.id)===m[1]); if(!o)return send(res,404,{error:'Pedido não encontrado'});
-  const e=[]; addText(e,'CHEFE TELLES',1,1,2); addText(e,'NOVO PEDIDO '+String(o.number).padStart(2,'0'),1,1,1); addText(e,'--------------------------------');
-  addText(e,'CLIENTE: '+(o.customer?.name||'')); if(o.customer?.phone)addText(e,'WHATSAPP: '+o.customer.phone); if(o.customer?.reference)addText(e,'PONTO DE REFERÊNCIA: '+o.customer.reference); addText(e,'--------------------------------');
+  const e=[]; addText(e,'CHEFE TELLES',1,1,2); addText(e,'PEDIDO '+String(o.number).padStart(2,'0'),1,1,1); addText(e,new Date(o.createdAt).toLocaleString('pt-BR',{timeZone:'America/Sao_Paulo'}),0,1,0); addText(e,'--------------------------------');
+  addText(e,'STATUS: '+(o.status||'Novo')); addText(e,'CLIENTE: '+(o.customer?.name||'')); if(o.customer?.phone)addText(e,'WHATSAPP: '+o.customer.phone); if(o.customer?.reference)addText(e,'PONTO DE REFERÊNCIA: '+o.customer.reference); addText(e,'--------------------------------');
   for(const i of (o.items||[])) addText(e,`${i.qty}x ${i.name} - R$ ${(Number(i.price||0)*Number(i.qty||0)).toFixed(2)}`);
-  addText(e,'--------------------------------'); addText(e,'SUBTOTAL: R$ '+Number(o.subtotal||o.total||0).toFixed(2)); addText(e,'ENTREGA: R$ '+Number(o.deliveryFee||0).toFixed(2)); addText(e,'TOTAL: R$ '+Number(o.total||0).toFixed(2),1,0,1); addText(e,'PAGAMENTO: '+(o.customer?.payment||'')); addText(e,'ENDEREÇO: '+(o.customer?.address||'')); addText(e,'OBS: '+(o.customer?.note||'Nenhuma')); addText(e,' '); addText(e,' ');
+  addText(e,'--------------------------------'); addText(e,'SUBTOTAL: R$ '+Number(o.subtotal||o.total||0).toFixed(2)); addText(e,'ENTREGA: R$ '+Number(o.deliveryFee||0).toFixed(2)); addText(e,'TOTAL: R$ '+Number(o.total||0).toFixed(2),1,0,1); addText(e,'PAGAMENTO: '+(o.customer?.payment||'')); addText(e,'ENDEREÇO: '+(o.customer?.address||'')); if(o.deliveryDistanceKm)addText(e,'DISTÂNCIA: '+o.deliveryDistanceKm+' km'); addText(e,'OBS: '+(o.customer?.note||'Nenhuma')); addText(e,' '); addText(e,' ');
   return send(res,200,JSON.parse(printJson(e)));
 }
 
@@ -162,7 +217,7 @@ async function api(req,res,pathname){
     }
     if(req.method==='GET'&&pathname==='/api/store'){
       const d=await read();
-      return send(res,200,{settings:{name:d.settings.name,whatsapp:d.settings.whatsapp,pixKey:d.settings.pixKey||'',pixRecipient:d.settings.pixRecipient||'',pixType:d.settings.pixType||'',pixQr:d.settings.pixQr||'',botWhatsapp:d.settings.botWhatsapp||d.settings.whatsapp,botMessage:d.settings.botMessage||''},categories:d.categories,products:d.products.filter(p=>p.active),deliveryZones:d.deliveryZones.filter(z=>z.active!==false)});
+      return send(res,200,{settings:{name:d.settings.name,whatsapp:d.settings.whatsapp,pixKey:d.settings.pixKey||'',pixRecipient:d.settings.pixRecipient||'',pixType:d.settings.pixType||'',pixQr:d.settings.pixQr||'',botWhatsapp:d.settings.botWhatsapp||d.settings.whatsapp,botMessage:d.settings.botMessage||'',deliveryMode:d.settings.deliveryMode||'bairro',storeLat:d.settings.storeLat||'',storeLng:d.settings.storeLng||''},categories:d.categories,products:d.products.filter(p=>p.active),deliveryZones:d.deliveryZones.filter(z=>z.active!==false),deliveryKmRanges:(d.deliveryKmRanges||[]).filter(z=>z.active!==false)});
     }
     if(req.method==='POST'&&pathname==='/api/login'){
       const b=await body(req),d=await read();
@@ -170,6 +225,22 @@ async function api(req,res,pathname){
       const token=crypto.randomBytes(24).toString('hex'); adminTokens.add(token); return send(res,200,{ok:true,token});
     }
     if(req.method==='POST'&&pathname==='/api/logout'){const h=req.headers.authorization||''; if(h.startsWith('Bearer '))adminTokens.delete(h.slice(7)); return send(res,200,{ok:true});}
+
+    const cepMatch=pathname.match(/^\/api\/cep\/(\d{8})$/);
+    if(req.method==='GET'&&cepMatch){try{return send(res,200,await lookupCep(cepMatch[1]));}catch(e){return send(res,404,{error:e.message});}}
+    if(req.method==='POST'&&pathname==='/api/delivery-quote-address'){
+      const b=await body(req),d=await read(); if((d.settings.deliveryMode||'bairro')!=='km')return send(res,400,{error:'Entrega por km não está ativa.'});
+      if(!String(b.street||'').trim()||!String(b.number||'').trim())return send(res,400,{error:'Informe rua e número para calcular a entrega.'});
+      try{const geo=await geocodeBrazilAddress(b);const route=await deliveryKm(d.settings,geo.lat,geo.lng),fee=resolveKmFee(d.deliveryKmRanges,route.km);if(fee===null)return send(res,400,{error:'Endereço fora da área de entrega cadastrada.',distanceKm:Number(route.km.toFixed(2))});return send(res,200,{lat:geo.lat,lng:geo.lng,addressFound:geo.displayName,distanceKm:Number(route.km.toFixed(2)),deliveryFee:fee,routeType:route.source});}catch(e){return send(res,400,{error:e.message||'Não foi possível calcular a entrega pelo endereço.'});}
+    }
+    if(req.method==='POST'&&pathname==='/api/delivery-quote'){
+      const b=await body(req),d=await read();
+      if((d.settings.deliveryMode||'bairro')!=='km')return send(res,400,{error:'Entrega por km não está ativa.'});
+      if(!d.settings.storeLat||!d.settings.storeLng||!b.lat||!b.lng)return send(res,400,{error:'Localização da loja ou cliente não informada.'});
+      const route=await deliveryKm(d.settings,b.lat,b.lng), fee=resolveKmFee(d.deliveryKmRanges,route.km);
+      if(fee===null)return send(res,400,{error:'Localização fora da área de entrega cadastrada.',distanceKm:Number(route.km.toFixed(2))});
+      return send(res,200,{distanceKm:Number(route.km.toFixed(2)),deliveryFee:fee,routeType:route.source});
+    }
 
     if(req.method==='POST'&&pathname==='/api/orders'){
       const b=await body(req),d=await read(),today=localDay();
@@ -179,16 +250,20 @@ async function api(req,res,pathname){
       if(b.customer?.delivery==='Retirada'){
         deliveryFee=0;
       }else{
-        const resolved=resolveDeliveryFee(d.deliveryZones,b.customer?.neighborhood,b.customer?.street);
-        if(resolved===null)return send(res,400,{error:'Bairro/rua sem taxa de entrega cadastrada.'});
-        deliveryFee=resolved;
+        if((d.settings.deliveryMode||'bairro')==='km' && b.customer?.lat && b.customer?.lng && d.settings.storeLat && d.settings.storeLng){
+          const route=await deliveryKm(d.settings,b.customer.lat,b.customer.lng); const resolved=resolveKmFee(d.deliveryKmRanges,route.km);
+          if(resolved===null)return send(res,400,{error:'Localização fora da área de entrega cadastrada.'}); deliveryFee=resolved; b.deliveryDistanceKm=Number(route.km.toFixed(2)); b.deliveryRouteType=route.source;
+        }else{
+          const resolved=resolveDeliveryFee(d.deliveryZones,b.customer?.neighborhood,b.customer?.street);
+          if(resolved===null)return send(res,400,{error:'Bairro/rua sem taxa de entrega cadastrada.'}); deliveryFee=resolved;
+        }
       }
       const customer={...(b.customer||{})};
       if(customer.delivery!=='Retirada'){
         const street=String(customer.street||'').trim(), number=String(customer.number||'').trim(), complement=String(customer.complement||'').trim(), neighborhood=String(customer.neighborhood||'').trim(), reference=String(customer.reference||'').trim();
         customer.address=[street,number&&('Nº '+number),neighborhood,complement,reference&&('Referência: '+reference)].filter(Boolean).join(', ');
       }else customer.address='Retirada na loja';
-      const order={...b,customer,id:Date.now(),day:today,number:count,status:'Novo',createdAt:new Date().toISOString(),subtotal,deliveryFee,total:subtotal+deliveryFee};
+      const order={...b,customer,id:Date.now(),day:today,number:count,status:'Novo',statusHistory:[{status:'Novo',at:new Date().toISOString()}],driverId:null,estimatedMinutes:Number(d.settings.defaultEtaMinutes||0),createdAt:new Date().toISOString(),subtotal,deliveryFee,total:subtotal+deliveryFee};
       d.orders.push(order);await write(d);return send(res,201,order);
     }
 
@@ -200,7 +275,7 @@ async function api(req,res,pathname){
     }
     if(req.method==='GET'&&pathname==='/api/orders')return send(res,200,(await read()).orders.slice().reverse());
     const om=pathname.match(/^\/api\/orders\/(\d+)$/);
-    if(om&&req.method==='PUT'){const b=await body(req),d=await read(),o=d.orders.find(x=>String(x.id)===om[1]);if(!o)return send(res,404,{error:'Pedido não encontrado'});o.status=b.status||o.status;await write(d);return send(res,200,o);}
+    if(om&&req.method==='PUT'){const b=await body(req),d=await read(),o=d.orders.find(x=>String(x.id)===om[1]);if(!o)return send(res,404,{error:'Pedido não encontrado'});if(b.status&&b.status!==o.status){o.status=b.status;o.statusHistory=Array.isArray(o.statusHistory)?o.statusHistory:[];o.statusHistory.push({status:b.status,at:new Date().toISOString()});} if(b.driverId!==undefined)o.driverId=b.driverId||null;if(b.estimatedMinutes!==undefined)o.estimatedMinutes=Number(b.estimatedMinutes)||0;await write(d);return send(res,200,o);}
     if(om&&req.method==='DELETE'){
       const d=await read(),i=d.orders.findIndex(x=>String(x.id)===om[1]);
       if(i<0)return send(res,404,{error:'Pedido não encontrado'});
@@ -238,6 +313,11 @@ async function api(req,res,pathname){
     const pm=pathname.match(/^\/api\/products\/(\d+)$/);
     if(pm&&req.method==='PUT'){const b=await body(req),d=await read(),i=d.products.findIndex(x=>String(x.id)===pm[1]);if(i<0)return send(res,404,{error:'Produto não encontrado'});d.products[i]={...d.products[i],...b,price:Number(b.price)||0};await write(d);return send(res,200,d.products[i]);}
     if(pm&&req.method==='DELETE'){const d=await read(),p=d.products.find(x=>x.id==pm[1]);if(p)p.active=false;await write(d);return send(res,200,{ok:true});}
+
+    if(req.method==='POST'&&pathname==='/api/drivers'){const b=await body(req),d=await read();const x={id:Date.now(),name:String(b.name||'').trim(),phone:String(b.phone||'').trim(),active:b.active!==false};if(!x.name)return send(res,400,{error:'Informe o nome do entregador'});d.drivers.push(x);await write(d);return send(res,201,x);}
+    const dm=pathname.match(/^\/api\/drivers\/(\d+)$/);if(dm&&req.method==='DELETE'){const d=await read();d.drivers=d.drivers.filter(x=>String(x.id)!==dm[1]);await write(d);return send(res,200,{ok:true});}
+    if(req.method==='POST'&&pathname==='/api/delivery-km'){const b=await body(req),d=await read();const x={id:Date.now(),maxKm:Number(b.maxKm)||0,fee:Number(b.fee)||0,active:true};if(x.maxKm<=0)return send(res,400,{error:'Informe a distância'});d.deliveryKmRanges.push(x);await write(d);return send(res,201,x);}
+    const km=pathname.match(/^\/api\/delivery-km\/(\d+)$/);if(km&&req.method==='DELETE'){const d=await read();d.deliveryKmRanges=d.deliveryKmRanges.filter(x=>String(x.id)!==km[1]);await write(d);return send(res,200,{ok:true});}
 
     if(req.method==='POST'&&pathname==='/api/delivery-zones'){
       const b=await body(req),d=await read();const z={id:Date.now(),neighborhood:String(b.neighborhood||'').trim(),street:String(b.street||'').trim(),fee:Number(b.fee)||0,active:b.active!==false};
