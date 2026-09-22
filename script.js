@@ -177,10 +177,11 @@ const searchEl=document.querySelector('#addressSearch'), suggestions=document.qu
 searchEl?.addEventListener('input',()=>{
   clearTimeout(searchTimer);
   const q=searchEl.value.trim();
+  const bairro=(document.querySelector('#neighborhood')?.value||'').trim();
   if(q.length<3){suggestions?.classList.remove('show');return;}
   searchTimer=setTimeout(async()=>{
     try{
-      const r=await fetch('/api/address-search?q='+encodeURIComponent(q));
+      const r=await fetch('/api/address-search?q='+encodeURIComponent(q)+'&neighborhood='+encodeURIComponent(bairro));
       const arr=await r.json(); if(!r.ok)throw Error(arr.error||'Erro na busca');
       suggestions.innerHTML=arr.map((x,i)=>`<div class="address-suggestion" data-i="${i}"><b>${esc((x.label||'').split(',').slice(0,2).join(','))}</b><small>${esc((x.label||'').split(',').slice(2).join(','))}</small></div>`).join('');
       suggestions.classList.toggle('show',arr.length>0);
@@ -212,3 +213,42 @@ document.querySelector('#useLocation')?.addEventListener('click',()=>{
     if(st)st.textContent += ` • precisão GPS ±${Math.round(accuracy)} m. Arraste o pino se necessário.`;
   },()=>{}, {enableHighAccuracy:true,timeout:15000,maximumAge:0});
 },true);
+
+document.querySelector('#neighborhood')?.addEventListener('change',()=>{
+  const bairro=document.querySelector('#neighborhood').value.trim();
+  const busca=document.querySelector('#addressSearch');
+  if(bairro && busca && !busca.value.trim()){
+    busca.placeholder='Buscar rua em '+bairro;
+  }
+});
+
+async function runAddressSearch(){
+  const input=document.querySelector('#addressSearch');
+  const box=document.querySelector('#addressSuggestions');
+  const status=document.querySelector('#addressSearchStatus');
+  const q=(input?.value||'').trim();
+  const bairro=(document.querySelector('#neighborhood')?.value||'').trim();
+  if(q.length<2 && bairro.length<2){if(status)status.textContent='Digite a rua ou informe o bairro.';return;}
+  if(status)status.textContent='Buscando endereços...';
+  try{
+    const r=await fetch('/api/address-search?q='+encodeURIComponent(q)+'&neighborhood='+encodeURIComponent(bairro));
+    const arr=await r.json(); if(!r.ok)throw Error(arr.error||'Falha na busca.');
+    if(!arr.length){box.innerHTML='';box.classList.remove('show');if(status)status.textContent='Nenhum endereço encontrado. Tente rua + bairro ou use o GPS/mapa.';return;}
+    box.innerHTML=arr.map((x,i)=>`<div class="address-suggestion" data-manual-i="${i}"><b>${esc((x.label||'').split(',').slice(0,2).join(','))}</b><small>${esc((x.label||'').split(',').slice(2).join(','))}</small></div>`).join('');
+    box.classList.add('show'); if(status)status.textContent=arr.length+' endereço(s) encontrado(s). Selecione o correto.';
+    box.querySelectorAll('[data-manual-i]').forEach(el=>el.onclick=async()=>{
+      const x=arr[Number(el.dataset.manualI)],a=x.address||{};
+      input.value=x.label||q; box.classList.remove('show');
+      const road=a.road||a.pedestrian||a.residential||'';
+      const nb=a.suburb||a.neighbourhood||a.quarter||a.city_district||bairro;
+      if(road)document.querySelector('#street').value=road;
+      if(nb)document.querySelector('#neighborhood').value=nb;
+      if(a.house_number)document.querySelector('[name=number]').value=a.house_number;
+      if(a.postcode)document.querySelector('#cep').value=a.postcode;
+      await setConfirmedPoint(x.lat,x.lng,false);
+      if(status)status.textContent='Endereço selecionado. Confira o pino no mapa.';
+    });
+  }catch(e){if(status)status.textContent=e.message;}
+}
+document.querySelector('#searchAddressBtn')?.addEventListener('click',runAddressSearch);
+document.querySelector('#addressSearch')?.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();runAddressSearch();}});

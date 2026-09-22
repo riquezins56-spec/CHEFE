@@ -137,14 +137,31 @@ function resolveDeliveryFee(zones, neighborhood, street){
 
 function haversineKm(a,b,c,d){const R=6371,toRad=x=>Number(x)*Math.PI/180;const dLat=toRad(c-a),dLon=toRad(d-b);const q=Math.sin(dLat/2)**2+Math.cos(toRad(a))*Math.cos(toRad(c))*Math.sin(dLon/2)**2;return 2*R*Math.asin(Math.sqrt(q));}
 function resolveKmFee(ranges,km,settings={}){
-  const list=(ranges||[]).filter(x=>x.active!==false&&Number(x.maxKm)>0).sort((a,b)=>Number(a.maxKm)-Number(b.maxKm));
-  if(!list.length)return null;
-  const distance=Number(km)||0, maxAllowed=Number(settings.maxDeliveryKm)||0;
-  if(maxAllowed>0&&distance>maxAllowed)return null;
-  const range=list.find(x=>distance<=Number(x.maxKm));
-  if(range)return Number(range.fee)||0;
-  const last=list[list.length-1], extraRate=Math.max(0,Number(settings.extraKmFee)||0);
-  return Number(last.fee||0)+(Math.max(0,distance-Number(last.maxKm))*extraRate);
+  const active=(ranges||[]).filter(x=>x.active!==false&&Number(x.maxKm)>0)
+    .sort((a,b)=>Number(a.maxKm)-Number(b.maxKm));
+  if(!active.length)return null;
+  const d=Number(km);
+  const maxDeliveryKm=Number(settings.maxDeliveryKm||0);
+  if(maxDeliveryKm>0&&d>maxDeliveryKm)return null;
+
+  // Cada faixa representa um ponto da tabela. Entre dois pontos, o preço cresce
+  // proporcionalmente por km. Ex.: 2km=R$5, 4km=R$10 -> 4,2km continua crescendo.
+  if(d<=Number(active[0].maxKm)){
+    const firstKm=Number(active[0].maxKm), firstFee=Number(active[0].fee||0);
+    return Math.round((firstKm>0 ? firstFee*(d/firstKm) : firstFee)*100)/100;
+  }
+  for(let i=1;i<active.length;i++){
+    const prev=active[i-1], cur=active[i];
+    const aKm=Number(prev.maxKm), bKm=Number(cur.maxKm);
+    if(d<=bKm){
+      const aFee=Number(prev.fee||0), bFee=Number(cur.fee||0);
+      const rate=(bFee-aFee)/(bKm-aKm);
+      return Math.round((aFee+(d-aKm)*rate)*100)/100;
+    }
+  }
+  const last=active[active.length-1];
+  const extra=Number(settings.extraKmFee||0);
+  return Math.round((Number(last.fee||0)+(d-Number(last.maxKm))*extra)*100)/100;
 }
 
 // Distância real pelas ruas. Por padrão usa OSRM; em produção pode apontar ROUTING_BASE_URL para sua própria instância/provedor compatível.
@@ -318,16 +335,42 @@ async function api(req,res,pathname){
 
     if(req.method==='GET'&&pathname==='/api/address-search'){
       const q=String(u.searchParams.get('q')||'').trim();
-      if(q.length<3)return send(res,200,[]);
+      const neighborhood=String(u.searchParams.get('neighborhood')||'').trim();
+      if(q.length<2 && neighborhood.length<2)return send(res,200,[]);
       try{
         const d=await read();
-        const city=String(d.settings.storeCity||'').trim(),state=String(d.settings.storeState||'').trim();
-        const full=[q,city,state,'Brasil'].filter(Boolean).join(', ');
-        const url='https://nominatim.openstreetmap.org/search?format=jsonv2&addressdetails=1&limit=8&countrycodes=br&q='+encodeURIComponent(full);
-        const r=await fetch(url,{headers:{'User-Agent':'CHEFE-TELLES/10.1 (customer address search)','Accept-Language':'pt-BR'}});
-        if(!r.ok)throw Error('Busca de endereço indisponível.');
-        const arr=await r.json();
-        return send(res,200,arr.map(x=>({lat:Number(x.lat),lng:Number(x.lon),label:x.display_name,address:x.address||{}})));
+        const city=String(d.settings.storeCity||'').trim();
+        const state=String(d.settings.storeState||'').trim();
+        const headers={'User-Agent':'CHEFE-TELLES/10.3 (address autocomplete)','Accept-Language':'pt-BR'};
+        const urls=[];
+        // Busca estruturada primeiro: rua + bairro + cidade/UF.
+        if(q){
+          const params=new URLSearchParams({format:'jsonv2',addressdetails:'1',limit:'10',countrycodes:'br',street:q});
+          if(city)params.set('city',city);
+          if(state)params.set('state',state);
+          urls.push('https://nominatim.openstreetmap.org/search?'+params.toString());
+        }
+        // Fallback textual é importante para "Corredor", travessas e nomes locais.
+        const full=[q,neighborhood,city,state,'Brasil'].filter(Boolean).join(', ');
+        if(full)urls.push('https://nominatim.openstreetmap.org/search?format=jsonv2&addressdetails=1&limit=10&countrycodes=br&q='+encodeURIComponent(full));
+        if(neighborhood){
+          const byBairro=[q||'rua',neighborhood,city,state,'Brasil'].filter(Boolean).join(', ');
+          urls.push('https://nominatim.openstreetmap.org/search?format=jsonv2&addressdetails=1&limit=10&countrycodes=br&q='+encodeURIComponent(byBairro));
+        }
+        let all=[];
+        for(const url of urls){
+          try{
+            const r=await fetch(url,{headers});
+            if(r.ok)all.push(...await r.json());
+          }catch{}
+          if(all.length>=10)break;
+        }
+        const seen=new Set();
+        const out=all.filter(x=>{
+          const key=Number(x.lat).toFixed(6)+','+Number(x.lon).toFixed(6);
+          if(seen.has(key))return false; seen.add(key); return true;
+        }).slice(0,10).map(x=>({lat:Number(x.lat),lng:Number(x.lon),label:x.display_name,address:x.address||{}}));
+        return send(res,200,out);
       }catch(e){return send(res,400,{error:e.message||'Não foi possível buscar endereços.'});}
     }
     if(req.method==='POST'&&pathname==='/api/customer-location/reverse'){
