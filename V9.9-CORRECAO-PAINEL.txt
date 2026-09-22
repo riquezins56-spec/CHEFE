@@ -1,0 +1,5 @@
+Correção da V9.8:
+- removidas referências JavaScript da antiga interface de taxa por bairro/rua;
+- login não tenta mais acessar elementos que não existem;
+- aba Entrega usa somente o sistema unificado por rota/KM;
+- mantidas faixas de KM, KM excedente, distância máxima e demais funções.

@@ -1,0 +1,7 @@
+CHEFE TELLES V9.8
+- Sistema único de entrega por rota real.
+- Bairro e rua ficam registrados, mas a taxa é calculada pela distância do endereço exato.
+- Faixas de KM configuráveis.
+- Acima da última faixa: taxa da última faixa + valor proporcional por KM excedente.
+- Distância máxima configurável; 0 = sem limite.
+- Servidor recalcula a taxa ao confirmar o pedido.
