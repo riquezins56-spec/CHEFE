@@ -253,38 +253,35 @@ async function runAddressSearch(){
 document.querySelector('#searchAddressBtn')?.addEventListener('click',runAddressSearch);
 document.querySelector('#addressSearch')?.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();runAddressSearch();}});
 
-// V10.4 — localização organizada em duas ações.
+// Localização organizada: GPS ou busca de endereço.
 document.querySelector('#toggleAddressSearch')?.addEventListener('click',()=>{
   const area=document.querySelector('#addressSearchArea');
   area?.classList.toggle('show');
   if(area?.classList.contains('show'))document.querySelector('#addressSearch')?.focus();
 });
-document.querySelector('#useLocationTop')?.addEventListener('click',()=>{
-  document.querySelector('#useLocation')?.click();
-});
 
-// Ao usar GPS, preencher automaticamente os campos de endereço por geocodificação reversa.
 document.querySelector('#useLocationTop')?.addEventListener('click',()=>{
-  if(!navigator.geolocation)return;
+  const st=document.querySelector('#gpsStatus');
+  if(!navigator.geolocation){if(st)st.textContent='GPS não disponível neste aparelho.';return;}
+  if(st)st.textContent='Obtendo sua localização...';
   navigator.geolocation.getCurrentPosition(async pos=>{
+    const lat=pos.coords.latitude,lng=pos.coords.longitude;
     try{
-      const lat=pos.coords.latitude,lng=pos.coords.longitude;
-      const rev=await reverseCustomerPoint(lat,lng),a=rev.address||{};
-      const road=a.road||a.pedestrian||a.residential||'';
-      const nb=a.suburb||a.neighbourhood||a.quarter||a.city_district||'';
-      const number=a.house_number||'';
-      const cep=a.postcode||'';
-      if(cep)document.querySelector('#cep').value=cep;
-      if(road)document.querySelector('#street').value=road;
-      if(nb)document.querySelector('#neighborhood').value=nb;
-      if(number)document.querySelector('[name=number]').value=number;
+      const rev=await reverseCustomerPoint(lat,lng);
+      if(rev.cep)document.querySelector('#cep').value=rev.cep;
+      if(rev.street)document.querySelector('#street').value=rev.street;
+      if(rev.neighborhood)document.querySelector('#neighborhood').value=rev.neighborhood;
+      if(rev.number)document.querySelector('[name=number]').value=rev.number;
       const search=document.querySelector('#addressSearch');
-      if(search)search.value=[road,number,nb].filter(Boolean).join(', ');
+      if(search)search.value=[rev.street,rev.number,rev.neighborhood].filter(Boolean).join(', ');
       await setConfirmedPoint(lat,lng,false);
-      const st=document.querySelector('#gpsStatus');
-      if(st)st.textContent='Localização encontrada e endereço preenchido. Confira o número e o pino no mapa.';
+      if(st)st.textContent=`Localização encontrada (precisão aproximada ±${Math.round(pos.coords.accuracy)} m). Confira o número e o pino no mapa.`;
     }catch(e){
-      const st=document.querySelector('#gpsStatus'); if(st)st.textContent='GPS localizado. Confira o ponto no mapa e complete o endereço.';
+      ensureDeliveryMap(lat,lng);
+      await setConfirmedPoint(lat,lng,false);
+      if(st)st.textContent='GPS localizado. Complete o que faltar no endereço e confira o pino.';
     }
-  },()=>{}, {enableHighAccuracy:true,timeout:15000,maximumAge:0});
+  },()=>{
+    if(st)st.textContent='Não foi possível acessar sua localização. Permita o GPS ou use Buscar endereço.';
+  },{enableHighAccuracy:true,timeout:15000,maximumAge:0});
 });

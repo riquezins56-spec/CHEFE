@@ -334,8 +334,9 @@ async function api(req,res,pathname){
     if(req.method==='POST'&&pathname==='/api/logout'){const h=req.headers.authorization||''; if(h.startsWith('Bearer '))adminTokens.delete(h.slice(7)); return send(res,200,{ok:true});}
 
     if(req.method==='GET'&&pathname==='/api/address-search'){
-      const q=String(u.searchParams.get('q')||'').trim();
-      const neighborhood=String(u.searchParams.get('neighborhood')||'').trim();
+      const searchUrl=new URL(req.url,'http://localhost');
+      const q=String(searchUrl.searchParams.get('q')||'').trim();
+      const neighborhood=String(searchUrl.searchParams.get('neighborhood')||'').trim();
       if(q.length<2 && neighborhood.length<2)return send(res,200,[]);
       try{
         const d=await read();
