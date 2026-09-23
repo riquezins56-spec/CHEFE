@@ -15,9 +15,30 @@ document.querySelector('#cartBtn').onclick=openCart;document.querySelector('#cle
 let deliveryZones=[];const normalizeText=v=>String(v??'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/\s+/g,' ').trim();function findDeliveryZone(neighborhood,street){const nb=normalizeText(neighborhood),st=normalizeText(street);if(!nb)return null;const same=deliveryZones.filter(z=>z.active!==false&&normalizeText(z.neighborhood)===nb);if(!same.length)return null;const exact=same.find(z=>st&&normalizeText(z.street)===st);return exact||same.find(z=>!normalizeText(z.street))||null;}
 function setupDelivery(){deliveryZones=store.deliveryZones||[];const type=document.querySelector('#deliveryType'),bairro=document.querySelector('#neighborhood'),rua=document.querySelector('#street'),fee=document.querySelector('#deliveryFee'),feePreview=document.querySelector('#deliveryFeePreview'),fields=document.querySelector('#deliveryFields'),addr=document.querySelector('#address'),addrLabel=document.querySelector('#addressLabel'),hint=document.querySelector('#deliveryHint'),nbList=document.querySelector('#neighborhoodList'),streetList=document.querySelector('#streetList');if(!type||!bairro)return;nbList.innerHTML=[...new Set(deliveryZones.map(z=>z.neighborhood).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'pt-BR')).map(x=>`<option value="${esc(x)}">`).join('');function refreshStreetSuggestions(){const nb=normalizeText(bairro.value);streetList.innerHTML=[...new Set(deliveryZones.filter(z=>z.active!==false&&normalizeText(z.neighborhood)===nb&&normalizeText(z.street)).map(z=>z.street))].sort((a,b)=>a.localeCompare(b,'pt-BR')).map(x=>`<option value="${esc(x)}">`).join('');}function buildAddress(){if(type.value==='Retirada'){addr.value='Retirada na loja';return;}const street=rua.value.trim(),num=document.querySelector('[name=number]').value.trim(),comp=document.querySelector('[name=complement]').value.trim(),ref=(document.querySelector('[name=reference]')?.value||'').trim();addr.value=[street,num&&('Nº '+num),bairro.value.trim(),comp,ref&&('Referência: '+ref)].filter(Boolean).join(', ');}function update(){const retirada=type.value==='Retirada';fields.style.display=retirada?'none':'block';addrLabel.style.display=retirada?'none':'block';addr.required=!retirada;bairro.required=!retirada;rua.required=!retirada;document.querySelector('[name=number]').required=!retirada;
 const cepEl=document.querySelector('#cep'),compEl=document.querySelector('[name=complement]'),refEl=document.querySelector('[name=reference]');
-for(const el of [cepEl,bairro,rua,document.querySelector('[name=number]'),compEl,refEl]){if(el)el.disabled=retirada;}if(retirada){fee.value='0';feePreview.textContent=money(0);hint.textContent='Retirada na loja: sem taxa de entrega.';addr.value='Retirada na loja';return;}refreshStreetSuggestions();if(true){if(!document.querySelector('#customerLat')?.value){fee.value='0';feePreview.textContent='Aguardando endereço';hint.textContent='Informe CEP, rua e número. A rota e a taxa por km serão calculadas automaticamente.';}buildAddress();return;}const zone=findDeliveryZone(bairro.value,rua.value);if(zone){const v=Number(zone.fee)||0;fee.value=String(v);feePreview.textContent=money(v);hint.textContent=normalizeText(zone.street)?`Taxa aplicada para ${zone.street}.`:`Taxa fixa do bairro ${zone.neighborhood}.`;}else{fee.value='0';feePreview.textContent='Não cadastrada';hint.textContent='A taxa aparece automaticamente quando o bairro/rua estiver cadastrado pela loja.';}buildAddress();}type.onchange=update;bairro.oninput=update;bairro.onchange=update;rua.oninput=update;rua.onchange=update;document.querySelector('[name=number]').oninput=buildAddress;document.querySelector('[name=complement]').oninput=buildAddress;update();}
-document.querySelector('#orderForm').onsubmit=async e=>{e.preventDefault();if(!cart.length)return;const f=new FormData(e.target),formData=Object.fromEntries(f),subtotal=cart.reduce((s,i)=>s+i.price*i.qty,0);if(formData.delivery!=='Retirada'&&false&&!findDeliveryZone(formData.neighborhood,formData.street)){alert('Essa região ainda não possui taxa de entrega cadastrada pela loja. Confira o bairro e a rua.');return;}if(formData.delivery!=='Retirada'&&true&&(!formData.lat||!formData.lng)){try{const q=await quoteAddressDelivery(formData);formData.lat=q.lat;formData.lng=q.lng;formData.deliveryFee=q.deliveryFee;document.querySelector('#customerLat').value=q.lat;document.querySelector('#customerLng').value=q.lng;document.querySelector('#deliveryFee').value=q.deliveryFee;}catch(err){alert(err.message||'Confira o endereço e calcule a entrega.');return;}}const order={customer:formData,items:cart.map(({id,name,price,qty})=>({id,name,price,qty})),subtotal,deliveryFee:formData.delivery==='Retirada'?0:Number(formData.deliveryFee||0),total:subtotal+(formData.delivery==='Retirada'?0:Number(formData.deliveryFee||0))};try{const r=await fetch('/api/orders',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(order)});const saved=await r.json();if(!r.ok)throw Error(saved.error||'Erro');const itens=saved.items.map(i=>`${i.qty}x ${i.name} — ${money(i.price*i.qty)}`).join('\n');const tipoPedido=saved.customer.delivery==='Retirada'?'RETIRADA NA LOJA':'ENTREGA';
-const msg=`NOVO PEDIDO ${String(saved.number).padStart(2,'0')}\nDATA/HORA: ${saved.createdAtText||new Date(saved.createdAt).toLocaleString('pt-BR')}\nTIPO: ${tipoPedido}\n\nCliente: ${saved.customer.name}\nWhatsApp: ${saved.customer.phone}\n\nPEDIDO:\n${itens}\n\nSUBTOTAL: ${money(saved.subtotal)}\nENTREGA: ${money(saved.deliveryFee)}\nTOTAL: ${money(saved.total)}\n\n${saved.customer.delivery==='Retirada'?'RETIRADA NA LOJA':'ENDEREÇO:\n'+saved.customer.address}\n\nPAGAMENTO: ${saved.customer.payment}\n\nOBSERVAÇÃO:\n${saved.customer.note||'Nenhuma'}`;window.lastOrderWhatsappUrl='https://wa.me/'+String(store.settings.whatsapp||'').replace(/\D/g,'')+'?text='+encodeURIComponent(msg);cart=[];renderCart();document.querySelector('#checkoutModal').classList.remove('show');e.target.reset();setupDelivery();document.querySelector('#successTitle').textContent=`Pedido ${String(saved.number).padStart(2,'0')} confirmado!`;document.querySelector('#successText').textContent=`Pedido realizado em ${saved.createdAtText||new Date(saved.createdAt).toLocaleString('pt-BR')}. Toque em ENVIAR PEDIDO para abrir o WhatsApp.`;document.querySelector('#successModal').classList.add('show');}catch(err){alert(err.message||'Não foi possível enviar o pedido.');}};
+for(const el of [cepEl,bairro,rua,document.querySelector('[name=number]'),compEl,refEl]){if(el)el.disabled=retirada;}if(retirada){
+  fee.disabled=false;fee.value='0';feePreview.textContent=money(0);hint.textContent='Retirada na loja: sem taxa de entrega.';addr.value='Retirada na loja';
+  document.querySelector('#customerLat').value='';document.querySelector('#customerLng').value='';
+  const submitBtn=document.querySelector('#orderForm button[type=submit]');if(submitBtn){submitBtn.disabled=false;submitBtn.style.display='block';submitBtn.textContent='CONFIRMAR PEDIDO';}
+  const mapWrap=document.querySelector('#deliveryMapWrap'),searchArea=document.querySelector('#addressSearchArea'),rs=document.querySelector('#routeSummary');
+  if(mapWrap)mapWrap.classList.remove('show');if(searchArea)searchArea.classList.remove('show');if(rs)rs.style.display='none';
+  setTimeout(()=>document.querySelector('#orderForm button[type=submit]')?.scrollIntoView({behavior:'smooth',block:'center'}),80);
+  return;
+}refreshStreetSuggestions();if(true){if(!document.querySelector('#customerLat')?.value){fee.value='0';feePreview.textContent='Aguardando endereço';hint.textContent='Informe CEP, rua e número. A rota e a taxa por km serão calculadas automaticamente.';}buildAddress();return;}const zone=findDeliveryZone(bairro.value,rua.value);if(zone){const v=Number(zone.fee)||0;fee.value=String(v);feePreview.textContent=money(v);hint.textContent=normalizeText(zone.street)?`Taxa aplicada para ${zone.street}.`:`Taxa fixa do bairro ${zone.neighborhood}.`;}else{fee.value='0';feePreview.textContent='Não cadastrada';hint.textContent='A taxa aparece automaticamente quando o bairro/rua estiver cadastrado pela loja.';}buildAddress();}type.onchange=update;bairro.oninput=update;bairro.onchange=update;rua.oninput=update;rua.onchange=update;document.querySelector('[name=number]').oninput=buildAddress;document.querySelector('[name=complement]').oninput=buildAddress;update();}
+document.querySelector('#orderForm').onsubmit=async e=>{e.preventDefault();if(!cart.length)return;const f=new FormData(e.target),formData=Object.fromEntries(f),subtotal=cart.reduce((s,i)=>s+i.price*i.qty,0);if(formData.delivery!=='Retirada'&&false&&!findDeliveryZone(formData.neighborhood,formData.street)){alert('Essa região ainda não possui taxa de entrega cadastrada pela loja. Confira o bairro e a rua.');return;}if(formData.delivery!=='Retirada'&&true&&(!formData.lat||!formData.lng)){try{const q=await quoteAddressDelivery(formData);formData.lat=q.lat;formData.lng=q.lng;formData.deliveryFee=q.deliveryFee;document.querySelector('#customerLat').value=q.lat;document.querySelector('#customerLng').value=q.lng;document.querySelector('#deliveryFee').value=q.deliveryFee;}catch(err){alert(err.message||'Confira o endereço e calcule a entrega.');return;}}if(formData.delivery!=='Retirada'){
+  try{
+    const q=(formData.lat&&formData.lng)?await quoteRoadDelivery(formData.lat,formData.lng):await quoteAddressDelivery(formData);
+    if(!Number.isFinite(Number(q.distanceKm))||Number(q.distanceKm)<0.1)throw Error('Rota inválida. Confirme o ponto correto no mapa.');
+    if(q.lat){formData.lat=q.lat;document.querySelector('#customerLat').value=q.lat;}
+    if(q.lng){formData.lng=q.lng;document.querySelector('#customerLng').value=q.lng;}
+    formData.deliveryFee=q.deliveryFee;document.querySelector('#deliveryFee').value=q.deliveryFee;
+  }catch(err){alert(err.message||'Não foi possível validar a rota da entrega.');return;}
+}
+const order={customer:formData,items:cart.map(({id,name,price,qty})=>({id,name,price,qty})),subtotal,deliveryFee:formData.delivery==='Retirada'?0:Number(formData.deliveryFee||0),total:subtotal+(formData.delivery==='Retirada'?0:Number(formData.deliveryFee||0))};try{const r=await fetch('/api/orders',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(order)});const saved=await r.json();if(!r.ok)throw Error(saved.error||'Erro');const itens=saved.items.map(i=>`${i.qty}x ${i.name} — ${money(i.price*i.qty)}`).join('\n');const tipoPedido=saved.customer.delivery==='Retirada'?'RETIRADA NA LOJA':'ENTREGA';
+const msg=`NOVO PEDIDO ${String(saved.number).padStart(2,'0')}\nDATA/HORA: ${saved.createdAtText||new Date(saved.createdAt).toLocaleString('pt-BR')}\nTIPO: ${tipoPedido}\n\nCliente: ${saved.customer.name}\nWhatsApp: ${saved.customer.phone}\n\nPEDIDO:\n${itens}\n\nSUBTOTAL: ${money(saved.subtotal)}\nENTREGA: ${money(saved.deliveryFee)}\nTOTAL: ${money(saved.total)}\n\n${saved.customer.delivery==='Retirada'?'RETIRADA NA LOJA':'ENDEREÇO:\n'+saved.customer.address}\n\nPAGAMENTO: ${saved.customer.payment}\n\nOBSERVAÇÃO:\n${saved.customer.note||'Nenhuma'}`;window.lastOrderWhatsappUrl='https://wa.me/'+String(store.settings.whatsapp||'').replace(/\D/g,'')+'?text='+encodeURIComponent(msg);cart=[];renderCart();document.querySelector('#checkoutModal').classList.remove('show');e.target.reset();setupDelivery();document.querySelector('#successTitle').textContent=`Pedido ${String(saved.number).padStart(2,'0')} confirmado!`;document.querySelector('#successText').textContent=`Pedido realizado em ${saved.createdAtText||new Date(saved.createdAt).toLocaleString('pt-BR')}. Toque em ENVIAR PEDIDO para abrir o WhatsApp.`;const sendBtn=document.querySelector('#sendOrderWhatsapp');
+if(sendBtn)sendBtn.style.display='block';
+const success=document.querySelector('#successModal');
+success?.querySelectorAll('button').forEach(b=>b.style.removeProperty('display'));
+success?.classList.add('show');}catch(err){alert(err.message||'Não foi possível enviar o pedido.');}};
 loadStore();renderCart();setInterval(loadStore,15000);
 
 function updatePixCheckout(){const pay=document.querySelector('[name="payment"]')?.value;const b=document.querySelector('#pixCheckout');if(!b)return;const show=pay==='Pix'&&store?.settings?.pixKey;b.style.display=show?'flex':'none';if(show){document.querySelector('#pixCheckoutKey').textContent=store.settings.pixKey;document.querySelector('#pixCheckoutRecipient').textContent=(store.settings.pixRecipient||'')+(store.settings.pixType?' · '+store.settings.pixType:'');const im=document.querySelector('#pixCheckoutQr');if(store.settings.pixQr){im.src=store.settings.pixQr;im.style.display='block'}else im.style.display='none'}}
@@ -154,11 +175,14 @@ async function setConfirmedPoint(lat,lng,fromDrag=false){
       const q=await quoteRoadDelivery(lat,lng);
       document.querySelector('#deliveryFee').value=q.deliveryFee;
       document.querySelector('#deliveryFeePreview').textContent=money(q.deliveryFee);
-      if(st)st.textContent=`Ponto confirmado • rota ${Number(q.distanceKm).toFixed(1)} km • taxa ${money(q.deliveryFee)}`;
+      if(st)st.textContent=`Ponto localizado • rota ${Number(q.distanceKm).toFixed(1)} km • taxa ${money(q.deliveryFee)}`;
+      const rs=document.querySelector('#routeSummary');
+      if(rs){rs.style.display='block';rs.innerHTML=`<b>Entrega calculada pela rota</b><span>${Number(q.distanceKm).toFixed(2)} km → ${money(q.deliveryFee)}</span>`;}
     }catch(e){
-      document.querySelector('#deliveryFee').value='0';
-      document.querySelector('#deliveryFeePreview').textContent='Fora da área';
-      if(st)st.textContent=e.message;
+      document.querySelector('#deliveryFee').value='';
+      document.querySelector('#deliveryFeePreview').textContent='Aguardando rota válida';
+      const rs=document.querySelector('#routeSummary');if(rs)rs.style.display='none';
+      if(st)st.textContent=e.message||'Confirme um ponto válido no mapa.';
     }
   },250);
 }
@@ -181,8 +205,11 @@ document.querySelector('#confirmMapPoint')?.addEventListener('click',async()=>{
   if(!deliveryMarker)return;
   const p=deliveryMarker.getLatLng();
   await refreshAddressFromPoint(p.lat,p.lng);
+  const wrap=document.querySelector('#deliveryMapWrap');
+  if(wrap)wrap.classList.remove('show');
   const st=document.querySelector('#gpsStatus');
-  if(st)st.textContent='Ponto confirmado. Confira os dados do endereço; você pode editar se necessário.';
+  if(st)st.textContent='✓ Ponto confirmado. Endereço preenchido pelo mapa; edite somente se algo estiver incorreto.';
+  document.querySelector('#addressDetails')?.scrollIntoView({behavior:'smooth',block:'center'});
 });
 
 const searchEl=document.querySelector('#addressSearch'), suggestions=document.querySelector('#addressSuggestions');
@@ -190,7 +217,7 @@ searchEl?.addEventListener('input',()=>{
   clearTimeout(searchTimer);
   const q=searchEl.value.trim();
   const bairro=(document.querySelector('#neighborhood')?.value||'').trim();
-  if(q.length<3){suggestions?.classList.remove('show');return;}
+  if(q.length<2){suggestions?.classList.remove('show');return;}
   searchTimer=setTimeout(async()=>{
     try{
       const r=await fetch('/api/address-search?q='+encodeURIComponent(q)+'&neighborhood='+encodeURIComponent(bairro));
@@ -211,7 +238,7 @@ searchEl?.addEventListener('input',()=>{
         await setConfirmedPoint(x.lat,x.lng,false);
       });
     }catch(e){suggestions.innerHTML='';suggestions.classList.remove('show');}
-  },350);
+  },220);
 });
 
 // Reforça o GPS: mostra o ponto obtido no mapa para o cliente corrigir se necessário.

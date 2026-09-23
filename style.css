@@ -76,3 +76,10 @@ body{overflow-x:hidden;overflow-y:auto}
 .delivery-map-wrap{padding:10px}
 .delivery-map-wrap .leaflet-container{font-family:inherit}
 @media(max-width:520px){#deliveryMap{height:420px;min-height:420px}}
+
+.route-summary{margin:10px 0;padding:12px;border-radius:12px;background:#151515;border:1px solid #333}
+.route-summary b,.route-summary span{display:block}
+.route-summary span{margin-top:4px;font-size:14px}
+#orderForm button[type=submit]{margin-top:14px}
+
+.address-search-area{position:relative}.address-suggestions.show{box-shadow:0 10px 30px rgba(0,0,0,.45)}

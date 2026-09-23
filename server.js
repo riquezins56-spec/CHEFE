@@ -176,7 +176,7 @@ async function roadRouteKm(storeLat,storeLng,customerLat,customerLng){
     const r=await fetch(url,{headers:{'User-Agent':'CHEFE-TELLES/1.0'},signal:ctrl.signal});
     if(!r.ok)throw new Error('Roteador indisponível');
     const j=await r.json(); const meters=Number(j?.routes?.[0]?.distance);
-    if(!Number.isFinite(meters))throw new Error('Rota não encontrada');
+    if(!Number.isFinite(meters)||meters<100)throw new Error('Rota inválida. Confirme o ponto correto da entrega no mapa.');
     return {km:meters/1000,source:'road'};
   } finally { clearTimeout(timer); }
 }
