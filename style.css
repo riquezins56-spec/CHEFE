@@ -83,3 +83,6 @@ body{overflow-x:hidden;overflow-y:auto}
 #orderForm button[type=submit]{margin-top:14px}
 
 .address-search-area{position:relative}.address-suggestions.show{box-shadow:0 10px 30px rgba(0,0,0,.45)}
+
+.pickup-fields{display:none;margin-top:12px}
+.pickup-fields.show{display:block}
