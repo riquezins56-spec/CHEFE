@@ -346,17 +346,17 @@ async function api(req,res,pathname){
         const urls=[];
         // Busca estruturada primeiro: rua + bairro + cidade/UF.
         if(q){
-          const params=new URLSearchParams({format:'jsonv2',addressdetails:'1',limit:'10',countrycodes:'br',street:q});
+          const params=new URLSearchParams({format:'jsonv2',addressdetails:'1',limit:'15',countrycodes:'br',street:q});
           if(city)params.set('city',city);
           if(state)params.set('state',state);
           urls.push('https://nominatim.openstreetmap.org/search?'+params.toString());
         }
         // Fallback textual é importante para "Corredor", travessas e nomes locais.
         const full=[q,neighborhood,city,state,'Brasil'].filter(Boolean).join(', ');
-        if(full)urls.push('https://nominatim.openstreetmap.org/search?format=jsonv2&addressdetails=1&limit=10&countrycodes=br&q='+encodeURIComponent(full));
+        if(full)urls.push('https://nominatim.openstreetmap.org/search?format=jsonv2&addressdetails=1&limit=15&countrycodes=br&q='+encodeURIComponent(full));
         if(neighborhood){
           const byBairro=[q||'rua',neighborhood,city,state,'Brasil'].filter(Boolean).join(', ');
-          urls.push('https://nominatim.openstreetmap.org/search?format=jsonv2&addressdetails=1&limit=10&countrycodes=br&q='+encodeURIComponent(byBairro));
+          urls.push('https://nominatim.openstreetmap.org/search?format=jsonv2&addressdetails=1&limit=15&countrycodes=br&q='+encodeURIComponent(byBairro));
         }
         let all=[];
         for(const url of urls){
@@ -370,7 +370,7 @@ async function api(req,res,pathname){
         const out=all.filter(x=>{
           const key=Number(x.lat).toFixed(6)+','+Number(x.lon).toFixed(6);
           if(seen.has(key))return false; seen.add(key); return true;
-        }).slice(0,10).map(x=>({lat:Number(x.lat),lng:Number(x.lon),label:x.display_name,address:x.address||{}}));
+        }).slice(0,15).map(x=>({lat:Number(x.lat),lng:Number(x.lon),label:x.display_name,address:x.address||{}}));
         return send(res,200,out);
       }catch(e){return send(res,400,{error:e.message||'Não foi possível buscar endereços.'});}
     }
@@ -417,7 +417,9 @@ async function api(req,res,pathname){
         const street=String(customer.street||'').trim(), number=String(customer.number||'').trim(), complement=String(customer.complement||'').trim(), neighborhood=String(customer.neighborhood||'').trim(), reference=String(customer.reference||'').trim();
         customer.address=[street,number&&('Nº '+number),neighborhood,complement,reference&&('Referência: '+reference)].filter(Boolean).join(', ');
       }else customer.address='Retirada na loja';
-      const order={...b,customer,id:Date.now(),day:today,number:count,status:'Novo',statusHistory:[{status:'Novo',at:new Date().toISOString()}],driverId:null,estimatedMinutes:Number(d.settings.defaultEtaMinutes||0),createdAt:new Date().toISOString(),subtotal,deliveryFee,total:subtotal+deliveryFee};
+      const createdAt=new Date().toISOString();
+      const createdAtText=new Date(createdAt).toLocaleString('pt-BR',{timeZone:'America/Sao_Paulo',day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'});
+      const order={...b,customer,id:Date.now(),day:today,number:count,status:'Novo',statusHistory:[{status:'Novo',at:createdAt}],driverId:null,estimatedMinutes:Number(d.settings.defaultEtaMinutes||0),createdAt,createdAtText,subtotal,deliveryFee,total:subtotal+deliveryFee};
       d.orders.push(order);await write(d);return send(res,201,order);
     }
 

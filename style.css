@@ -70,3 +70,9 @@ body{overflow-x:hidden;overflow-y:auto}
 .address-search-area{display:none;margin-top:10px}
 .address-search-area.show{display:block}
 @media(max-width:520px){.location-actions{grid-template-columns:1fr}}
+
+/* Mapa de entrega estilo aplicativo: ruas, quadras, construções e rótulos do OpenStreetMap. */
+#deliveryMap{height:360px;min-height:360px;border-radius:16px}
+.delivery-map-wrap{padding:10px}
+.delivery-map-wrap .leaflet-container{font-family:inherit}
+@media(max-width:520px){#deliveryMap{height:420px;min-height:420px}}
