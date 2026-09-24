@@ -58,9 +58,18 @@ const order={customer:formData,items:cart.map(({id,name,price,qty})=>({id,name,p
 const msg=`NOVO PEDIDO ${String(saved.number).padStart(2,'0')}\nDATA/HORA: ${saved.createdAtText||new Date(saved.createdAt).toLocaleString('pt-BR')}\nTIPO: ${tipoPedido}\n\nCliente: ${saved.customer.name}\nWhatsApp: ${saved.customer.phone}\n\nPEDIDO:\n${itens}\n\nSUBTOTAL: ${money(saved.subtotal)}\nENTREGA: ${money(saved.deliveryFee)}\nTOTAL: ${money(saved.total)}\n\n${saved.customer.delivery==='Retirada'?'RETIRADA NA LOJA':'ENDEREÇO:\n'+saved.customer.address}\n\nPAGAMENTO: ${saved.customer.payment}\n\nOBSERVAÇÃO:\n${saved.customer.note||'Nenhuma'}`;window.lastOrderWhatsappUrl='https://wa.me/'+String(store.settings.whatsapp||'').replace(/\D/g,'')+'?text='+encodeURIComponent(msg);cart=[];renderCart();document.querySelector('#checkoutModal').classList.remove('show');document.querySelector('#successTitle').textContent=`Pedido ${String(saved.number).padStart(2,'0')} confirmado!`;document.querySelector('#successText').textContent=`Pedido realizado em ${saved.createdAtText||new Date(saved.createdAt).toLocaleString('pt-BR')}. Toque em ENVIAR PEDIDO para abrir o WhatsApp.`;const sendBtn=document.querySelector('#sendOrderWhatsapp');
 if(sendBtn)sendBtn.style.display='block';
 const success=document.querySelector('#successModal');
-if(success){success.querySelectorAll('button').forEach(b=>b.style.removeProperty('display'));success.classList.add('show');}
-// Só limpa/prepara o próximo pedido DEPOIS de abrir a confirmação. Falha aqui não pode esconder o sucesso.
-try{e.target.reset();setupDelivery();syncOrderTypeUI();}catch(resetErr){console.warn('Pedido salvo; falha apenas ao preparar próximo formulário:',resetErr);}}catch(err){alert(err.message||'Não foi possível enviar o pedido.');}};
+document.querySelector('#checkoutModal')?.classList.remove('show');
+document.querySelector('#cart')?.classList.remove('open');
+document.querySelector('#overlay')?.classList.remove('show');
+if(success){
+  success.querySelectorAll('button').forEach(b=>b.style.removeProperty('display'));
+  success.classList.add('show');
+  success.style.display='flex';
+  success.style.zIndex='99999';
+  void success.offsetHeight;
+  requestAnimationFrame(()=>{success.classList.add('show');success.style.display='flex';});
+}
+setTimeout(()=>{try{e.target.reset();setupDelivery();syncOrderTypeUI();}catch(resetErr){console.warn('Pedido salvo; falha apenas ao preparar próximo formulário:',resetErr);}},0);}catch(err){alert(err.message||'Não foi possível enviar o pedido.');}};
 loadStore();renderCart();setInterval(loadStore,15000);
 
 function updatePixCheckout(){const pay=document.querySelector('[name="payment"]')?.value;const b=document.querySelector('#pixCheckout');if(!b)return;const show=pay==='Pix'&&store?.settings?.pixKey;b.style.display=show?'flex':'none';if(show){document.querySelector('#pixCheckoutKey').textContent=store.settings.pixKey;document.querySelector('#pixCheckoutRecipient').textContent=(store.settings.pixRecipient||'')+(store.settings.pixType?' · '+store.settings.pixType:'');const im=document.querySelector('#pixCheckoutQr');if(store.settings.pixQr){im.src=store.settings.pixQr;im.style.display='block'}else im.style.display='none'}}

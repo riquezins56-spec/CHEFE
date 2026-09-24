@@ -114,3 +114,7 @@ body{overflow-x:hidden;overflow-y:auto}
  .checkout-sticky{margin:0 -14px;padding-left:14px;padding-right:14px}
  #deliveryMap{height:300px;min-height:300px}
 }
+
+/* V10.16 */
+#successModal.show{display:flex!important;z-index:99999!important;align-items:center!important;justify-content:center!important}
+#successModal .success-card{position:relative;z-index:100000;max-height:calc(100dvh - 24px)}
