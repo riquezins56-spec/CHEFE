@@ -48,7 +48,7 @@ document.querySelector('#deliveryType')?.addEventListener('change',syncOrderType
 document.querySelector('#orderForm').onsubmit=async e=>{e.preventDefault();if(!cart.length)return;const f=new FormData(e.target),formData=Object.fromEntries(f),subtotal=cart.reduce((s,i)=>s+i.price*i.qty,0);if(formData.delivery==='Retirada'){formData.payment=document.querySelector('#paymentMain')?.value||formData.payment||'Pix';formData.note=document.querySelector('#noteMain')?.value||'';formData.address='Retirada na loja';formData.deliveryFee=0;formData.lat='';formData.lng='';}if(formData.delivery!=='Retirada'&&false&&!findDeliveryZone(formData.neighborhood,formData.street)){alert('Essa região ainda não possui taxa de entrega cadastrada pela loja. Confira o bairro e a rua.');return;}if(formData.delivery!=='Retirada'){
   try{
     const q=(formData.lat&&formData.lng)?await quoteRoadDelivery(formData.lat,formData.lng):await quoteAddressDelivery(formData);
-    if(!Number.isFinite(Number(q.distanceKm))||Number(q.distanceKm)<0.1)throw Error('Rota inválida. Confirme o ponto correto no mapa.');
+    if(!Number.isFinite(Number(q.distanceKm))||Number(q.distanceKm)<0.1||q.routeType!=='road')throw Error('Não foi possível validar a rota real pelas ruas. Confirme o ponto correto no mapa.');
     if(q.lat){formData.lat=q.lat;document.querySelector('#customerLat').value=q.lat;}
     if(q.lng){formData.lng=q.lng;document.querySelector('#customerLng').value=q.lng;}
     formData.deliveryFee=q.deliveryFee;document.querySelector('#deliveryFee').value=q.deliveryFee;
@@ -85,7 +85,7 @@ new MutationObserver(()=>{const sm=document.querySelector('#successModal');if(re
 setTimeout(()=>{const r=document.querySelector('[name=reference]');if(r)r.addEventListener('input',()=>document.querySelector('[name=number]')?.dispatchEvent(new Event('input')))},0);
 
 async function quoteRoadDelivery(lat,lng){const r=await fetch('/api/delivery-quote',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({lat,lng})});const j=await r.json();if(!r.ok)throw Error(j.error||'Não foi possível calcular a rota.');return j}
-document.querySelector('#useLocation')?.addEventListener('click',()=>{const st=document.querySelector('#gpsStatus');if(!navigator.geolocation){st.textContent='GPS não disponível neste aparelho.';return}st.textContent='Obtendo localização e calculando rota pelas ruas...';navigator.geolocation.getCurrentPosition(async pos=>{const lat=pos.coords.latitude,lng=pos.coords.longitude;document.querySelector('#customerLat').value=lat;document.querySelector('#customerLng').value=lng;if(true){try{const x=await quoteRoadDelivery(lat,lng);document.querySelector('#deliveryFee').value=x.deliveryFee;document.querySelector('#deliveryFeePreview').textContent=money(x.deliveryFee);st.textContent=`Rota calculada • ${Number(x.distanceKm).toFixed(1)} km • taxa ${money(x.deliveryFee)}`+(x.routeType==='fallback'?' • estimativa temporária':'');}catch(e){document.querySelector('#deliveryFee').value='0';document.querySelector('#deliveryFeePreview').textContent='Fora da área';st.textContent=e.message}}else st.textContent='Localização registrada. A taxa atual é calculada pelo bairro/rua.'},()=>{st.textContent='Não foi possível acessar a localização. Permita o GPS no navegador.'},{enableHighAccuracy:true,timeout:12000,maximumAge:60000})});
+document.querySelector('#useLocation')?.addEventListener('click',()=>{const st=document.querySelector('#gpsStatus');if(!navigator.geolocation){st.textContent='GPS não disponível neste aparelho.';return}st.textContent='Obtendo localização e calculando rota pelas ruas...';navigator.geolocation.getCurrentPosition(async pos=>{const lat=pos.coords.latitude,lng=pos.coords.longitude;document.querySelector('#customerLat').value=lat;document.querySelector('#customerLng').value=lng;if(true){try{const x=await quoteRoadDelivery(lat,lng);document.querySelector('#deliveryFee').value=x.deliveryFee;document.querySelector('#deliveryFeePreview').textContent=money(x.deliveryFee);st.textContent=`Rota calculada • ${Number(x.distanceKm).toFixed(1)} km • taxa ${money(x.deliveryFee)}`+(x.routeType==='road'?' • rota pelas ruas':'');}catch(e){document.querySelector('#deliveryFee').value='0';document.querySelector('#deliveryFeePreview').textContent='Fora da área';st.textContent=e.message}}else st.textContent='Localização registrada. A taxa atual é calculada pelo bairro/rua.'},()=>{st.textContent='Não foi possível acessar a localização. Permita o GPS no navegador.'},{enableHighAccuracy:true,timeout:12000,maximumAge:60000})});
 
 
 // V9.2 — CEP + endereço editável + geocodificação e rota real
@@ -117,7 +117,13 @@ let autoCepTimer=null;
 let lastAutoAddress='';
 function clearAddressQuote(){
   const lat=document.querySelector('#customerLat'),lng=document.querySelector('#customerLng');
-  if(lat)lat.value=''; if(lng)lng.value='';
+  const fee=document.querySelector('#deliveryFee'),preview=document.querySelector('#deliveryFeePreview');
+  const summary=document.querySelector('#routeSummary'),sticky=document.querySelector('#checkoutStickyInfo');
+  if(lat)lat.value=''; if(lng)lng.value=''; if(fee)fee.value='0';
+  if(preview)preview.textContent='Aguardando rota';
+  if(summary)summary.style.display='none';
+  if(sticky && document.querySelector('#deliveryType')?.value!=='Retirada')sticky.textContent='Entrega • endereço alterado, recalculando rota';
+  lastAutoAddress='';
 }
 function addressReadyForQuote(){
   const cep=(document.querySelector('#cep')?.value||'').replace(/\D/g,'');

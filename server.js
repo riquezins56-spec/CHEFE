@@ -231,10 +231,9 @@ async function geocodeBrazilAddress(x){
       if(candidates.length>=8)break;
     }catch{}
   }
-  if(!candidates.length&&cepPoint){
-    return {lat:cepPoint.lat,lng:cepPoint.lng,displayName:[street,number,neighborhood,city,state,cep].filter(Boolean).join(', '),precision:'cep'};
+  if(!candidates.length){
+    throw Error('Não foi possível localizar rua e número com segurança. Use a busca ou confirme o ponto no mapa.');
   }
-  if(!candidates.length)throw Error('Não encontramos esse endereço. Confira CEP, rua, bairro e número.');
 
   const norm=v=>String(v||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().trim();
   const hav=(a,b,c,d)=>{const R=6371,toRad=v=>v*Math.PI/180,dl=toRad(c-a),dn=toRad(d-b);const z=Math.sin(dl/2)**2+Math.cos(toRad(a))*Math.cos(toRad(c))*Math.sin(dn/2)**2;return 2*R*Math.asin(Math.sqrt(z));};
@@ -257,6 +256,15 @@ async function geocodeBrazilAddress(x){
   }).sort((a,b)=>b.score-a.score);
   const best=scored[0]?.c;
   if(!best)throw Error('Não encontramos esse endereço.');
+  const ba=best.address||{};
+  const bestCity=ba.city||ba.town||ba.municipality||ba.village||'';
+  const bestRoad=ba.road||ba.pedestrian||ba.residential||'';
+  const bestPost=String(ba.postcode||'').replace(/\D/g,'');
+  if(city && bestCity && norm(bestCity)!==norm(city))throw Error('O endereço encontrado pertence a outra cidade. Confira os dados ou confirme no mapa.');
+  if(street && bestRoad && norm(bestRoad)!==norm(street) && !norm(best.display_name).includes(norm(street)))
+    throw Error('Não foi possível confirmar essa rua com segurança. Selecione o endereço na busca ou confirme o ponto no mapa.');
+  if(cep && bestPost && bestPost!==cep)
+    throw Error('O CEP não confere com o ponto encontrado. Confira o endereço ou confirme no mapa.');
   return {lat:Number(best.lat),lng:Number(best.lon),displayName:best.display_name,precision:number?'address':'street'};
 }
 
@@ -280,8 +288,10 @@ async function reverseGeocodeBrazil(lat,lng){
 }
 
 async function deliveryKm(settings,lat,lng){
-  try{return await roadRouteKm(settings.storeLat,settings.storeLng,lat,lng)}
-  catch(e){return {km:haversineKm(settings.storeLat,settings.storeLng,lat,lng),source:'fallback'}}
+  if(!settings.storeLat||!settings.storeLng)throw Error('A localização da loja ainda não foi confirmada no painel do dono.');
+  // Para cobrança não usamos linha reta/aproximação. Se o roteador falhar,
+  // a taxa não é liberada até obter a rota real pelas ruas.
+  return await roadRouteKm(settings.storeLat,settings.storeLng,lat,lng);
 }
 
 
