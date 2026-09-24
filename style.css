@@ -99,3 +99,18 @@ body{overflow-x:hidden;overflow-y:auto}
  #checkoutModal .modal-card{max-height:calc(100dvh - 16px);padding:18px 16px 0;border-radius:18px}
  #orderForm{padding-bottom:88px}
 }
+
+/* V10.13 */
+#checkoutModal{overflow:hidden;align-items:center}
+#checkoutModal .modal-card{height:min(92dvh,820px);max-height:92dvh;overflow:hidden;padding:20px 20px 0}
+#orderForm{display:flex;flex:1;min-height:0;flex-direction:column;overflow:hidden;padding:0}
+.checkout-scroll{flex:1;min-height:0;overflow-y:auto;overflow-x:hidden;padding:0 4px 18px 0;overscroll-behavior:contain}
+.checkout-sticky{position:relative;flex:0 0 auto;bottom:auto;margin:0 -20px;padding:11px 20px calc(14px + env(safe-area-inset-bottom));background:#141414;border-top:1px solid #343434;box-shadow:0 -12px 30px rgba(0,0,0,.42)}
+#confirmDelivery{margin:0!important;min-height:50px;font-size:15px}
+.address-suggestions.show{position:static!important;display:block;max-height:230px;overflow-y:auto;margin-top:8px}
+@media(max-width:560px){
+ #checkoutModal{padding:6px;align-items:stretch}
+ #checkoutModal .modal-card{height:calc(100dvh - 12px);max-height:calc(100dvh - 12px);padding:16px 14px 0;margin:0 auto}
+ .checkout-sticky{margin:0 -14px;padding-left:14px;padding-right:14px}
+ #deliveryMap{height:300px;min-height:300px}
+}

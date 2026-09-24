@@ -21,7 +21,6 @@ for(const el of [cepEl,bairro,rua,document.querySelector('[name=number]'),compEl
   const submitBtn=document.querySelector('#orderForm button[type=submit]');if(submitBtn){submitBtn.disabled=false;submitBtn.style.display='block';submitBtn.textContent='CONFIRMAR PEDIDO';}
   const mapWrap=document.querySelector('#deliveryMapWrap'),searchArea=document.querySelector('#addressSearchArea'),rs=document.querySelector('#routeSummary');
   if(mapWrap)mapWrap.classList.remove('show');if(searchArea)searchArea.classList.remove('show');if(rs)rs.style.display='none';
-  setTimeout(()=>document.querySelector('#orderForm button[type=submit]')?.scrollIntoView({behavior:'smooth',block:'center'}),80);
   return;
 }refreshStreetSuggestions();if(true){if(!document.querySelector('#customerLat')?.value){fee.value='0';feePreview.textContent='Aguardando endereço';hint.textContent='Informe CEP, rua e número. A rota e a taxa por km serão calculadas automaticamente.';}buildAddress();return;}const zone=findDeliveryZone(bairro.value,rua.value);if(zone){const v=Number(zone.fee)||0;fee.value=String(v);feePreview.textContent=money(v);hint.textContent=normalizeText(zone.street)?`Taxa aplicada para ${zone.street}.`:`Taxa fixa do bairro ${zone.neighborhood}.`;}else{fee.value='0';feePreview.textContent='Não cadastrada';hint.textContent='A taxa aparece automaticamente quando o bairro/rua estiver cadastrado pela loja.';}buildAddress();}type.onchange=update;bairro.oninput=update;bairro.onchange=update;rua.oninput=update;rua.onchange=update;document.querySelector('[name=number]').oninput=buildAddress;document.querySelector('[name=complement]').oninput=buildAddress;update();}
 
@@ -48,7 +47,7 @@ document.querySelector('#deliveryType')?.addEventListener('change',syncOrderType
 document.querySelector('#pickupPayment')?.addEventListener('change',e=>{const x=document.querySelector('#paymentMain');if(x)x.value=e.target.value;});
 document.querySelector('#pickupNote')?.addEventListener('input',e=>{const x=document.querySelector('#noteMain');if(x)x.value=e.target.value;});
 
-document.querySelector('#orderForm').onsubmit=async e=>{e.preventDefault();if(!cart.length)return;const f=new FormData(e.target),formData=Object.fromEntries(f),subtotal=cart.reduce((s,i)=>s+i.price*i.qty,0);if(formData.delivery==='Retirada'){formData.payment=document.querySelector('#pickupPayment')?.value||formData.payment||'Pix';formData.note=document.querySelector('#pickupNote')?.value||'';formData.address='Retirada na loja';formData.deliveryFee=0;}if(formData.delivery!=='Retirada'&&false&&!findDeliveryZone(formData.neighborhood,formData.street)){alert('Essa região ainda não possui taxa de entrega cadastrada pela loja. Confira o bairro e a rua.');return;}if(formData.delivery!=='Retirada'){try{const q=(formData.lat&&formData.lng)?await quoteRoadDelivery(formData.lat,formData.lng):await quoteAddressDelivery(formData);if(!Number.isFinite(Number(q.distanceKm))||Number(q.distanceKm)<0.1)throw Error('Rota inválida. Confirme o ponto correto no mapa.');if(q.lat){formData.lat=q.lat;document.querySelector('#customerLat').value=q.lat;}if(q.lng){formData.lng=q.lng;document.querySelector('#customerLng').value=q.lng;}formData.deliveryFee=q.deliveryFee;document.querySelector('#deliveryFee').value=q.deliveryFee;}catch(err){alert(err.message||'Não foi possível validar a rota da entrega.');return;}}if(formData.delivery!=='Retirada'){
+document.querySelector('#orderForm').onsubmit=async e=>{e.preventDefault();if(!cart.length)return;const f=new FormData(e.target),formData=Object.fromEntries(f),subtotal=cart.reduce((s,i)=>s+i.price*i.qty,0);if(formData.delivery==='Retirada'){formData.payment=document.querySelector('#pickupPayment')?.value||formData.payment||'Pix';formData.note=document.querySelector('#pickupNote')?.value||'';formData.address='Retirada na loja';formData.deliveryFee=0;}if(formData.delivery!=='Retirada'&&false&&!findDeliveryZone(formData.neighborhood,formData.street)){alert('Essa região ainda não possui taxa de entrega cadastrada pela loja. Confira o bairro e a rua.');return;}if(formData.delivery!=='Retirada'){
   try{
     const q=(formData.lat&&formData.lng)?await quoteRoadDelivery(formData.lat,formData.lng):await quoteAddressDelivery(formData);
     if(!Number.isFinite(Number(q.distanceKm))||Number(q.distanceKm)<0.1)throw Error('Rota inválida. Confirme o ponto correto no mapa.');
@@ -240,13 +239,16 @@ searchEl?.addEventListener('input',()=>{
   clearTimeout(searchTimer);
   const q=searchEl.value.trim();
   const bairro=(document.querySelector('#neighborhood')?.value||'').trim();
-  if(q.length<2){suggestions?.classList.remove('show');return;}
+  if(q.length<2){suggestions?.classList.remove('show');const st=document.querySelector('#addressSearchStatus');if(st)st.textContent=q.length?'Digite mais uma letra para buscar.':'';return;}
   searchTimer=setTimeout(async()=>{
+    const st=document.querySelector('#addressSearchStatus');
+    if(st)st.textContent='Buscando ruas e endereços...';
     try{
       const r=await fetch('/api/address-search?q='+encodeURIComponent(q)+'&neighborhood='+encodeURIComponent(bairro));
       const arr=await r.json(); if(!r.ok)throw Error(arr.error||'Erro na busca');
       suggestions.innerHTML=arr.map((x,i)=>`<div class="address-suggestion" data-i="${i}"><b>${esc((x.label||'').split(',').slice(0,2).join(','))}</b><small>${esc((x.label||'').split(',').slice(2).join(','))}</small></div>`).join('');
       suggestions.classList.toggle('show',arr.length>0);
+      if(st)st.textContent=arr.length?`${arr.length} resultado(s). Toque no endereço correto.`:'Nenhum endereço encontrado. Tente só parte do nome da rua.';
       suggestions.querySelectorAll('.address-suggestion').forEach(el=>el.onclick=async()=>{
         const x=arr[Number(el.dataset.i)],a=x.address||{};
         searchEl.value=x.label||q;suggestions.classList.remove('show');
@@ -260,7 +262,7 @@ searchEl?.addEventListener('input',()=>{
         document.querySelector('[name=number]')?.dispatchEvent(new Event('input',{bubbles:true}));
         await setConfirmedPoint(x.lat,x.lng,false);
       });
-    }catch(e){suggestions.innerHTML='';suggestions.classList.remove('show');}
+     }catch(e){suggestions.innerHTML='';suggestions.classList.remove('show');if(st)st.textContent=e.message||'Não foi possível buscar agora.';}
   },220);
 });
 

@@ -359,6 +359,21 @@ async function api(req,res,pathname){
           urls.push('https://nominatim.openstreetmap.org/search?format=jsonv2&addressdetails=1&limit=15&countrycodes=br&q='+encodeURIComponent(byBairro));
         }
         let all=[];
+        const storeLat=Number(d.settings.storeLat), storeLng=Number(d.settings.storeLng);
+        if(q && Number.isFinite(storeLat) && Number.isFinite(storeLng)){
+          try{
+            const safe=q.replace(/[\\"']/g,' ').trim();
+            const oq=`[out:json][timeout:10];way(around:12000,${storeLat},${storeLng})["highway"]["name"~"${safe}",i];out tags center 25;`;
+            const or=await fetch('https://overpass-api.de/api/interpreter',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded','User-Agent':'CHEFE-TELLES/10.13'},body:'data='+encodeURIComponent(oq)});
+            if(or.ok){
+              const od=await or.json();
+              for(const x of (od.elements||[])){
+                const name=String(x.tags?.name||'').trim(),lat=Number(x.center?.lat),lon=Number(x.center?.lon);
+                if(name&&Number.isFinite(lat)&&Number.isFinite(lon))all.push({lat:String(lat),lon:String(lon),display_name:[name,neighborhood,city,state,'Brasil'].filter(Boolean).join(', '),address:{road:name,suburb:neighborhood,city,state}});
+              }
+            }
+          }catch{}
+        }
         for(const url of urls){
           try{
             const r=await fetch(url,{headers});
