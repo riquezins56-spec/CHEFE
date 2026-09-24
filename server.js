@@ -147,8 +147,9 @@ function resolveKmFee(ranges,km,settings={}){
   // Cada faixa representa um ponto da tabela. Entre dois pontos, o preço cresce
   // proporcionalmente por km. Ex.: 2km=R$5, 4km=R$10 -> 4,2km continua crescendo.
   if(d<=Number(active[0].maxKm)){
-    const firstKm=Number(active[0].maxKm), firstFee=Number(active[0].fee||0);
-    return Math.round((firstKm>0 ? firstFee*(d/firstKm) : firstFee)*100)/100;
+    // A primeira faixa é a TAXA MÍNIMA.
+    // Ex.: 2 km = R$5 => qualquer rota até 2 km custa R$5.
+    return Math.round(Number(active[0].fee||0)*100)/100;
   }
   for(let i=1;i<active.length;i++){
     const prev=active[i-1], cur=active[i];
@@ -359,31 +360,40 @@ async function api(req,res,pathname){
           urls.push('https://nominatim.openstreetmap.org/search?format=jsonv2&addressdetails=1&limit=15&countrycodes=br&q='+encodeURIComponent(byBairro));
         }
         let all=[];
+        // Primeiro usa a busca normal de endereço, que é mais rápida para autocomplete.
+        for(const url of urls){
+          try{
+            const r=await fetch(url,{headers,signal:AbortSignal.timeout(3500)});
+            if(r.ok)all.push(...await r.json());
+          }catch{}
+          if(all.length>=10)break;
+        }
+
+        // Se a busca normal não achar o suficiente, procura nomes de ruas mapeadas
+        // perto da loja. O timeout impede travamento do checkout.
         const storeLat=Number(d.settings.storeLat), storeLng=Number(d.settings.storeLng);
-        if(q && Number.isFinite(storeLat) && Number.isFinite(storeLng)){
+        if(all.length<5 && q.length>=3 && Number.isFinite(storeLat) && Number.isFinite(storeLng)){
           try{
             const words=normalizeSearchText(q).split(' ').filter(Boolean);
-            const oq=`[out:json][timeout:12];way(around:12000,${storeLat},${storeLng})["highway"]["name"];out tags center 700;`;
-            const or=await fetch('https://overpass-api.de/api/interpreter',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded','User-Agent':'CHEFE-TELLES/10.14'},body:'data='+encodeURIComponent(oq)});
+            const oq=`[out:json][timeout:3];way(around:12000,${storeLat},${storeLng})["highway"]["name"];out tags center 500;`;
+            const or=await fetch('https://overpass-api.de/api/interpreter',{
+              method:'POST',
+              headers:{'Content-Type':'application/x-www-form-urlencoded','User-Agent':'CHEFE-TELLES/10.18'},
+              body:'data='+encodeURIComponent(oq),
+              signal:AbortSignal.timeout(3500)
+            });
             if(or.ok){
-              const od=await or.json(),seen=new Set();
+              const od=await or.json(),localSeen=new Set();
               for(const x of (od.elements||[])){
                 const name=String(x.tags?.name||'').trim(),norm=normalizeSearchText(name),lat=Number(x.center?.lat),lon=Number(x.center?.lon);
-                if(name&&words.length&&words.every(w=>norm.includes(w))&&Number.isFinite(lat)&&Number.isFinite(lon)&&!seen.has(norm)){
-                  seen.add(norm);
+                if(name&&words.every(w=>norm.includes(w))&&Number.isFinite(lat)&&Number.isFinite(lon)&&!localSeen.has(norm)){
+                  localSeen.add(norm);
                   all.push({lat:String(lat),lon:String(lon),display_name:[name,city,state,'Brasil'].filter(Boolean).join(', '),address:{road:name,city,state}});
-                  if(all.length>=20)break;
+                  if(all.length>=15)break;
                 }
               }
             }
           }catch{}
-        }
-        for(const url of urls){
-          try{
-            const r=await fetch(url,{headers});
-            if(r.ok)all.push(...await r.json());
-          }catch{}
-          if(all.length>=10)break;
         }
         const seen=new Set();
         const out=all.filter(x=>{

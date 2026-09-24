@@ -252,6 +252,7 @@ searchEl?.addEventListener('input',()=>{
   const bairro=(document.querySelector('#neighborhood')?.value||'').trim();
   if(q.length<2){suggestions?.classList.remove('show');const st=document.querySelector('#addressSearchStatus');if(st)st.textContent=q.length?'Digite mais uma letra para buscar.':'';return;}
   searchTimer=setTimeout(async()=>{
+    const seq=++addressSearchSeq;
     const st=document.querySelector('#addressSearchStatus');
     if(st)st.textContent='Buscando ruas e endereços...';
     try{
@@ -273,7 +274,7 @@ searchEl?.addEventListener('input',()=>{
         document.querySelector('[name=number]')?.dispatchEvent(new Event('input',{bubbles:true}));
         await setConfirmedPoint(x.lat,x.lng,false);
       });
-     }catch(e){suggestions.innerHTML='';suggestions.classList.remove('show');if(st)st.textContent=e.message||'Não foi possível buscar agora.';}
+     }catch(e){suggestions.innerHTML='';suggestions.classList.remove('show');if(st)st.textContent=e?.name==='AbortError'?'A busca demorou demais. Digite parte do nome da rua e tente novamente.':(e.message||'Não foi possível buscar agora.');}
   },220);
 });
 
