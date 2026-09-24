@@ -86,3 +86,16 @@ body{overflow-x:hidden;overflow-y:auto}
 
 .pickup-fields{display:none;margin-top:12px}
 .pickup-fields.show{display:block}
+
+#checkoutModal .modal-card{display:flex;flex-direction:column;max-height:calc(100dvh - 24px);overflow:hidden;padding-bottom:0}
+#orderForm{overflow-y:auto;padding-right:3px;padding-bottom:96px}
+.checkout-sticky{position:sticky;bottom:0;z-index:30;background:linear-gradient(180deg,rgba(20,20,20,.85),#141414 22%);padding:12px 0 16px;border-top:1px solid #303030;margin-top:14px}
+.checkout-sticky-info{font-size:12px;color:#aaa;text-align:center;margin-bottom:7px}
+.address-search-area{position:relative}
+.address-suggestions.show{position:absolute;left:0;right:0;top:100%;z-index:70;display:block;max-height:260px;overflow:auto;box-shadow:0 14px 35px rgba(0,0,0,.7)}
+.address-suggestion{min-height:54px}
+@media(max-width:560px){
+ #checkoutModal{padding:8px}
+ #checkoutModal .modal-card{max-height:calc(100dvh - 16px);padding:18px 16px 0;border-radius:18px}
+ #orderForm{padding-bottom:88px}
+}

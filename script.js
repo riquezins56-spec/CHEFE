@@ -30,21 +30,25 @@ function syncOrderTypeUI(){
   const pickup=document.querySelector('#pickupFields'),delivery=document.querySelector('#deliveryFields');
   const address=document.querySelector('#addressLabel'),pay=document.querySelector('#paymentLabel');
   const note=document.querySelector('#noteLabel'),confirm=document.querySelector('#confirmDelivery');
+  const sticky=document.querySelector('#checkoutStickyInfo');
   if(pickup)pickup.classList.toggle('show',retirada);
   if(delivery)delivery.style.display=retirada?'none':'block';
   if(address)address.style.display=retirada?'none':'block';
   if(pay)pay.style.display=retirada?'none':'block';
   if(note)note.style.display=retirada?'none':'block';
-  if(confirm)confirm.style.display=retirada?'none':'block';
+  if(confirm){confirm.style.display='block';confirm.disabled=false;confirm.textContent='CONFIRMAR PEDIDO';}
+  if(sticky)sticky.textContent=retirada?'Retirada na loja • taxa R$ 0,00':'Entrega • confirme endereço e rota';
+  if(retirada){
+    const mainPay=document.querySelector('#paymentMain'),mainNote=document.querySelector('#noteMain');
+    if(mainPay)mainPay.value=document.querySelector('#pickupPayment')?.value||'Pix';
+    if(mainNote)mainNote.value=document.querySelector('#pickupNote')?.value||'';
+  }
 }
 document.querySelector('#deliveryType')?.addEventListener('change',syncOrderTypeUI);
-document.querySelector('#confirmPickup')?.addEventListener('click',()=>{
-  const pay=document.querySelector('#paymentMain'),note=document.querySelector('#noteMain');
-  if(pay)pay.value=document.querySelector('#pickupPayment')?.value||'Pix';
-  if(note)note.value=document.querySelector('#pickupNote')?.value||'';
-  document.querySelector('#orderForm')?.requestSubmit();
-});
-document.querySelector('#orderForm').onsubmit=async e=>{e.preventDefault();if(!cart.length)return;const f=new FormData(e.target),formData=Object.fromEntries(f),subtotal=cart.reduce((s,i)=>s+i.price*i.qty,0);if(formData.delivery!=='Retirada'&&false&&!findDeliveryZone(formData.neighborhood,formData.street)){alert('Essa região ainda não possui taxa de entrega cadastrada pela loja. Confira o bairro e a rua.');return;}if(formData.delivery!=='Retirada'&&true&&(!formData.lat||!formData.lng)){try{const q=await quoteAddressDelivery(formData);formData.lat=q.lat;formData.lng=q.lng;formData.deliveryFee=q.deliveryFee;document.querySelector('#customerLat').value=q.lat;document.querySelector('#customerLng').value=q.lng;document.querySelector('#deliveryFee').value=q.deliveryFee;}catch(err){alert(err.message||'Confira o endereço e calcule a entrega.');return;}}if(formData.delivery!=='Retirada'){
+document.querySelector('#pickupPayment')?.addEventListener('change',e=>{const x=document.querySelector('#paymentMain');if(x)x.value=e.target.value;});
+document.querySelector('#pickupNote')?.addEventListener('input',e=>{const x=document.querySelector('#noteMain');if(x)x.value=e.target.value;});
+
+document.querySelector('#orderForm').onsubmit=async e=>{e.preventDefault();if(!cart.length)return;const f=new FormData(e.target),formData=Object.fromEntries(f),subtotal=cart.reduce((s,i)=>s+i.price*i.qty,0);if(formData.delivery==='Retirada'){formData.payment=document.querySelector('#pickupPayment')?.value||formData.payment||'Pix';formData.note=document.querySelector('#pickupNote')?.value||'';formData.address='Retirada na loja';formData.deliveryFee=0;}if(formData.delivery!=='Retirada'&&false&&!findDeliveryZone(formData.neighborhood,formData.street)){alert('Essa região ainda não possui taxa de entrega cadastrada pela loja. Confira o bairro e a rua.');return;}if(formData.delivery!=='Retirada'){try{const q=(formData.lat&&formData.lng)?await quoteRoadDelivery(formData.lat,formData.lng):await quoteAddressDelivery(formData);if(!Number.isFinite(Number(q.distanceKm))||Number(q.distanceKm)<0.1)throw Error('Rota inválida. Confirme o ponto correto no mapa.');if(q.lat){formData.lat=q.lat;document.querySelector('#customerLat').value=q.lat;}if(q.lng){formData.lng=q.lng;document.querySelector('#customerLng').value=q.lng;}formData.deliveryFee=q.deliveryFee;document.querySelector('#deliveryFee').value=q.deliveryFee;}catch(err){alert(err.message||'Não foi possível validar a rota da entrega.');return;}}if(formData.delivery!=='Retirada'){
   try{
     const q=(formData.lat&&formData.lng)?await quoteRoadDelivery(formData.lat,formData.lng):await quoteAddressDelivery(formData);
     if(!Number.isFinite(Number(q.distanceKm))||Number(q.distanceKm)<0.1)throw Error('Rota inválida. Confirme o ponto correto no mapa.');
@@ -225,10 +229,9 @@ document.querySelector('#confirmMapPoint')?.addEventListener('click',async()=>{
   if(!deliveryMarker)return;
   const p=deliveryMarker.getLatLng();
   await refreshAddressFromPoint(p.lat,p.lng);
-  const wrap=document.querySelector('#deliveryMapWrap');
-  if(wrap)wrap.classList.remove('show');
+  document.querySelector('#deliveryMapWrap')?.classList.remove('show');
   const st=document.querySelector('#gpsStatus');
-  if(st)st.textContent='✓ Ponto confirmado. Endereço preenchido pelo mapa; edite somente se algo estiver incorreto.';
+  if(st)st.textContent='✓ Ponto confirmado. Confira o endereço preenchido e edite somente se necessário.';
   document.querySelector('#addressDetails')?.scrollIntoView({behavior:'smooth',block:'center'});
 });
 
