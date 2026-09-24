@@ -362,14 +362,18 @@ async function api(req,res,pathname){
         const storeLat=Number(d.settings.storeLat), storeLng=Number(d.settings.storeLng);
         if(q && Number.isFinite(storeLat) && Number.isFinite(storeLng)){
           try{
-            const safe=q.replace(/[\\"']/g,' ').trim();
-            const oq=`[out:json][timeout:10];way(around:12000,${storeLat},${storeLng})["highway"]["name"~"${safe}",i];out tags center 25;`;
-            const or=await fetch('https://overpass-api.de/api/interpreter',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded','User-Agent':'CHEFE-TELLES/10.13'},body:'data='+encodeURIComponent(oq)});
+            const words=normalizeSearchText(q).split(' ').filter(Boolean);
+            const oq=`[out:json][timeout:12];way(around:12000,${storeLat},${storeLng})["highway"]["name"];out tags center 700;`;
+            const or=await fetch('https://overpass-api.de/api/interpreter',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded','User-Agent':'CHEFE-TELLES/10.14'},body:'data='+encodeURIComponent(oq)});
             if(or.ok){
-              const od=await or.json();
+              const od=await or.json(),seen=new Set();
               for(const x of (od.elements||[])){
-                const name=String(x.tags?.name||'').trim(),lat=Number(x.center?.lat),lon=Number(x.center?.lon);
-                if(name&&Number.isFinite(lat)&&Number.isFinite(lon))all.push({lat:String(lat),lon:String(lon),display_name:[name,neighborhood,city,state,'Brasil'].filter(Boolean).join(', '),address:{road:name,suburb:neighborhood,city,state}});
+                const name=String(x.tags?.name||'').trim(),norm=normalizeSearchText(name),lat=Number(x.center?.lat),lon=Number(x.center?.lon);
+                if(name&&words.length&&words.every(w=>norm.includes(w))&&Number.isFinite(lat)&&Number.isFinite(lon)&&!seen.has(norm)){
+                  seen.add(norm);
+                  all.push({lat:String(lat),lon:String(lon),display_name:[name,city,state,'Brasil'].filter(Boolean).join(', '),address:{road:name,city,state}});
+                  if(all.length>=20)break;
+                }
               }
             }
           }catch{}

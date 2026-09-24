@@ -10,12 +10,7 @@
 <section class="trust"><div><b class="flame-mark" aria-hidden="true"></b><span>Feito na hora</span></div><div><b class="mini-pizza" aria-hidden="true"></b><span>Hambúrgueres & pizzas</span></div><div><b class="mini-phone" aria-hidden="true"></b><span>Pedido pelo WhatsApp</span></div></section></main>
 <aside id="cart" class="cart-panel"><div class="cart-header"><div><span class="eyebrow">SEU PEDIDO</span><h2>Carrinho</h2></div><button id="closeCart">✕</button></div><div id="cartItems" class="cart-items"></div><div class="cart-footer"><div class="total-row"><span>Total</span><strong id="subtotal">R$ 0,00</strong></div><div class="cart-actions"><button id="clearCart" class="secondary full">LIMPAR / REFAZER PEDIDO</button><button id="checkoutBtn" class="primary full">FINALIZAR PEDIDO</button></div></div></aside><div id="overlay"></div>
 <div id="checkoutModal" class="modal"><div class="modal-card"><button class="modal-close" id="closeModal">✕</button><span class="eyebrow">FINALIZAÇÃO</span><h2>Dados do pedido</h2><form id="orderForm"><div class="checkout-scroll"><label>Nome<input name="name" required placeholder="Seu nome"></label><label>WhatsApp<input name="phone" required placeholder="(00) 00000-0000"></label><label>Tipo de pedido<select name="delivery" id="deliveryType"><option>Entrega</option><option>Retirada</option></select></label>
-<div id="pickupFields" class="pickup-fields">
-<label>Pagamento<select id="pickupPayment"><option>Pix</option><option>Dinheiro</option><option>Cartão</option></select></label>
-<label>Observação<textarea id="pickupNote" placeholder="Ex.: sem cebola, molho à parte..."></textarea></label>
-<div class="delivery-preview"><span>Taxa de entrega</span><strong>R$ 0,00</strong></div>
-
-</div><div id="deliveryFields"><div class="location-box">
+<div id="deliveryFields"><div class="location-box">
 <div class="location-title"><b>Localização da entrega</b><span>Escolha uma opção. Os dados do endereço serão preenchidos automaticamente.</span></div>
 <div class="location-actions"><button type="button" class="secondary" id="useLocationTop">📍 USAR MINHA LOCALIZAÇÃO</button><button type="button" class="secondary" id="toggleAddressSearch">🔎 BUSCAR ENDEREÇO</button></div>
 <div id="addressSearchArea" class="address-search-area"><label>Buscar rua/endereço<input id="addressSearch" autocomplete="off" placeholder="Ex.: Rua Doutor João Braga"></label><button type="button" class="secondary full" id="searchAddressBtn">BUSCAR</button><div id="addressSearchStatus" class="delivery-hint"></div><div id="addressSuggestions" class="address-suggestions"></div></div>

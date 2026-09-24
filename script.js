@@ -26,28 +26,26 @@ for(const el of [cepEl,bairro,rua,document.querySelector('[name=number]'),compEl
 
 function syncOrderTypeUI(){
   const retirada=document.querySelector('#deliveryType')?.value==='Retirada';
-  const pickup=document.querySelector('#pickupFields'),delivery=document.querySelector('#deliveryFields');
-  const address=document.querySelector('#addressLabel'),pay=document.querySelector('#paymentLabel');
-  const note=document.querySelector('#noteLabel'),confirm=document.querySelector('#confirmDelivery');
-  const sticky=document.querySelector('#checkoutStickyInfo');
-  if(pickup)pickup.classList.toggle('show',retirada);
+  const delivery=document.querySelector('#deliveryFields'),address=document.querySelector('#addressLabel');
+  const pay=document.querySelector('#paymentLabel'),note=document.querySelector('#noteLabel');
+  const confirm=document.querySelector('#confirmDelivery'),sticky=document.querySelector('#checkoutStickyInfo');
   if(delivery)delivery.style.display=retirada?'none':'block';
   if(address)address.style.display=retirada?'none':'block';
-  if(pay)pay.style.display=retirada?'none':'block';
-  if(note)note.style.display=retirada?'none':'block';
-  if(confirm){confirm.style.display='block';confirm.disabled=false;confirm.textContent='CONFIRMAR PEDIDO';}
-  if(sticky)sticky.textContent=retirada?'Retirada na loja • taxa R$ 0,00':'Entrega • confirme endereço e rota';
+  if(pay)pay.style.display='block';
+  if(note)note.style.display='block';
   if(retirada){
-    const mainPay=document.querySelector('#paymentMain'),mainNote=document.querySelector('#noteMain');
-    if(mainPay)mainPay.value=document.querySelector('#pickupPayment')?.value||'Pix';
-    if(mainNote)mainNote.value=document.querySelector('#pickupNote')?.value||'';
-  }
+    const fee=document.querySelector('#deliveryFee'),lat=document.querySelector('#customerLat'),lng=document.querySelector('#customerLng');
+    const preview=document.querySelector('#deliveryFeePreview'),summary=document.querySelector('#routeSummary'),map=document.querySelector('#deliveryMapWrap');
+    if(fee)fee.value='0'; if(lat)lat.value=''; if(lng)lng.value='';
+    if(preview)preview.textContent=''; if(summary)summary.style.display='none'; if(map)map.classList.remove('show');
+    if(sticky)sticky.textContent='Retirada na loja';
+  }else if(sticky)sticky.textContent='Entrega • confirme o endereço e a rota';
+  if(confirm){confirm.style.display='block';confirm.disabled=false;confirm.textContent='CONFIRMAR PEDIDO';}
 }
 document.querySelector('#deliveryType')?.addEventListener('change',syncOrderTypeUI);
-document.querySelector('#pickupPayment')?.addEventListener('change',e=>{const x=document.querySelector('#paymentMain');if(x)x.value=e.target.value;});
-document.querySelector('#pickupNote')?.addEventListener('input',e=>{const x=document.querySelector('#noteMain');if(x)x.value=e.target.value;});
 
-document.querySelector('#orderForm').onsubmit=async e=>{e.preventDefault();if(!cart.length)return;const f=new FormData(e.target),formData=Object.fromEntries(f),subtotal=cart.reduce((s,i)=>s+i.price*i.qty,0);if(formData.delivery==='Retirada'){formData.payment=document.querySelector('#pickupPayment')?.value||formData.payment||'Pix';formData.note=document.querySelector('#pickupNote')?.value||'';formData.address='Retirada na loja';formData.deliveryFee=0;}if(formData.delivery!=='Retirada'&&false&&!findDeliveryZone(formData.neighborhood,formData.street)){alert('Essa região ainda não possui taxa de entrega cadastrada pela loja. Confira o bairro e a rua.');return;}if(formData.delivery!=='Retirada'){
+
+document.querySelector('#orderForm').onsubmit=async e=>{e.preventDefault();if(!cart.length)return;const f=new FormData(e.target),formData=Object.fromEntries(f),subtotal=cart.reduce((s,i)=>s+i.price*i.qty,0);if(formData.delivery==='Retirada'){formData.payment=document.querySelector('#paymentMain')?.value||formData.payment||'Pix';formData.note=document.querySelector('#noteMain')?.value||'';formData.address='Retirada na loja';formData.deliveryFee=0;formData.lat='';formData.lng='';}if(formData.delivery!=='Retirada'&&false&&!findDeliveryZone(formData.neighborhood,formData.street)){alert('Essa região ainda não possui taxa de entrega cadastrada pela loja. Confira o bairro e a rua.');return;}if(formData.delivery!=='Retirada'){
   try{
     const q=(formData.lat&&formData.lng)?await quoteRoadDelivery(formData.lat,formData.lng):await quoteAddressDelivery(formData);
     if(!Number.isFinite(Number(q.distanceKm))||Number(q.distanceKm)<0.1)throw Error('Rota inválida. Confirme o ponto correto no mapa.');
