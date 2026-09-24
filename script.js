@@ -62,14 +62,17 @@ document.querySelector('#checkoutModal')?.classList.remove('show');
 document.querySelector('#cart')?.classList.remove('open');
 document.querySelector('#overlay')?.classList.remove('show');
 if(success){
+  // Move a confirmação diretamente para o BODY para ela não ficar presa
+  // em nenhum contexto/camada do checkout.
+  if(success.parentElement!==document.body)document.body.appendChild(success);
   success.querySelectorAll('button').forEach(b=>b.style.removeProperty('display'));
+  success.removeAttribute('style');
   success.classList.add('show');
-  success.style.display='flex';
-  success.style.zIndex='99999';
-  void success.offsetHeight;
-  requestAnimationFrame(()=>{success.classList.add('show');success.style.display='flex';});
+  document.body.classList.add('order-success-open');
 }
-setTimeout(()=>{try{e.target.reset();setupDelivery();syncOrderTypeUI();}catch(resetErr){console.warn('Pedido salvo; falha apenas ao preparar próximo formulário:',resetErr);}},0);}catch(err){alert(err.message||'Não foi possível enviar o pedido.');}};
+// NÃO reseta/reabre o checkout aqui. O formulário só é preparado para
+// um novo pedido quando o cliente sair da confirmação.
+}catch(err){alert(err.message||'Não foi possível enviar o pedido.');}};
 loadStore();renderCart();setInterval(loadStore,15000);
 
 function updatePixCheckout(){const pay=document.querySelector('[name="payment"]')?.value;const b=document.querySelector('#pixCheckout');if(!b)return;const show=pay==='Pix'&&store?.settings?.pixKey;b.style.display=show?'flex':'none';if(show){document.querySelector('#pixCheckoutKey').textContent=store.settings.pixKey;document.querySelector('#pixCheckoutRecipient').textContent=(store.settings.pixRecipient||'')+(store.settings.pixType?' · '+store.settings.pixType:'');const im=document.querySelector('#pixCheckoutQr');if(store.settings.pixQr){im.src=store.settings.pixQr;im.style.display='block'}else im.style.display='none'}}

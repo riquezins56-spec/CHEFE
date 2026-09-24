@@ -118,3 +118,17 @@ body{overflow-x:hidden;overflow-y:auto}
 /* V10.16 */
 #successModal.show{display:flex!important;z-index:99999!important;align-items:center!important;justify-content:center!important}
 #successModal .success-card{position:relative;z-index:100000;max-height:calc(100dvh - 24px)}
+
+/* V10.17 — sucesso independente do checkout */
+body.order-success-open{overflow:hidden!important}
+body>#successModal{
+  position:fixed!important;
+  inset:0!important;
+  width:100vw!important;
+  height:100dvh!important;
+  z-index:2147483647!important;
+  background:rgba(0,0,0,.82)!important;
+  padding:16px!important;
+}
+body>#successModal.show{display:flex!important;align-items:center!important;justify-content:center!important}
+body>#successModal .success-card{width:min(520px,100%)!important;max-height:calc(100dvh - 32px)!important;overflow:auto!important}
