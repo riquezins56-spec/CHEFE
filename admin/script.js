@@ -2,10 +2,12 @@
 function chefeTone(kind){
  try{
   const C=window.AudioContext||window.webkitAudioContext;if(!C)return;
-  const c=window.__chefeAudio||(window.__chefeAudio=new C());if(c.state==='suspended')c.resume();
+  const c=window.__chefeAudio||(window.__chefeAudio=new C());
+  if(c.state==='suspended')c.resume();
   const now=c.currentTime;
-  const strike=(at,freq,vol,dur)=>{[1,2.01,3.9].forEach((mul,i)=>{const o=c.createOscillator(),g=c.createGain();o.type='sine';o.frequency.setValueAtTime(freq*mul,at);const v=vol/(1+i*1.8);g.gain.setValueAtTime(.0001,at);g.gain.exponentialRampToValueAtTime(v,at+.008);g.gain.exponentialRampToValueAtTime(.0001,at+dur/(1+i*.18));o.connect(g);g.connect(c.destination);o.start(at);o.stop(at+dur+.05);});};
-  if(kind==='new'){strike(now,784,.28,.9);strike(now+.34,988,.25,1.0);}else{strike(now,659,.20,.72);strike(now+.22,880,.18,.82);}
+  const ring=(at,freq,vol,dur)=>{[1,2.02,3.98].forEach((m,i)=>{const o=c.createOscillator(),g=c.createGain();o.type='sine';o.frequency.setValueAtTime(freq*m,at);g.gain.setValueAtTime(.0001,at);g.gain.exponentialRampToValueAtTime(vol/(1+i*2),at+.01);g.gain.exponentialRampToValueAtTime(.0001,at+dur);o.connect(g);g.connect(c.destination);o.start(at);o.stop(at+dur+.04);});};
+  if(kind==='new'){ring(now,784,.25,.82);ring(now+.32,988,.22,.92);}
+  else{ring(now,659,.18,.65);ring(now+.20,880,.16,.72);}
  }catch(e){}
 }
 document.addEventListener('pointerdown',()=>{try{const C=window.AudioContext||window.webkitAudioContext;if(C&&!window.__chefeAudio)window.__chefeAudio=new C();window.__chefeAudio?.resume?.()}catch(e){}},{once:true});
@@ -181,5 +183,5 @@ setTimeout(chefeWatchNewOrders,1500);
 setInterval(chefeWatchNewOrders,5000);
 document.addEventListener('visibilitychange',()=>{if(!document.hidden)chefeWatchNewOrders()});
 
-// V10.32 — áudio no celular após a primeira interação permitida pelo navegador.
-['touchstart','pointerdown','click'].forEach(ev=>document.addEventListener(ev,()=>{try{const C=window.AudioContext||window.webkitAudioContext;if(!C)return;const c=window.__chefeAudio||(window.__chefeAudio=new C());if(c.state==='suspended')c.resume()}catch(e){}},{once:true,passive:true}));
+// Libera o mesmo áudio no navegador móvel após a primeira interação permitida.
+['touchstart','pointerdown'].forEach(ev=>document.addEventListener(ev,()=>{try{window.__chefeAudio?.resume?.()}catch(e){}},{once:true,passive:true}));
