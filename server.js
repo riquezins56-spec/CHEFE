@@ -281,7 +281,13 @@ async function geocodeBrazilAddress(x){
     throw Error('Não foi possível confirmar essa rua com segurança. Confira rua e bairro.');
   if(neighborhood){
     const bestNb=ba.suburb||ba.neighbourhood||ba.quarter||ba.city_district||'';
-    if(bestNb && searchSimilarity(neighborhood,bestNb)<.68)throw Error('O bairro não confere com a rua encontrada. Confira rua e bairro.');
+    const nbSimilarity=bestNb?searchSimilarity(neighborhood,bestNb):0;
+    const roadSimilarity=bestRoad?searchSimilarity(street,bestRoad):0;
+    // O OpenStreetMap nem sempre atribui à rua o mesmo nome de bairro usado localmente.
+    // Se a rua/cidade já foram confirmadas com boa correspondência, a divergência do
+    // bairro não bloqueia o cálculo. O bairro continua sendo usado fortemente no ranking.
+    if(bestNb && nbSimilarity<.68 && roadSimilarity<.82)
+      throw Error('Não foi possível confirmar rua e bairro com segurança. Confira os dados.');
   }
   return {lat:Number(best.lat),lng:Number(best.lon),displayName:best.display_name,precision:number?'address':'street'};
 }
