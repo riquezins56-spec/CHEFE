@@ -4,7 +4,7 @@ function chefeTone(kind){
   const C=window.AudioContext||window.webkitAudioContext;if(!C)return;
   const c=window.__chefeAudio||(window.__chefeAudio=new C());
   if(c.state==='suspended')c.resume();
-  const now=c.currentTime, seq=kind==='new'?[[784,0,.22],[988,.30,.32],[784,.68,.42]]:[[659,0,.18],[880,.22,.30],[1047,.50,.38]];
+  const now=c.currentTime, seq=kind==='new'?[[880,0,.13],[1175,.18,.18],[1568,.40,.28]]:[[659,0,.14],[784,.16,.14],[1047,.33,.32]];
   seq.forEach(([hz,delay,dur])=>{const o=c.createOscillator(),g=c.createGain();o.type='sine';o.frequency.value=hz;g.gain.setValueAtTime(.0001,now+delay);g.gain.exponentialRampToValueAtTime(.22,now+delay+.015);g.gain.exponentialRampToValueAtTime(.0001,now+delay+dur);o.connect(g);g.connect(c.destination);o.start(now+delay);o.stop(now+delay+dur+.03);});
  }catch(e){}
 }
