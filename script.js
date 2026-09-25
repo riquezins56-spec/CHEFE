@@ -1,3 +1,14 @@
+
+function chefeTone(kind){
+ try{
+  const C=window.AudioContext||window.webkitAudioContext;if(!C)return;
+  const c=window.__chefeAudio||(window.__chefeAudio=new C());
+  if(c.state==='suspended')c.resume();
+  const now=c.currentTime, seq=kind==='new'?[[880,0,.13],[1175,.18,.18],[1568,.40,.28]]:[[659,0,.14],[784,.16,.14],[1047,.33,.32]];
+  seq.forEach(([hz,delay,dur])=>{const o=c.createOscillator(),g=c.createGain();o.type='sine';o.frequency.value=hz;g.gain.setValueAtTime(.0001,now+delay);g.gain.exponentialRampToValueAtTime(.22,now+delay+.015);g.gain.exponentialRampToValueAtTime(.0001,now+delay+dur);o.connect(g);g.connect(c.destination);o.start(now+delay);o.stop(now+delay+dur+.03);});
+ }catch(e){}
+}
+document.addEventListener('pointerdown',()=>{try{const C=window.AudioContext||window.webkitAudioContext;if(C&&!window.__chefeAudio)window.__chefeAudio=new C();window.__chefeAudio?.resume?.()}catch(e){}},{once:true});
 let products=[],cart=[],store={categories:[],settings:{},deliveryZones:[],deliveryKmRanges:[]};
 const money=v=>Number(v||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
 const esc=s=>String(s??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;');
@@ -54,7 +65,8 @@ document.querySelector('#orderForm').onsubmit=async e=>{e.preventDefault();if(!c
     formData.deliveryFee=q.deliveryFee;document.querySelector('#deliveryFee').value=q.deliveryFee;
   }catch(err){alert(err.message||'Não foi possível validar a rota da entrega.');return;}
 }
-const order={customer:formData,items:cart.map(({id,name,price,qty})=>({id,name,price,qty})),subtotal,deliveryFee:formData.delivery==='Retirada'?0:Number(formData.deliveryFee||0),total:subtotal+(formData.delivery==='Retirada'?0:Number(formData.deliveryFee||0))};try{const r=await fetch('/api/orders',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(order)});const saved=await r.json();if(!r.ok)throw Error(saved.error||'Erro');const itens=saved.items.map(i=>`${i.qty}x ${i.name} — ${money(i.price*i.qty)}`).join('\n');const tipoPedido=saved.customer.delivery==='Retirada'?'RETIRADA NA LOJA':'ENTREGA';
+const order={customer:formData,items:cart.map(({id,name,price,qty})=>({id,name,price,qty})),subtotal,deliveryFee:formData.delivery==='Retirada'?0:Number(formData.deliveryFee||0),total:subtotal+(formData.delivery==='Retirada'?0:Number(formData.deliveryFee||0))};try{const r=await fetch('/api/orders',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(order)});const saved=await r.json();
+    chefeTone('done');if(!r.ok)throw Error(saved.error||'Erro');const itens=saved.items.map(i=>`${i.qty}x ${i.name} — ${money(i.price*i.qty)}`).join('\n');const tipoPedido=saved.customer.delivery==='Retirada'?'RETIRADA NA LOJA':'ENTREGA';
 const msg=`NOVO PEDIDO ${String(saved.number).padStart(2,'0')}\nDATA/HORA: ${saved.createdAtText||new Date(saved.createdAt).toLocaleString('pt-BR')}\nTIPO: ${tipoPedido}\n\nCliente: ${saved.customer.name}\nWhatsApp: ${saved.customer.phone}\n\nPEDIDO:\n${itens}\n\nSUBTOTAL: ${money(saved.subtotal)}\nENTREGA: ${money(saved.deliveryFee)}\nTOTAL: ${money(saved.total)}\n\n${saved.customer.delivery==='Retirada'?'RETIRADA NA LOJA':'ENDEREÇO:\n'+saved.customer.address}\n\nPAGAMENTO: ${saved.customer.payment}\n\nOBSERVAÇÃO:\n${saved.customer.note||'Nenhuma'}\n\nACOMPANHAR PEDIDO:\n${location.origin+'/acompanhar.html?t='+saved.trackingToken}`;window.lastOrderWhatsappUrl='https://wa.me/'+String(store.settings.whatsapp||'').replace(/\D/g,'')+'?text='+encodeURIComponent(msg);cart=[];renderCart();document.querySelector('#checkoutModal').classList.remove('show');document.querySelector('#successTitle').textContent=`Pedido ${String(saved.number).padStart(2,'0')} confirmado!`;document.querySelector('#successText').textContent=`Pedido realizado em ${saved.createdAtText||new Date(saved.createdAt).toLocaleString('pt-BR')}. Toque em ENVIAR PEDIDO para abrir o WhatsApp.`;if(saved.trackingToken)localStorage.setItem('chefeTellesTrackingToken',saved.trackingToken);const sendBtn=document.querySelector('#sendOrderWhatsapp');
 if(sendBtn)sendBtn.style.display='block';
 const success=document.querySelector('#successModal');
@@ -261,7 +273,13 @@ searchEl?.addEventListener('input',()=>{
     const st=document.querySelector('#addressSearchStatus');
     if(st)st.textContent='Buscando ruas e endereços...';
     try{
-      const r=await fetch('/api/address-search?q='+encodeURIComponent(q));
+      const r=await fetch('/api/address-search?'+new URLSearchParams({
+    q,
+    street:(document.querySelector('#street')?.value||'').trim(),
+    number:(document.querySelector('[name=number]')?.value||'').trim(),
+    neighborhood:(document.querySelector('#neighborhood')?.value||'').trim(),
+    cep:(document.querySelector('#cep')?.value||'').trim()
+  }).toString());
       const arr=await r.json(); if(!r.ok)throw Error(arr.error||'Erro na busca');
       suggestions.innerHTML=arr.map((x,i)=>`<div class="address-suggestion" data-i="${i}"><b>${esc((x.label||'').split(',').slice(0,2).join(','))}</b><small>${esc((x.label||'').split(',').slice(2).join(','))}</small></div>`).join('');
       suggestions.classList.toggle('show',arr.length>0);
@@ -298,11 +316,13 @@ document.querySelector('#useLocation')?.addEventListener('click',()=>{
 
 async function runAddressSearch(){
   const input=document.querySelector('#addressSearch'),box=document.querySelector('#addressSuggestions'),status=document.querySelector('#addressSearchStatus'),q=(input?.value||'').trim();
-  if(q.length<2){if(status)status.textContent='Digite parte da rua, bairro ou endereço.';return;}
+  if(q.length<2){if(status)status.textContent='Digite parte da rua, bairro ou endereço. CEP é opcional.';return;}
   if(status)status.textContent='Buscando rua, bairro e endereço juntos...';
   try{
-    const r=await fetch('/api/address-search?q='+encodeURIComponent(q)),arr=await r.json();if(!r.ok)throw Error(arr.error||'Falha na busca.');
-    if(!arr.length){box.innerHTML='';box.classList.remove('show');status.textContent='Nenhum resultado. Tente outra parte do nome ou use GPS/mapa.';return;}
+    const street=(document.querySelector('#street')?.value||'').trim(),number=(document.querySelector('[name=number]')?.value||'').trim(),neighborhood=(document.querySelector('#neighborhood')?.value||'').trim(),cep=(document.querySelector('#cep')?.value||'').trim();
+    const params=new URLSearchParams({q});if(street)params.set('street',street);if(number)params.set('number',number);if(neighborhood)params.set('neighborhood',neighborhood);if(cep)params.set('cep',cep);
+    const r=await fetch('/api/address-search?'+params.toString()),arr=await r.json();if(!r.ok)throw Error(arr.error||'Falha na busca.');
+    if(!arr.length){box.innerHTML='';box.classList.remove('show');status.textContent='Não encontramos uma correspondência segura. Confira uma sugestão parecida, tente outro trecho do nome ou marque o ponto no mapa.';return;}
     box.innerHTML=arr.map((x,i)=>`<div class="address-suggestion" data-manual-i="${i}"><b>${esc((x.label||'').split(',').slice(0,2).join(','))}</b><small>${esc((x.label||'').split(',').slice(2).join(','))}</small></div>`).join('');
     box.classList.add('show');status.textContent=arr.length+' resultado(s). Selecione o correto.';
     box.querySelectorAll('[data-manual-i]').forEach(el=>el.onclick=async()=>{

@@ -113,6 +113,18 @@ async function write(d){
 function normalizeSearchText(v){
   return String(v||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9\s]/g,' ').replace(/\s+/g,' ').trim();
 }
+function searchWords(v){return normalizeSearchText(v).split(' ').filter(x=>x.length>1)}
+function levenshtein(a,b){
+  a=normalizeSearchText(a);b=normalizeSearchText(b);
+  if(!a)return b.length;if(!b)return a.length;
+  const prev=Array.from({length:b.length+1},(_,i)=>i),cur=new Array(b.length+1);
+  for(let i=1;i<=a.length;i++){cur[0]=i;for(let k=1;k<=b.length;k++)cur[k]=Math.min(cur[k-1]+1,prev[k]+1,prev[k-1]+(a[i-1]===b[k-1]?0:1));for(let k=0;k<=b.length;k++)prev[k]=cur[k]}
+  return prev[b.length];
+}
+function searchSimilarity(a,b){
+  a=normalizeSearchText(a);b=normalizeSearchText(b);if(!a||!b)return 0;if(a.includes(b)||b.includes(a))return .96;
+  const d=levenshtein(a,b);return Math.max(0,1-d/Math.max(a.length,b.length));
+}
 function send(res,status,data,type='application/json'){
   res.writeHead(status, {'Content-Type':type,'Access-Control-Allow-Origin':'*','Cache-Control':'no-store'});
   res.end(type.startsWith('application/json') ? JSON.stringify(data) : data);
@@ -235,7 +247,8 @@ async function geocodeBrazilAddress(x){
     }catch{}
   }
   if(!candidates.length){
-    throw Error('Não foi possível localizar rua e número com segurança. Use a busca ou confirme o ponto no mapa.');
+    if(cepPoint) return {lat:cepPoint.lat,lng:cepPoint.lng,displayName:[street,number,neighborhood,city,state,cep].filter(Boolean).join(', '),precision:'cep'};
+    throw Error('Não foi possível localizar o endereço. Use “Usar minha localização” para registrar o ponto exato da loja.');
   }
 
   const norm=v=>String(v||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().trim();
@@ -348,45 +361,74 @@ async function api(req,res,pathname){
     if(req.method==='POST'&&pathname==='/api/logout'){const h=req.headers.authorization||''; if(h.startsWith('Bearer '))adminTokens.delete(h.slice(7)); return send(res,200,{ok:true});}
 
     if(req.method==='GET'&&pathname==='/api/address-search'){
-      const searchUrl=new URL(req.url,'http://localhost'),q=String(searchUrl.searchParams.get('q')||'').trim();
-      if(q.length<2)return send(res,200,[]);
+      const searchUrl=new URL(req.url,'http://localhost');
+      const q=String(searchUrl.searchParams.get('q')||'').trim();
+      const hintStreet=String(searchUrl.searchParams.get('street')||'').trim();
+      const hintNumber=String(searchUrl.searchParams.get('number')||'').trim();
+      const hintNeighborhood=String(searchUrl.searchParams.get('neighborhood')||'').trim();
+      const hintCep=String(searchUrl.searchParams.get('cep')||'').replace(/\D/g,'');
+      const raw=[q,hintStreet,hintNumber,hintNeighborhood].filter(Boolean).join(', ').trim();
+      if(raw.length<2)return send(res,200,[]);
       try{
         const d=await read(),city=String(d.settings.storeCity||'').trim(),state=String(d.settings.storeState||'').trim();
         const storeLat=Number(d.settings.storeLat),storeLng=Number(d.settings.storeLng);
-        const headers={'User-Agent':'CHEFE-TELLES/10.28 (unified address search)','Accept-Language':'pt-BR'};
-        const words=normalizeSearchText(q).split(' ').filter(Boolean);
-        const queries=[[q,city,state,'Brasil'],[q,state,'Brasil'],[q,'Brasil']].map(v=>v.filter(Boolean).join(', ')).filter((v,i,a)=>a.indexOf(v)===i);
+        const headers={'User-Agent':'CHEFE-TELLES/10.31 (resilient unified search)','Accept-Language':'pt-BR'};
+        const words=searchWords([q,hintStreet,hintNeighborhood].filter(Boolean).join(' '));
+        let cepData=null;
+        if(hintCep.length===8){try{cepData=await lookupCep(hintCep)}catch{}}
+        const cityHint=city||cepData?.city||'',stateHint=state||cepData?.state||'';
+        const typed=[hintStreet||q,hintNumber,hintNeighborhood||cepData?.neighborhood||''].filter(Boolean).join(', ');
+        const queries=[
+          [typed,cityHint,stateHint,hintCep,'Brasil'],
+          [hintStreet||q,hintNeighborhood,cityHint,stateHint,'Brasil'],
+          [q,cityHint,stateHint,'Brasil'],
+          [hintStreet||q,cityHint,stateHint,'Brasil'],
+          [hintNeighborhood||q,cityHint,stateHint,'Brasil'],
+          [q,stateHint,'Brasil'],
+          [q,'Brasil']
+        ].map(v=>v.filter(Boolean).join(', ')).filter((v,i,a)=>v.length>2&&a.indexOf(v)===i);
         let all=[];
         for(const text of queries){
           try{
-            const p=new URLSearchParams({format:'jsonv2',addressdetails:'1',limit:'20',countrycodes:'br',q:text});
-            if(Number.isFinite(storeLat)&&Number.isFinite(storeLng)){p.set('viewbox',`${storeLng-0.35},${storeLat+0.35},${storeLng+0.35},${storeLat-0.35}`);p.set('bounded','0');}
-            const r=await fetch('https://nominatim.openstreetmap.org/search?'+p.toString(),{headers,signal:AbortSignal.timeout(4500)});
+            const p=new URLSearchParams({format:'jsonv2',addressdetails:'1',limit:'25',countrycodes:'br',q:text});
+            if(Number.isFinite(storeLat)&&Number.isFinite(storeLng)){p.set('viewbox',`${storeLng-0.45},${storeLat+0.45},${storeLng+0.45},${storeLat-0.45}`);p.set('bounded','0')}
+            const r=await fetch('https://nominatim.openstreetmap.org/search?'+p.toString(),{headers,signal:AbortSignal.timeout(5500)});
             if(r.ok)all.push(...await r.json());
           }catch{}
-          if(all.length>=15)break;
+          if(all.length>=25)break;
         }
-        if(all.length<8&&words.length&&Number.isFinite(storeLat)&&Number.isFinite(storeLng)){
-          try{
-            const oq=`[out:json][timeout:5];way(around:30000,${storeLat},${storeLng})["highway"]["name"];out tags center 1200;`;
-            const or=await fetch('https://overpass-api.de/api/interpreter',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded','User-Agent':'CHEFE-TELLES/10.28'},body:'data='+encodeURIComponent(oq),signal:AbortSignal.timeout(6000)});
-            if(or.ok){
+        // Fallback: roads around store + fuzzy typo matching.
+        if(all.length<10&&words.length&&Number.isFinite(storeLat)&&Number.isFinite(storeLng)){
+          for(const overpassBase of ['https://overpass-api.de/api/interpreter','https://overpass.kumi.systems/api/interpreter']){
+            try{
+              const oq=`[out:json][timeout:7];way(around:35000,${storeLat},${storeLng})["highway"]["name"];out tags center 1600;`;
+              const or=await fetch(overpassBase,{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded','User-Agent':'CHEFE-TELLES/10.31'},body:'data='+encodeURIComponent(oq),signal:AbortSignal.timeout(8000)});
+              if(!or.ok)continue;
               const od=await or.json(),seenRoad=new Set();
               for(const x of (od.elements||[])){
                 const name=String(x.tags?.name||'').trim(),nn=normalizeSearchText(name),lat=Number(x.center?.lat),lon=Number(x.center?.lon);
                 if(!name||!Number.isFinite(lat)||!Number.isFinite(lon)||seenRoad.has(nn))continue;
-                if(!(words.every(w=>nn.includes(w))||words.some(w=>w.length>=3&&nn.includes(w))))continue;
-                seenRoad.add(nn);all.push({lat:String(lat),lon:String(lon),display_name:[name,city,state,'Brasil'].filter(Boolean).join(', '),type:'road',class:'highway',address:{road:name,city,state}});
-                if(all.length>=25)break;
+                const roadWords=searchWords(name);
+                const fuzzy=words.every(w=>roadWords.some(rw=>rw.includes(w)||w.includes(rw)||searchSimilarity(w,rw)>=.68));
+                if(!fuzzy)continue;
+                seenRoad.add(nn);
+                all.push({lat:String(lat),lon:String(lon),display_name:[name,hintNeighborhood,cityHint,stateHint,'Brasil'].filter(Boolean).join(', '),type:'road',class:'highway',address:{road:name,neighbourhood:hintNeighborhood,city:cityHint,state:stateHint}});
+                if(all.length>=30)break;
               }
-            }
-          }catch{}
+              if(all.length>=10)break;
+            }catch{}
+          }
         }
         const score=x=>{
-          const ad=x.address||{},text=normalizeSearchText(x.display_name||''),road=normalizeSearchText(ad.road||ad.pedestrian||ad.residential||''),nb=normalizeSearchText(ad.suburb||ad.neighbourhood||ad.quarter||ad.city_district||''),c=normalizeSearchText(ad.city||ad.town||ad.municipality||ad.village||'');
-          let n=0;if(road&&words.every(w=>road.includes(w)))n+=70;if(nb&&words.every(w=>nb.includes(w)))n+=60;
-          for(const w of words){if(road.includes(w))n+=14;if(nb.includes(w))n+=12;if(text.includes(w))n+=4}
-          if(city&&c===normalizeSearchText(city))n+=35;if(ad.house_number)n+=8;return n;
+          const ad=x.address||{},text=normalizeSearchText(x.display_name||''),road=ad.road||ad.pedestrian||ad.residential||'',nb=ad.suburb||ad.neighbourhood||ad.quarter||ad.city_district||'',c=ad.city||ad.town||ad.municipality||ad.village||'';
+          let n=0;
+          if(cityHint&&normalizeSearchText(c)===normalizeSearchText(cityHint))n+=45;
+          if(hintStreet){const sim=searchSimilarity(hintStreet,road);n+=Math.round(sim*65)}
+          if(hintNeighborhood){const sim=searchSimilarity(hintNeighborhood,nb);n+=Math.round(sim*45)}
+          if(q){const qt=normalizeSearchText(q);if(text.includes(qt))n+=55;else{const qws=searchWords(q),tws=searchWords([road,nb,text].join(' '));n+=qws.reduce((sum,w)=>sum+Math.round(Math.max(0,...tws.map(t=>searchSimilarity(w,t)))*18),0)}}
+          if(hintNumber&&String(ad.house_number||'')===hintNumber)n+=18;
+          if(hintCep&&String(ad.postcode||'').replace(/\D/g,'')===hintCep)n+=25;
+          if(ad.house_number)n+=5;return n;
         };
         const seen=new Set();
         const out=all.map(x=>({...x,_score:score(x)})).sort((x,y)=>y._score-x._score).filter(x=>{
@@ -397,7 +439,7 @@ async function api(req,res,pathname){
           return {lat:Number(x.lat),lng:Number(x.lon),label:x.display_name,address:ad,kind:road?'road':(nb?'neighborhood':'place'),road,neighborhood:nb};
         });
         return send(res,200,out);
-      }catch(e){return send(res,400,{error:e.message||'Não foi possível buscar endereços.'});}
+      }catch(e){return send(res,400,{error:e.message||'Não foi possível buscar endereços.'})}
     }
     if(req.method==='GET'&&pathname==='/api/nearby-roads'){
       const lat=Number(u.searchParams.get('lat')),lng=Number(u.searchParams.get('lng'));
