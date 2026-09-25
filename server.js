@@ -240,15 +240,14 @@ async function geocodeBrazilAddress(x){
   let candidates=[];
   for(const q of queries){
     try{
-      const url='https://nominatim.openstreetmap.org/search?format=jsonv2&addressdetails=1&limit=8&countrycodes=br&q='+encodeURIComponent(q);
-      const r=await fetch(url,{headers}); if(!r.ok)continue;
+      const params=new URLSearchParams({format:'jsonv2',addressdetails:'1',limit:'20',countrycodes:'br',q});
+      const r=await fetch('https://nominatim.openstreetmap.org/search?'+params.toString(),{headers,signal:AbortSignal.timeout(6500)}); if(!r.ok)continue;
       const arr=await r.json(); candidates.push(...arr);
-      if(candidates.length>=8)break;
     }catch{}
   }
   if(!candidates.length){
     if(cepPoint) return {lat:cepPoint.lat,lng:cepPoint.lng,displayName:[street,number,neighborhood,city,state,cep].filter(Boolean).join(', '),precision:'cep'};
-    throw Error('Não foi possível localizar o endereço. Use “Usar minha localização” para registrar o ponto exato da loja.');
+    throw Error('Não foi possível localizar essa rua nesse bairro. Confira rua, número e bairro.');
   }
 
   const norm=v=>String(v||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().trim();
@@ -475,8 +474,16 @@ async function api(req,res,pathname){
     if(req.method==='GET'&&cepMatch){try{return send(res,200,await lookupCep(cepMatch[1]));}catch(e){return send(res,404,{error:e.message});}}
     if(req.method==='POST'&&pathname==='/api/delivery-quote-address'){
       const b=await body(req),d=await read();
-      if(!String(b.street||'').trim()||!String(b.number||'').trim())return send(res,400,{error:'Informe rua e número para calcular a entrega.'});
-      try{const geo=await geocodeBrazilAddress(b);const route=await deliveryKm(d.settings,geo.lat,geo.lng),fee=resolveKmFee(d.deliveryKmRanges,route.km,d.settings);if(fee===null)return send(res,400,{error:'Endereço fora da distância máxima de entrega.',distanceKm:Number(route.km.toFixed(2))});return send(res,200,{lat:geo.lat,lng:geo.lng,addressFound:geo.displayName,distanceKm:Number(route.km.toFixed(2)),deliveryFee:fee,routeType:route.source});}catch(e){return send(res,400,{error:e.message||'Não foi possível calcular a entrega pelo endereço.'});}
+      if(!String(b.street||'').trim()||!String(b.number||'').trim()||!String(b.neighborhood||'').trim())
+        return send(res,400,{error:'Informe rua, número e bairro para calcular a entrega.'});
+      const addressInput={...b,city:String(b.city||d.settings.storeCity||'').trim(),state:String(b.state||d.settings.storeState||'').trim()};
+      try{
+        const geo=await geocodeBrazilAddress(addressInput);
+        const route=await deliveryKm(d.settings,geo.lat,geo.lng);
+        const fee=resolveKmFee(d.deliveryKmRanges,route.km,d.settings);
+        if(fee===null)return send(res,400,{error:'Endereço fora da distância máxima de entrega.',distanceKm:Number(route.km.toFixed(2))});
+        return send(res,200,{lat:geo.lat,lng:geo.lng,addressFound:geo.displayName,distanceKm:Number(route.km.toFixed(2)),deliveryFee:fee,routeType:route.source});
+      }catch(e){return send(res,400,{error:e.message||'Não foi possível calcular a entrega pelo endereço.'});}
     }
     if(req.method==='POST'&&pathname==='/api/delivery-quote'){
       const b=await body(req),d=await read();
@@ -497,7 +504,10 @@ async function api(req,res,pathname){
         if(!d.settings.storeLat||!d.settings.storeLng)return send(res,400,{error:'A localização da loja ainda não foi confirmada no painel do dono.'});
         let lat=Number(b.customer?.lat),lng=Number(b.customer?.lng);
         if(!Number.isFinite(lat)||!Number.isFinite(lng)||!lat||!lng){
-          try{const geo=await geocodeBrazilAddress(b.customer||{});lat=geo.lat;lng=geo.lng;b.customer.lat=lat;b.customer.lng=lng;}catch(e){return send(res,400,{error:e.message||'Não foi possível localizar o endereço para calcular a entrega.'});}
+          try{
+            const geo=await geocodeBrazilAddress({...b.customer,city:String(b.customer?.city||d.settings.storeCity||'').trim(),state:String(b.customer?.state||d.settings.storeState||'').trim()});
+            lat=geo.lat;lng=geo.lng;b.customer.lat=lat;b.customer.lng=lng;
+          }catch(e){return send(res,400,{error:e.message||'Não foi possível localizar o endereço para calcular a entrega.'});}
         }
         const route=await deliveryKm(d.settings,lat,lng), resolved=resolveKmFee(d.deliveryKmRanges,route.km,d.settings);
         if(resolved===null)return send(res,400,{error:'Endereço fora da distância máxima de entrega.',distanceKm:Number(route.km.toFixed(2))});

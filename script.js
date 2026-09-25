@@ -108,7 +108,7 @@ async function lookupCepValue(cep){
   if(!r.ok) throw Error(j.error||'CEP não encontrado.'); return j;
 }
 async function quoteAddressDelivery(data){
-  const payload={cep:data.cep||document.querySelector('#cep')?.value||'',street:data.street||document.querySelector('#street')?.value||'',number:data.number||document.querySelector('[name=number]')?.value||'',neighborhood:data.neighborhood||document.querySelector('#neighborhood')?.value||''};
+  const payload={cep:data.cep||document.querySelector('#cep')?.value||'',street:data.street||document.querySelector('#street')?.value||'',number:data.number||document.querySelector('[name=number]')?.value||'',neighborhood:data.neighborhood||document.querySelector('#neighborhood')?.value||'',city:store?.settings?.storeCity||'',state:store?.settings?.storeState||''};
   const r=await fetch('/api/delivery-quote-address',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)}); const j=await r.json();
   if(!r.ok) throw Error(j.error||'Não foi possível localizar esse endereço.'); return j;
 }
