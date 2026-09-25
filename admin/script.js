@@ -1,3 +1,14 @@
+
+function chefeTone(kind){
+ try{
+  const C=window.AudioContext||window.webkitAudioContext;if(!C)return;
+  const c=window.__chefeAudio||(window.__chefeAudio=new C());
+  if(c.state==='suspended')c.resume();
+  const now=c.currentTime, seq=kind==='new'?[[880,0,.13],[1175,.18,.18],[1568,.40,.28]]:[[659,0,.14],[784,.16,.14],[1047,.33,.32]];
+  seq.forEach(([hz,delay,dur])=>{const o=c.createOscillator(),g=c.createGain();o.type='sine';o.frequency.value=hz;g.gain.setValueAtTime(.0001,now+delay);g.gain.exponentialRampToValueAtTime(.22,now+delay+.015);g.gain.exponentialRampToValueAtTime(.0001,now+delay+dur);o.connect(g);g.connect(c.destination);o.start(now+delay);o.stop(now+delay+dur+.03);});
+ }catch(e){}
+}
+document.addEventListener('pointerdown',()=>{try{const C=window.AudioContext||window.webkitAudioContext;if(C&&!window.__chefeAudio)window.__chefeAudio=new C();window.__chefeAudio?.resume?.()}catch(e){}},{once:true});
 function orderDateTime(o){return o.createdAtText||new Date(o.createdAt).toLocaleString('pt-BR');}
 let API_BASE = window.CHEFE_API_BASE || (location.protocol==='file:' ? '' : location.origin);
 let token=localStorage.getItem('chefeAdminToken')||'',state={};const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)],money=v=>Number(v||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'}),esc=s=>String(s??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;');
@@ -116,7 +127,28 @@ function fillStoreAddress(s={}){ if($('#sStoreCep')){$('#sStoreCep').value=s.sto
 async function lookupStoreCep(){const cep=$('#sStoreCep').value.replace(/\D/g,'');if(cep.length!==8)throw Error('Informe um CEP com 8 números.');const r=await fetch('https://viacep.com.br/ws/'+cep+'/json/');const j=await r.json();if(!r.ok||j.erro)throw Error('CEP não encontrado.');$('#sStoreStreet').value=j.logradouro||'';$('#sStoreNeighborhood').value=j.bairro||'';$('#sStoreCity').value=j.localidade||'';$('#sStoreState').value=j.uf||'';return j;}
 $('#findStoreCep')?.addEventListener('click',async()=>{const m=$('#storeLocationMsg');try{m.textContent='Buscando CEP...';await lookupStoreCep();m.textContent='CEP encontrado. Confira o endereço e informe o número.';}catch(e){m.textContent=e.message}});
 $('#useStoreGps')?.addEventListener('click',()=>{const m=$('#storeLocationMsg');if(!window.isSecureContext){m.textContent='A localização exige HTTPS.';return}if(!navigator.geolocation){m.textContent='GPS não disponível neste aparelho.';return}m.textContent='Obtendo localização e endereço...';navigator.geolocation.getCurrentPosition(async p=>{const lat=p.coords.latitude,lng=p.coords.longitude;$('#sStoreLat').value=lat;$('#sStoreLng').value=lng;try{const r=await api('/api/store-location/reverse',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({lat,lng})});if(r.cep)$('#sStoreCep').value=r.cep;if(r.street)$('#sStoreStreet').value=r.street;if(r.number)$('#sStoreNumber').value=r.number;if(r.neighborhood)$('#sStoreNeighborhood').value=r.neighborhood;if(r.city)$('#sStoreCity').value=r.city;if(r.state)$('#sStoreState').value=String(r.state).replace(/^BR-/,'').slice(0,2).toUpperCase();m.textContent='Localização encontrada e endereço preenchido. Confira principalmente o número e clique em Salvar configurações.';}catch(e){m.textContent='GPS capturado. Não conseguimos preencher todo o endereço, mas a localização exata foi mantida. Complete os campos e salve.';}},e=>m.textContent='Não foi possível obter a localização. Autorize o acesso ao GPS.',{enableHighAccuracy:true,timeout:20000,maximumAge:0})});
-$('#confirmStoreLocation')?.addEventListener('click',async()=>{const m=$('#storeLocationMsg');try{m.textContent='Localizando endereço da loja...';const payload={cep:$('#sStoreCep').value,street:$('#sStoreStreet').value,number:$('#sStoreNumber').value,neighborhood:$('#sStoreNeighborhood').value,city:$('#sStoreCity').value,state:$('#sStoreState').value};const r=await api('/api/store-location/resolve',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});$('#sStoreLat').value=r.lat;$('#sStoreLng').value=r.lng;const savePayload={deliveryMode:'route',storeLat:String(r.lat),storeLng:String(r.lng),storeCep:$('#sStoreCep').value.trim(),storeStreet:$('#sStoreStreet').value.trim(),storeNumber:$('#sStoreNumber').value.trim(),storeNeighborhood:$('#sStoreNeighborhood').value.trim(),storeCity:$('#sStoreCity').value.trim(),storeState:$('#sStoreState').value.trim().toUpperCase()};await api('/api/settings',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(savePayload)});state.settings={...state.settings,...savePayload};m.textContent='Localização da loja confirmada e salva. O cálculo por km já pode ser usado.';}catch(e){m.textContent='O mapa não encontrou esse endereço exato. Você ainda pode salvar o endereço. Para cálculo por km, use “Usar localização atual” para registrar o ponto exato da loja.';}});
+$('#confirmStoreLocation')?.addEventListener('click',async()=>{
+ const m=$('#storeLocationMsg');
+ const savePoint=async(lat,lng,source)=>{
+   const savePayload={deliveryMode:'route',storeLat:String(lat),storeLng:String(lng),storeCep:$('#sStoreCep').value.trim(),storeStreet:$('#sStoreStreet').value.trim(),storeNumber:$('#sStoreNumber').value.trim(),storeNeighborhood:$('#sStoreNeighborhood').value.trim(),storeCity:$('#sStoreCity').value.trim(),storeState:$('#sStoreState').value.trim().toUpperCase()};
+   await api('/api/settings',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(savePayload)});
+   state.settings={...state.settings,...savePayload};
+   m.textContent=source==='gps'?'Ponto da loja confirmado e salvo pelas coordenadas do GPS.':'Localização da loja confirmada e salva. O cálculo por km já pode ser usado.';
+ };
+ try{
+   m.textContent='Localizando endereço da loja...';
+   const payload={cep:$('#sStoreCep').value,street:$('#sStoreStreet').value,number:$('#sStoreNumber').value,neighborhood:$('#sStoreNeighborhood').value,city:$('#sStoreCity').value,state:$('#sStoreState').value};
+   const r=await api('/api/store-location/resolve',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+   $('#sStoreLat').value=r.lat;$('#sStoreLng').value=r.lng;
+   await savePoint(r.lat,r.lng,'address');
+ }catch(e){
+   const lat=Number($('#sStoreLat').value),lng=Number($('#sStoreLng').value);
+   if(Number.isFinite(lat)&&Number.isFinite(lng)&&lat&&lng){
+     try{await savePoint(lat,lng,'gps');return}catch(saveErr){m.textContent='Não foi possível salvar o ponto da loja: '+saveErr.message;return}
+   }
+   m.textContent='O endereço não gerou um ponto válido. Clique em “Usar minha localização” e depois confirme novamente.';
+ }
+});
 const _renderV93=renderV9;renderV9=function(){_renderV93();fillStoreAddress((state||{}).settings||{})};
 
 // V9.8 — sistema único de entrega por rota
@@ -126,3 +158,25 @@ $('#saveDeliveryRules')?.addEventListener('click',async()=>{
  state.settings={...state.settings,...payload}; $('#deliveryRulesMsg').textContent='Regras de entrega salvas.';
  setTimeout(()=>$('#deliveryRulesMsg').textContent='',2500);
 });
+
+
+// V10.29 — alerta sonoro de pedido novo.
+// Inicializa a lista atual sem tocar; depois avisa somente IDs que surgirem.
+let __chefeKnownOrderIds=null,__chefeOrderWatchBusy=false;
+async function chefeWatchNewOrders(){
+ if(__chefeOrderWatchBusy||document.hidden)return;
+ __chefeOrderWatchBusy=true;
+ try{
+  const list=await api('/api/orders');
+  const rows=Array.isArray(list)?list:(Array.isArray(list?.orders)?list.orders:[]);
+  const ids=new Set(rows.map(o=>String(o.id??o.number??o.orderNumber??'')).filter(Boolean));
+  if(__chefeKnownOrderIds===null){__chefeKnownOrderIds=ids;return;}
+  let found=false;
+  for(const id of ids)if(!__chefeKnownOrderIds.has(id)){found=true;break}
+  __chefeKnownOrderIds=ids;
+  if(found){chefeTone('new');setTimeout(()=>chefeTone('new'),850);}
+ }catch(e){}finally{__chefeOrderWatchBusy=false}
+}
+setTimeout(chefeWatchNewOrders,1500);
+setInterval(chefeWatchNewOrders,5000);
+document.addEventListener('visibilitychange',()=>{if(!document.hidden)chefeWatchNewOrders()});
