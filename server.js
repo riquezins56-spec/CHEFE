@@ -477,7 +477,7 @@ async function api(req,res,pathname){
       }else customer.address='Retirada na loja';
       const createdAt=new Date().toISOString();
       const createdAtText=new Date(createdAt).toLocaleString('pt-BR',{timeZone:'America/Sao_Paulo',day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'});
-      const order={...b,customer,id:Date.now(),trackingToken:crypto.randomBytes(16).toString('hex'),day:today,number:count,status:'Novo',statusHistory:[{status:'Novo',at:createdAt}],driverId:null,estimatedMinutes:Number(d.settings.defaultEtaMinutes||0),createdAt,createdAtText,subtotal,deliveryFee,total:subtotal+deliveryFee};
+      const order={...b,customer,id:Date.now(),trackingToken:crypto.randomBytes(16).toString('hex'),estimatedMinutes:Number(d.settings.defaultEtaMinutes||0),day:today,number:count,status:'Novo',statusHistory:[{status:'Novo',at:createdAt}],driverId:null,estimatedMinutes:Number(d.settings.defaultEtaMinutes||0),createdAt,createdAtText,subtotal,deliveryFee,total:subtotal+deliveryFee};
       d.orders.push(order);await write(d);return send(res,201,order);
     }
 
