@@ -2,10 +2,10 @@
 function chefeTone(kind){
  try{
   const C=window.AudioContext||window.webkitAudioContext;if(!C)return;
-  const c=window.__chefeAudio||(window.__chefeAudio=new C());
-  if(c.state==='suspended')c.resume();
-  const now=c.currentTime, seq=kind==='new'?[[880,0,.13],[1175,.18,.18],[1568,.40,.28]]:[[659,0,.14],[784,.16,.14],[1047,.33,.32]];
-  seq.forEach(([hz,delay,dur])=>{const o=c.createOscillator(),g=c.createGain();o.type='sine';o.frequency.value=hz;g.gain.setValueAtTime(.0001,now+delay);g.gain.exponentialRampToValueAtTime(.22,now+delay+.015);g.gain.exponentialRampToValueAtTime(.0001,now+delay+dur);o.connect(g);g.connect(c.destination);o.start(now+delay);o.stop(now+delay+dur+.03);});
+  const c=window.__chefeAudio||(window.__chefeAudio=new C());if(c.state==='suspended')c.resume();
+  const now=c.currentTime;
+  const strike=(at,freq,vol,dur)=>{[1,2.01,3.9].forEach((mul,i)=>{const o=c.createOscillator(),g=c.createGain();o.type='sine';o.frequency.setValueAtTime(freq*mul,at);const v=vol/(1+i*1.8);g.gain.setValueAtTime(.0001,at);g.gain.exponentialRampToValueAtTime(v,at+.008);g.gain.exponentialRampToValueAtTime(.0001,at+dur/(1+i*.18));o.connect(g);g.connect(c.destination);o.start(at);o.stop(at+dur+.05);});};
+  if(kind==='new'){strike(now,784,.28,.9);strike(now+.34,988,.25,1.0);}else{strike(now,659,.20,.72);strike(now+.22,880,.18,.82);}
  }catch(e){}
 }
 document.addEventListener('pointerdown',()=>{try{const C=window.AudioContext||window.webkitAudioContext;if(C&&!window.__chefeAudio)window.__chefeAudio=new C();window.__chefeAudio?.resume?.()}catch(e){}},{once:true});
@@ -33,7 +33,7 @@ for(const el of [cepEl,bairro,rua,document.querySelector('[name=number]'),compEl
   const mapWrap=document.querySelector('#deliveryMapWrap'),searchArea=document.querySelector('#addressSearchArea'),rs=document.querySelector('#routeSummary');
   if(mapWrap)mapWrap.classList.remove('show');if(searchArea)searchArea.classList.remove('show');if(rs)rs.style.display='none';
   return;
-}refreshStreetSuggestions();if(true){if(!document.querySelector('#customerLat')?.value){fee.value='0';feePreview.textContent='Aguardando endereço';hint.textContent='Informe CEP, rua e número. A rota e a taxa por km serão calculadas automaticamente.';}buildAddress();return;}const zone=findDeliveryZone(bairro.value,rua.value);if(zone){const v=Number(zone.fee)||0;fee.value=String(v);feePreview.textContent=money(v);hint.textContent=normalizeText(zone.street)?`Taxa aplicada para ${zone.street}.`:`Taxa fixa do bairro ${zone.neighborhood}.`;}else{fee.value='0';feePreview.textContent='Não cadastrada';hint.textContent='A taxa aparece automaticamente quando o bairro/rua estiver cadastrado pela loja.';}buildAddress();}type.onchange=update;bairro.oninput=update;bairro.onchange=update;rua.oninput=update;rua.onchange=update;document.querySelector('[name=number]').oninput=buildAddress;document.querySelector('[name=complement]').oninput=buildAddress;update();}
+}refreshStreetSuggestions();if(true){if(!document.querySelector('#customerLat')?.value){fee.value='0';feePreview.textContent='Aguardando endereço';hint.textContent='Informe rua, bairro e número. O CEP é opcional; a rota e a taxa serão calculadas automaticamente.';}buildAddress();return;}const zone=findDeliveryZone(bairro.value,rua.value);if(zone){const v=Number(zone.fee)||0;fee.value=String(v);feePreview.textContent=money(v);hint.textContent=normalizeText(zone.street)?`Taxa aplicada para ${zone.street}.`:`Taxa fixa do bairro ${zone.neighborhood}.`;}else{fee.value='0';feePreview.textContent='Não cadastrada';hint.textContent='A taxa aparece automaticamente quando o bairro/rua estiver cadastrado pela loja.';}buildAddress();}type.onchange=update;bairro.oninput=update;bairro.onchange=update;rua.oninput=update;rua.onchange=update;document.querySelector('[name=number]').oninput=buildAddress;document.querySelector('[name=complement]').oninput=buildAddress;update();}
 
 function syncOrderTypeUI(){
   const retirada=document.querySelector('#deliveryType')?.value==='Retirada';
@@ -137,12 +137,10 @@ function clearAddressQuote(){
   if(sticky && document.querySelector('#deliveryType')?.value!=='Retirada')sticky.textContent='Entrega • endereço alterado, recalculando rota';
   lastAutoAddress='';
 }
-function addressReadyForQuote(){
-  const cep=(document.querySelector('#cep')?.value||'').replace(/\D/g,'');
-  const street=(document.querySelector('#street')?.value||'').trim();
+function addressReadyForQuote(){  const street=(document.querySelector('#street')?.value||'').trim();
   const nb=(document.querySelector('#neighborhood')?.value||'').trim();
   const num=(document.querySelector('[name=number]')?.value||'').trim();
-  return cep.length===8 && street.length>=3 && nb.length>=2 && num.length>0;
+  return street.length>=3 && nb.length>=2 && num.length>0;
 }
 function scheduleAutomaticDelivery(){
   clearAddressQuote(); clearTimeout(autoDeliveryTimer);
@@ -281,7 +279,7 @@ searchEl?.addEventListener('input',()=>{
     cep:(document.querySelector('#cep')?.value||'').trim()
   }).toString());
       const arr=await r.json(); if(!r.ok)throw Error(arr.error||'Erro na busca');
-      suggestions.innerHTML=arr.map((x,i)=>`<div class="address-suggestion" data-i="${i}"><b>${esc((x.label||'').split(',').slice(0,2).join(','))}</b><small>${esc((x.label||'').split(',').slice(2).join(','))}</small></div>`).join('');
+      suggestions.innerHTML=arr.map((x,i)=>`<div class="address-suggestion" data-i="${i}"><b>${esc(x.title||(x.label||'').split(',').slice(0,2).join(','))}</b><small>${esc(x.detail||(x.label||'').split(',').slice(2).join(','))}</small></div>`).join('');
       suggestions.classList.toggle('show',arr.length>0);
       if(st)st.textContent=arr.length?`${arr.length} resultado(s). Toque no endereço correto.`:'Nenhum endereço encontrado. Tente só parte do nome da rua.';
       suggestions.querySelectorAll('.address-suggestion').forEach(el=>el.onclick=async()=>{
@@ -323,7 +321,7 @@ async function runAddressSearch(){
     const params=new URLSearchParams({q});if(street)params.set('street',street);if(number)params.set('number',number);if(neighborhood)params.set('neighborhood',neighborhood);if(cep)params.set('cep',cep);
     const r=await fetch('/api/address-search?'+params.toString()),arr=await r.json();if(!r.ok)throw Error(arr.error||'Falha na busca.');
     if(!arr.length){box.innerHTML='';box.classList.remove('show');status.textContent='Não encontramos uma correspondência segura. Confira uma sugestão parecida, tente outro trecho do nome ou marque o ponto no mapa.';return;}
-    box.innerHTML=arr.map((x,i)=>`<div class="address-suggestion" data-manual-i="${i}"><b>${esc((x.label||'').split(',').slice(0,2).join(','))}</b><small>${esc((x.label||'').split(',').slice(2).join(','))}</small></div>`).join('');
+    box.innerHTML=arr.map((x,i)=>`<div class="address-suggestion" data-manual-i="${i}"><b>${esc(x.title||(x.label||'').split(',').slice(0,2).join(','))}</b><small>${esc(x.detail||(x.label||'').split(',').slice(2).join(','))}</small></div>`).join('');
     box.classList.add('show');status.textContent=arr.length+' resultado(s). Selecione o correto.';
     box.querySelectorAll('[data-manual-i]').forEach(el=>el.onclick=async()=>{
       const x=arr[Number(el.dataset.manualI)],ad=x.address||{};input.value=x.label||q;box.classList.remove('show');
@@ -394,3 +392,6 @@ document.querySelector('#customerStatusBtn')?.addEventListener('click',()=>{
  openCustomerStatus();
 });
 document.querySelector('#closeCustomerStatus')?.addEventListener('click',()=>document.querySelector('#customerStatusModal')?.classList.remove('show'));
+
+// V10.32 — áudio no celular após a primeira interação permitida pelo navegador.
+['touchstart','pointerdown','click'].forEach(ev=>document.addEventListener(ev,()=>{try{const C=window.AudioContext||window.webkitAudioContext;if(!C)return;const c=window.__chefeAudio||(window.__chefeAudio=new C());if(c.state==='suspended')c.resume()}catch(e){}},{once:true,passive:true}));
