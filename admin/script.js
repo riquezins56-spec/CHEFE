@@ -4,10 +4,8 @@ function chefeTone(kind){
   const C=window.AudioContext||window.webkitAudioContext;if(!C)return;
   const c=window.__chefeAudio||(window.__chefeAudio=new C());
   if(c.state==='suspended')c.resume();
-  const now=c.currentTime;
-  const ring=(at,freq,vol,dur)=>{[1,2.02,3.98].forEach((m,i)=>{const o=c.createOscillator(),g=c.createGain();o.type='sine';o.frequency.setValueAtTime(freq*m,at);g.gain.setValueAtTime(.0001,at);g.gain.exponentialRampToValueAtTime(vol/(1+i*2),at+.01);g.gain.exponentialRampToValueAtTime(.0001,at+dur);o.connect(g);g.connect(c.destination);o.start(at);o.stop(at+dur+.04);});};
-  if(kind==='new'){ring(now,784,.25,.82);ring(now+.32,988,.22,.92);}
-  else{ring(now,659,.18,.65);ring(now+.20,880,.16,.72);}
+  const now=c.currentTime, seq=kind==='new'?[[784,0,.22],[988,.30,.32],[784,.68,.42]]:[[659,0,.18],[880,.22,.30],[1047,.50,.38]];
+  seq.forEach(([hz,delay,dur])=>{const o=c.createOscillator(),g=c.createGain();o.type='sine';o.frequency.value=hz;g.gain.setValueAtTime(.0001,now+delay);g.gain.exponentialRampToValueAtTime(.22,now+delay+.015);g.gain.exponentialRampToValueAtTime(.0001,now+delay+dur);o.connect(g);g.connect(c.destination);o.start(now+delay);o.stop(now+delay+dur+.03);});
  }catch(e){}
 }
 document.addEventListener('pointerdown',()=>{try{const C=window.AudioContext||window.webkitAudioContext;if(C&&!window.__chefeAudio)window.__chefeAudio=new C();window.__chefeAudio?.resume?.()}catch(e){}},{once:true});
@@ -182,6 +180,3 @@ async function chefeWatchNewOrders(){
 setTimeout(chefeWatchNewOrders,1500);
 setInterval(chefeWatchNewOrders,5000);
 document.addEventListener('visibilitychange',()=>{if(!document.hidden)chefeWatchNewOrders()});
-
-// Libera o mesmo áudio no navegador móvel após a primeira interação permitida.
-['touchstart','pointerdown'].forEach(ev=>document.addEventListener(ev,()=>{try{window.__chefeAudio?.resume?.()}catch(e){}},{once:true,passive:true}));
