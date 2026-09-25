@@ -477,8 +477,16 @@ async function api(req,res,pathname){
       }else customer.address='Retirada na loja';
       const createdAt=new Date().toISOString();
       const createdAtText=new Date(createdAt).toLocaleString('pt-BR',{timeZone:'America/Sao_Paulo',day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'});
-      const order={...b,customer,id:Date.now(),day:today,number:count,status:'Novo',statusHistory:[{status:'Novo',at:createdAt}],driverId:null,estimatedMinutes:Number(d.settings.defaultEtaMinutes||0),createdAt,createdAtText,subtotal,deliveryFee,total:subtotal+deliveryFee};
+      const order={...b,customer,id:Date.now(),trackingToken:crypto.randomBytes(16).toString('hex'),day:today,number:count,status:'Novo',statusHistory:[{status:'Novo',at:createdAt}],driverId:null,estimatedMinutes:Number(d.settings.defaultEtaMinutes||0),createdAt,createdAtText,subtotal,deliveryFee,total:subtotal+deliveryFee};
       d.orders.push(order);await write(d);return send(res,201,order);
+    }
+
+    const tm=pathname.match(/^\/api\/track\/([a-f0-9]{32})$/i);
+    if(tm&&req.method==='GET'){
+      const d=await read(),o=d.orders.find(x=>String(x.trackingToken||'')===tm[1]);
+      if(!o)return send(res,404,{error:'Pedido não encontrado'});
+      const driver=(d.drivers||[]).find(x=>String(x.id)===String(o.driverId||''));
+      return send(res,200,{number:o.number,status:o.status||'Novo',createdAt:o.createdAt,createdAtText:o.createdAtText,estimatedMinutes:Number(o.estimatedMinutes||0),customer:{name:o.customer?.name||'',delivery:o.customer?.delivery||'',address:o.customer?.address||'',payment:o.customer?.payment||''},items:o.items||[],subtotal:Number(o.subtotal||0),deliveryFee:Number(o.deliveryFee||0),total:Number(o.total||0),driver:driver?{name:driver.name||'',phone:driver.phone||''}:null});
     }
 
     if(!auth(req)) return send(res,401,{error:'Não autorizado'});
