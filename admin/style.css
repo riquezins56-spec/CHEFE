@@ -4,3 +4,14 @@
 @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 
 .order-manage label{font-size:11px;color:#999;display:grid;gap:5px}.order-manage input{width:105px;background:#080808;color:#fff;border:1px solid #363636;border-radius:10px;padding:10px}.order-manage select{max-width:220px}
+
+/* V10.24 — status do pedido mais visível */
+.order-manage label:has(select[data-status]){font-size:13px;font-weight:900;color:#fff;min-width:180px}
+.order-manage select[data-status]{min-width:180px;min-height:48px;font-size:16px;font-weight:800;padding:11px 38px 11px 13px;border:2px solid #5a5a5a;background:#111;color:#fff}
+@media(max-width:700px){
+ .order{display:block}
+ .order-actions.order-manage{display:grid!important;grid-template-columns:1fr 1fr;gap:10px;margin-top:18px;width:100%}
+ .order-manage label:has(select[data-status]){grid-column:1/-1;width:100%;font-size:15px}
+ .order-manage select[data-status]{width:100%;max-width:none!important;min-height:56px;font-size:18px;border-width:2px}
+ .order-actions.order-manage .btn{width:100%;min-height:48px}
+}
