@@ -15,3 +15,8 @@
  .order-manage select[data-status]{width:100%;max-width:none!important;min-height:56px;font-size:18px;border-width:2px}
  .order-actions.order-manage .btn{width:100%;min-height:48px}
 }
+
+@media(max-width:700px){
+ .order-actions.order-manage{align-items:stretch}
+ .order-manage select[data-status]{display:block;min-width:0}
+}
