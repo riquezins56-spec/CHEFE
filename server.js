@@ -424,7 +424,7 @@ async function api(req,res,pathname){
           let n=0;
           if(cityHint&&normalizeSearchText(c)===normalizeSearchText(cityHint))n+=45;
           if(hintStreet){const sim=searchSimilarity(hintStreet,road);n+=Math.round(sim*65)}
-          if(hintNeighborhood){const sim=searchSimilarity(hintNeighborhood,nb);n+=Math.round(sim*75);if(normalizeSearchText(nb)===normalizeSearchText(hintNeighborhood))n+=50}
+          if(hintNeighborhood){const sim=searchSimilarity(hintNeighborhood,nb);n+=Math.round(sim*45)}
           if(q){const qt=normalizeSearchText(q);if(text.includes(qt))n+=55;else{const qws=searchWords(q),tws=searchWords([road,nb,text].join(' '));n+=qws.reduce((sum,w)=>sum+Math.round(Math.max(0,...tws.map(t=>searchSimilarity(w,t)))*18),0)}}
           if(hintNumber&&String(ad.house_number||'')===hintNumber)n+=18;
           if(hintCep&&String(ad.postcode||'').replace(/\D/g,'')===hintCep)n+=25;
