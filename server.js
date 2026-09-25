@@ -424,12 +424,7 @@ async function api(req,res,pathname){
           let n=0;
           if(cityHint&&normalizeSearchText(c)===normalizeSearchText(cityHint))n+=45;
           if(hintStreet){const sim=searchSimilarity(hintStreet,road);n+=Math.round(sim*65)}
-          if(hintNeighborhood){
-            const sim=searchSimilarity(hintNeighborhood,nb);
-            n+=Math.round(sim*70);
-            if(normalizeSearchText(nb)===normalizeSearchText(hintNeighborhood))n+=45;
-          }
-          if(hintStreet&&hintNeighborhood&&normalizeSearchText(road)===normalizeSearchText(hintStreet)&&normalizeSearchText(nb)===normalizeSearchText(hintNeighborhood))n+=80;
+          if(hintNeighborhood){const sim=searchSimilarity(hintNeighborhood,nb);n+=Math.round(sim*75);if(normalizeSearchText(nb)===normalizeSearchText(hintNeighborhood))n+=50}
           if(q){const qt=normalizeSearchText(q);if(text.includes(qt))n+=55;else{const qws=searchWords(q),tws=searchWords([road,nb,text].join(' '));n+=qws.reduce((sum,w)=>sum+Math.round(Math.max(0,...tws.map(t=>searchSimilarity(w,t)))*18),0)}}
           if(hintNumber&&String(ad.house_number||'')===hintNumber)n+=18;
           if(hintCep&&String(ad.postcode||'').replace(/\D/g,'')===hintCep)n+=25;
@@ -441,10 +436,7 @@ async function api(req,res,pathname){
           if(seen.has(key))return false;seen.add(key);return true;
         }).slice(0,20).map(x=>{
           const ad=x.address||{},road=ad.road||ad.pedestrian||ad.residential||'',nb=ad.suburb||ad.neighbourhood||ad.quarter||ad.city_district||'';
-          const cityName=ad.city||ad.town||ad.municipality||ad.village||cityHint||'';
-          const title=[road||nb,nb&&road?nb:''].filter(Boolean).join(' — ');
-          const detail=[cityName,ad.state||stateHint,ad.postcode].filter(Boolean).join(' • ');
-          return {lat:Number(x.lat),lng:Number(x.lon),label:x.display_name,title:title||x.display_name,detail,address:ad,kind:road?'road':(nb?'neighborhood':'place'),road,neighborhood:nb};
+          return {lat:Number(x.lat),lng:Number(x.lon),label:x.display_name,address:ad,kind:road?'road':(nb?'neighborhood':'place'),road,neighborhood:nb};
         });
         return send(res,200,out);
       }catch(e){return send(res,400,{error:e.message||'Não foi possível buscar endereços.'})}

@@ -4,10 +4,8 @@ function chefeTone(kind){
   const C=window.AudioContext||window.webkitAudioContext;if(!C)return;
   const c=window.__chefeAudio||(window.__chefeAudio=new C());
   if(c.state==='suspended')c.resume();
-  const now=c.currentTime;
-  const ring=(at,freq,vol,dur)=>{[1,2.02,3.98].forEach((m,i)=>{const o=c.createOscillator(),g=c.createGain();o.type='sine';o.frequency.setValueAtTime(freq*m,at);g.gain.setValueAtTime(.0001,at);g.gain.exponentialRampToValueAtTime(vol/(1+i*2),at+.01);g.gain.exponentialRampToValueAtTime(.0001,at+dur);o.connect(g);g.connect(c.destination);o.start(at);o.stop(at+dur+.04);});};
-  if(kind==='new'){ring(now,784,.25,.82);ring(now+.32,988,.22,.92);}
-  else{ring(now,659,.18,.65);ring(now+.20,880,.16,.72);}
+  const now=c.currentTime, seq=kind==='new'?[[784,0,.22],[988,.30,.32],[784,.68,.42]]:[[659,0,.18],[880,.22,.30],[1047,.50,.38]];
+  seq.forEach(([hz,delay,dur])=>{const o=c.createOscillator(),g=c.createGain();o.type='sine';o.frequency.value=hz;g.gain.setValueAtTime(.0001,now+delay);g.gain.exponentialRampToValueAtTime(.22,now+delay+.015);g.gain.exponentialRampToValueAtTime(.0001,now+delay+dur);o.connect(g);g.connect(c.destination);o.start(now+delay);o.stop(now+delay+dur+.03);});
  }catch(e){}
 }
 document.addEventListener('pointerdown',()=>{try{const C=window.AudioContext||window.webkitAudioContext;if(C&&!window.__chefeAudio)window.__chefeAudio=new C();window.__chefeAudio?.resume?.()}catch(e){}},{once:true});
@@ -139,7 +137,9 @@ function clearAddressQuote(){
   if(sticky && document.querySelector('#deliveryType')?.value!=='Retirada')sticky.textContent='Entrega • endereço alterado, recalculando rota';
   lastAutoAddress='';
 }
-function addressReadyForQuote(){  const street=(document.querySelector('#street')?.value||'').trim();
+function addressReadyForQuote(){
+  const cep=(document.querySelector('#cep')?.value||'').replace(/\D/g,'');
+  const street=(document.querySelector('#street')?.value||'').trim();
   const nb=(document.querySelector('#neighborhood')?.value||'').trim();
   const num=(document.querySelector('[name=number]')?.value||'').trim();
   return street.length>=3 && nb.length>=2 && num.length>0;
@@ -281,7 +281,7 @@ searchEl?.addEventListener('input',()=>{
     cep:(document.querySelector('#cep')?.value||'').trim()
   }).toString());
       const arr=await r.json(); if(!r.ok)throw Error(arr.error||'Erro na busca');
-      suggestions.innerHTML=arr.map((x,i)=>`<div class="address-suggestion" data-i="${i}"><b>${esc(x.title||(x.label||'').split(',').slice(0,2).join(','))}</b><small>${esc(x.detail||(x.label||'').split(',').slice(2).join(','))}</small></div>`).join('');
+      suggestions.innerHTML=arr.map((x,i)=>`<div class="address-suggestion" data-i="${i}"><b>${esc((x.label||'').split(',').slice(0,2).join(','))}</b><small>${esc((x.label||'').split(',').slice(2).join(','))}</small></div>`).join('');
       suggestions.classList.toggle('show',arr.length>0);
       if(st)st.textContent=arr.length?`${arr.length} resultado(s). Toque no endereço correto.`:'Nenhum endereço encontrado. Tente só parte do nome da rua.';
       suggestions.querySelectorAll('.address-suggestion').forEach(el=>el.onclick=async()=>{
@@ -323,7 +323,7 @@ async function runAddressSearch(){
     const params=new URLSearchParams({q});if(street)params.set('street',street);if(number)params.set('number',number);if(neighborhood)params.set('neighborhood',neighborhood);if(cep)params.set('cep',cep);
     const r=await fetch('/api/address-search?'+params.toString()),arr=await r.json();if(!r.ok)throw Error(arr.error||'Falha na busca.');
     if(!arr.length){box.innerHTML='';box.classList.remove('show');status.textContent='Não encontramos uma correspondência segura. Confira uma sugestão parecida, tente outro trecho do nome ou marque o ponto no mapa.';return;}
-    box.innerHTML=arr.map((x,i)=>`<div class="address-suggestion" data-manual-i="${i}"><b>${esc(x.title||(x.label||'').split(',').slice(0,2).join(','))}</b><small>${esc(x.detail||(x.label||'').split(',').slice(2).join(','))}</small></div>`).join('');
+    box.innerHTML=arr.map((x,i)=>`<div class="address-suggestion" data-manual-i="${i}"><b>${esc((x.label||'').split(',').slice(0,2).join(','))}</b><small>${esc((x.label||'').split(',').slice(2).join(','))}</small></div>`).join('');
     box.classList.add('show');status.textContent=arr.length+' resultado(s). Selecione o correto.';
     box.querySelectorAll('[data-manual-i]').forEach(el=>el.onclick=async()=>{
       const x=arr[Number(el.dataset.manualI)],ad=x.address||{};input.value=x.label||q;box.classList.remove('show');
@@ -394,6 +394,3 @@ document.querySelector('#customerStatusBtn')?.addEventListener('click',()=>{
  openCustomerStatus();
 });
 document.querySelector('#closeCustomerStatus')?.addEventListener('click',()=>document.querySelector('#customerStatusModal')?.classList.remove('show'));
-
-// Libera o mesmo áudio no navegador móvel após a primeira interação permitida.
-['touchstart','pointerdown'].forEach(ev=>document.addEventListener(ev,()=>{try{window.__chefeAudio?.resume?.()}catch(e){}},{once:true,passive:true}));
