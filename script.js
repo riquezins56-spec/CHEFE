@@ -394,5 +394,13 @@ async function openCustomerStatus(){
  box.innerHTML=`<div class="customer-status-head"><b>Pedido #${String(o.number).padStart(2,'0')}</b><strong>${status}</strong></div><p><b>Preparação:</b> ${Number(o.estimatedMinutes||0)>0?Number(o.estimatedMinutes)+' minutos':'Aguardando a loja'}</p><p><b>Feito em:</b> ${o.createdAtText||new Date(o.createdAt).toLocaleString('pt-BR')}</p><p><b>Total:</b> ${Number(o.total||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'})}</p>${driver}<a class="primary full customer-track-link" href="/acompanhar.html?t=${encodeURIComponent(token)}">VER ACOMPANHAMENTO COMPLETO</a>`}
  catch(e){box.innerHTML='<p>'+e.message+'</p>'}
 }
-document.querySelector('#customerStatusBtn')?.addEventListener('click',openCustomerStatus);
+document.querySelector('#customerStatusBtn')?.addEventListener('click',()=>{
+ const token=localStorage.getItem('chefeTellesTrackingToken');
+ if(token){
+   location.href='/acompanhar.html?t='+encodeURIComponent(token);
+   return;
+ }
+ // If this device has no saved order yet, show the existing message.
+ openCustomerStatus();
+});
 document.querySelector('#closeCustomerStatus')?.addEventListener('click',()=>document.querySelector('#customerStatusModal')?.classList.remove('show'));
