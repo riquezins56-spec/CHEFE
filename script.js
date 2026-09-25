@@ -142,7 +142,7 @@ function addressReadyForQuote(){
   const street=(document.querySelector('#street')?.value||'').trim();
   const nb=(document.querySelector('#neighborhood')?.value||'').trim();
   const num=(document.querySelector('[name=number]')?.value||'').trim();
-  return cep.length===8 && street.length>=3 && nb.length>=2 && num.length>0;
+  return street.length>=3 && nb.length>=2 && num.length>0;
 }
 function scheduleAutomaticDelivery(){
   clearAddressQuote(); clearTimeout(autoDeliveryTimer);

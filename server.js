@@ -259,9 +259,10 @@ async function geocodeBrazilAddress(x){
     const cNb=a.suburb||a.neighbourhood||a.quarter||a.city_district||'';
     const cRoad=a.road||a.pedestrian||a.residential||'';
     const cPost=String(a.postcode||'').replace(/\D/g,'');
-    if(city&&norm(cCity)===norm(city))score+=35;
-    if(neighborhood&&norm(cNb)===norm(neighborhood))score+=25;
-    if(street&&norm(cRoad)===norm(street))score+=30;
+    if(city&&norm(cCity)===norm(city))score+=70;
+    if(neighborhood){const sim=searchSimilarity(neighborhood,cNb);score+=Math.round(sim*85);if(norm(cNb)===norm(neighborhood))score+=65}
+    if(street){const sim=searchSimilarity(street,cRoad);score+=Math.round(sim*90);if(norm(cRoad)===norm(street))score+=70}
+    if(street&&neighborhood&&norm(cRoad)===norm(street)&&norm(cNb)===norm(neighborhood))score+=120;
     if(cep&&cPost===cep)score+=45;
     const lat=Number(c.lat),lng=Number(c.lon);
     if(cepPoint&&Number.isFinite(lat)&&Number.isFinite(lng)){
@@ -277,10 +278,12 @@ async function geocodeBrazilAddress(x){
   const bestRoad=ba.road||ba.pedestrian||ba.residential||'';
   const bestPost=String(ba.postcode||'').replace(/\D/g,'');
   if(city && bestCity && norm(bestCity)!==norm(city))throw Error('O endereço encontrado pertence a outra cidade. Confira os dados ou confirme no mapa.');
-  if(street && bestRoad && norm(bestRoad)!==norm(street) && !norm(best.display_name).includes(norm(street)))
-    throw Error('Não foi possível confirmar essa rua com segurança. Selecione o endereço na busca ou confirme o ponto no mapa.');
-  if(cep && bestPost && bestPost!==cep)
-    throw Error('O CEP não confere com o ponto encontrado. Confira o endereço ou confirme no mapa.');
+  if(street && bestRoad && searchSimilarity(street,bestRoad)<.72 && !norm(best.display_name).includes(norm(street)))
+    throw Error('Não foi possível confirmar essa rua com segurança. Confira rua e bairro.');
+  if(neighborhood){
+    const bestNb=ba.suburb||ba.neighbourhood||ba.quarter||ba.city_district||'';
+    if(bestNb && searchSimilarity(neighborhood,bestNb)<.68)throw Error('O bairro não confere com a rua encontrada. Confira rua e bairro.');
+  }
   return {lat:Number(best.lat),lng:Number(best.lon),displayName:best.display_name,precision:number?'address':'street'};
 }
 
@@ -365,8 +368,10 @@ async function api(req,res,pathname){
       const q=String(searchUrl.searchParams.get('q')||'').trim();
       const hintStreet=String(searchUrl.searchParams.get('street')||'').trim();
       const hintNumber=String(searchUrl.searchParams.get('number')||'').trim();
-      const hintNeighborhood=String(searchUrl.searchParams.get('neighborhood')||'').trim();
+      let hintNeighborhood=String(searchUrl.searchParams.get('neighborhood')||'').trim();
       const hintCep=String(searchUrl.searchParams.get('cep')||'').replace(/\D/g,'');
+      const bairroMatch=q.match(/^\s*bairro\s+(.+)$/i);
+      if(!hintNeighborhood&&bairroMatch)hintNeighborhood=bairroMatch[1].trim();
       const raw=[q,hintStreet,hintNumber,hintNeighborhood].filter(Boolean).join(', ').trim();
       if(raw.length<2)return send(res,200,[]);
       try{
@@ -395,7 +400,6 @@ async function api(req,res,pathname){
             const r=await fetch('https://nominatim.openstreetmap.org/search?'+p.toString(),{headers,signal:AbortSignal.timeout(5500)});
             if(r.ok)all.push(...await r.json());
           }catch{}
-          if(all.length>=25)break;
         }
         // Fallback: roads around store + fuzzy typo matching.
         if(all.length<10&&words.length&&Number.isFinite(storeLat)&&Number.isFinite(storeLng)){
@@ -422,9 +426,10 @@ async function api(req,res,pathname){
         const score=x=>{
           const ad=x.address||{},text=normalizeSearchText(x.display_name||''),road=ad.road||ad.pedestrian||ad.residential||'',nb=ad.suburb||ad.neighbourhood||ad.quarter||ad.city_district||'',c=ad.city||ad.town||ad.municipality||ad.village||'';
           let n=0;
-          if(cityHint&&normalizeSearchText(c)===normalizeSearchText(cityHint))n+=45;
-          if(hintStreet){const sim=searchSimilarity(hintStreet,road);n+=Math.round(sim*65)}
-          if(hintNeighborhood){const sim=searchSimilarity(hintNeighborhood,nb);n+=Math.round(sim*45)}
+          if(cityHint&&normalizeSearchText(c)===normalizeSearchText(cityHint))n+=70;
+          if(hintStreet){const sim=searchSimilarity(hintStreet,road);n+=Math.round(sim*85);if(normalizeSearchText(road)===normalizeSearchText(hintStreet))n+=55}
+          if(hintNeighborhood){const sim=searchSimilarity(hintNeighborhood,nb);n+=Math.round(sim*90);if(normalizeSearchText(nb)===normalizeSearchText(hintNeighborhood))n+=70}
+          if(hintStreet&&hintNeighborhood&&normalizeSearchText(road)===normalizeSearchText(hintStreet)&&normalizeSearchText(nb)===normalizeSearchText(hintNeighborhood))n+=120;
           if(q){const qt=normalizeSearchText(q);if(text.includes(qt))n+=55;else{const qws=searchWords(q),tws=searchWords([road,nb,text].join(' '));n+=qws.reduce((sum,w)=>sum+Math.round(Math.max(0,...tws.map(t=>searchSimilarity(w,t)))*18),0)}}
           if(hintNumber&&String(ad.house_number||'')===hintNumber)n+=18;
           if(hintCep&&String(ad.postcode||'').replace(/\D/g,'')===hintCep)n+=25;
@@ -434,7 +439,7 @@ async function api(req,res,pathname){
         const out=all.map(x=>({...x,_score:score(x)})).sort((x,y)=>y._score-x._score).filter(x=>{
           const key=normalizeSearchText(x.display_name)||Number(x.lat).toFixed(5)+','+Number(x.lon).toFixed(5);
           if(seen.has(key))return false;seen.add(key);return true;
-        }).slice(0,20).map(x=>{
+        }).slice(0,60).map(x=>{
           const ad=x.address||{},road=ad.road||ad.pedestrian||ad.residential||'',nb=ad.suburb||ad.neighbourhood||ad.quarter||ad.city_district||'';
           return {lat:Number(x.lat),lng:Number(x.lon),label:x.display_name,address:ad,kind:road?'road':(nb?'neighborhood':'place'),road,neighborhood:nb};
         });
