@@ -110,6 +110,9 @@ async function write(d){
   }
   fs.writeFileSync(DB,JSON.stringify(d,null,2));
 }
+function normalizeSearchText(v){
+  return String(v||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9\s]/g,' ').replace(/\s+/g,' ').trim();
+}
 function send(res,status,data,type='application/json'){
   res.writeHead(status, {'Content-Type':type,'Access-Control-Allow-Origin':'*','Cache-Control':'no-store'});
   res.end(type.startsWith('application/json') ? JSON.stringify(data) : data);
@@ -345,71 +348,54 @@ async function api(req,res,pathname){
     if(req.method==='POST'&&pathname==='/api/logout'){const h=req.headers.authorization||''; if(h.startsWith('Bearer '))adminTokens.delete(h.slice(7)); return send(res,200,{ok:true});}
 
     if(req.method==='GET'&&pathname==='/api/address-search'){
-      const searchUrl=new URL(req.url,'http://localhost');
-      const q=String(searchUrl.searchParams.get('q')||'').trim();
-      const neighborhood=String(searchUrl.searchParams.get('neighborhood')||'').trim();
-      if(q.length<2 && neighborhood.length<2)return send(res,200,[]);
+      const searchUrl=new URL(req.url,'http://localhost'),q=String(searchUrl.searchParams.get('q')||'').trim();
+      if(q.length<2)return send(res,200,[]);
       try{
-        const d=await read();
-        const city=String(d.settings.storeCity||'').trim();
-        const state=String(d.settings.storeState||'').trim();
-        const headers={'User-Agent':'CHEFE-TELLES/10.3 (address autocomplete)','Accept-Language':'pt-BR'};
-        const urls=[];
-        // Busca estruturada primeiro: rua + bairro + cidade/UF.
-        if(q){
-          const params=new URLSearchParams({format:'jsonv2',addressdetails:'1',limit:'15',countrycodes:'br',street:q});
-          if(city)params.set('city',city);
-          if(state)params.set('state',state);
-          urls.push('https://nominatim.openstreetmap.org/search?'+params.toString());
-        }
-        // Fallback textual é importante para "Corredor", travessas e nomes locais.
-        const full=[q,neighborhood,city,state,'Brasil'].filter(Boolean).join(', ');
-        if(full)urls.push('https://nominatim.openstreetmap.org/search?format=jsonv2&addressdetails=1&limit=15&countrycodes=br&q='+encodeURIComponent(full));
-        if(neighborhood){
-          const byBairro=[q||'rua',neighborhood,city,state,'Brasil'].filter(Boolean).join(', ');
-          urls.push('https://nominatim.openstreetmap.org/search?format=jsonv2&addressdetails=1&limit=15&countrycodes=br&q='+encodeURIComponent(byBairro));
-        }
+        const d=await read(),city=String(d.settings.storeCity||'').trim(),state=String(d.settings.storeState||'').trim();
+        const storeLat=Number(d.settings.storeLat),storeLng=Number(d.settings.storeLng);
+        const headers={'User-Agent':'CHEFE-TELLES/10.28 (unified address search)','Accept-Language':'pt-BR'};
+        const words=normalizeSearchText(q).split(' ').filter(Boolean);
+        const queries=[[q,city,state,'Brasil'],[q,state,'Brasil'],[q,'Brasil']].map(v=>v.filter(Boolean).join(', ')).filter((v,i,a)=>a.indexOf(v)===i);
         let all=[];
-        // Primeiro usa a busca normal de endereço, que é mais rápida para autocomplete.
-        for(const url of urls){
+        for(const text of queries){
           try{
-            const r=await fetch(url,{headers,signal:AbortSignal.timeout(3500)});
+            const p=new URLSearchParams({format:'jsonv2',addressdetails:'1',limit:'20',countrycodes:'br',q:text});
+            if(Number.isFinite(storeLat)&&Number.isFinite(storeLng)){p.set('viewbox',`${storeLng-0.35},${storeLat+0.35},${storeLng+0.35},${storeLat-0.35}`);p.set('bounded','0');}
+            const r=await fetch('https://nominatim.openstreetmap.org/search?'+p.toString(),{headers,signal:AbortSignal.timeout(4500)});
             if(r.ok)all.push(...await r.json());
           }catch{}
-          if(all.length>=10)break;
+          if(all.length>=15)break;
         }
-
-        // Se a busca normal não achar o suficiente, procura nomes de ruas mapeadas
-        // perto da loja. O timeout impede travamento do checkout.
-        const storeLat=Number(d.settings.storeLat), storeLng=Number(d.settings.storeLng);
-        if(all.length<5 && q.length>=3 && Number.isFinite(storeLat) && Number.isFinite(storeLng)){
+        if(all.length<8&&words.length&&Number.isFinite(storeLat)&&Number.isFinite(storeLng)){
           try{
-            const words=normalizeSearchText(q).split(' ').filter(Boolean);
-            const oq=`[out:json][timeout:3];way(around:12000,${storeLat},${storeLng})["highway"]["name"];out tags center 500;`;
-            const or=await fetch('https://overpass-api.de/api/interpreter',{
-              method:'POST',
-              headers:{'Content-Type':'application/x-www-form-urlencoded','User-Agent':'CHEFE-TELLES/10.18'},
-              body:'data='+encodeURIComponent(oq),
-              signal:AbortSignal.timeout(3500)
-            });
+            const oq=`[out:json][timeout:5];way(around:30000,${storeLat},${storeLng})["highway"]["name"];out tags center 1200;`;
+            const or=await fetch('https://overpass-api.de/api/interpreter',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded','User-Agent':'CHEFE-TELLES/10.28'},body:'data='+encodeURIComponent(oq),signal:AbortSignal.timeout(6000)});
             if(or.ok){
-              const od=await or.json(),localSeen=new Set();
+              const od=await or.json(),seenRoad=new Set();
               for(const x of (od.elements||[])){
-                const name=String(x.tags?.name||'').trim(),norm=normalizeSearchText(name),lat=Number(x.center?.lat),lon=Number(x.center?.lon);
-                if(name&&words.every(w=>norm.includes(w))&&Number.isFinite(lat)&&Number.isFinite(lon)&&!localSeen.has(norm)){
-                  localSeen.add(norm);
-                  all.push({lat:String(lat),lon:String(lon),display_name:[name,city,state,'Brasil'].filter(Boolean).join(', '),address:{road:name,city,state}});
-                  if(all.length>=15)break;
-                }
+                const name=String(x.tags?.name||'').trim(),nn=normalizeSearchText(name),lat=Number(x.center?.lat),lon=Number(x.center?.lon);
+                if(!name||!Number.isFinite(lat)||!Number.isFinite(lon)||seenRoad.has(nn))continue;
+                if(!(words.every(w=>nn.includes(w))||words.some(w=>w.length>=3&&nn.includes(w))))continue;
+                seenRoad.add(nn);all.push({lat:String(lat),lon:String(lon),display_name:[name,city,state,'Brasil'].filter(Boolean).join(', '),type:'road',class:'highway',address:{road:name,city,state}});
+                if(all.length>=25)break;
               }
             }
           }catch{}
         }
+        const score=x=>{
+          const ad=x.address||{},text=normalizeSearchText(x.display_name||''),road=normalizeSearchText(ad.road||ad.pedestrian||ad.residential||''),nb=normalizeSearchText(ad.suburb||ad.neighbourhood||ad.quarter||ad.city_district||''),c=normalizeSearchText(ad.city||ad.town||ad.municipality||ad.village||'');
+          let n=0;if(road&&words.every(w=>road.includes(w)))n+=70;if(nb&&words.every(w=>nb.includes(w)))n+=60;
+          for(const w of words){if(road.includes(w))n+=14;if(nb.includes(w))n+=12;if(text.includes(w))n+=4}
+          if(city&&c===normalizeSearchText(city))n+=35;if(ad.house_number)n+=8;return n;
+        };
         const seen=new Set();
-        const out=all.filter(x=>{
-          const key=Number(x.lat).toFixed(6)+','+Number(x.lon).toFixed(6);
-          if(seen.has(key))return false; seen.add(key); return true;
-        }).slice(0,15).map(x=>({lat:Number(x.lat),lng:Number(x.lon),label:x.display_name,address:x.address||{}}));
+        const out=all.map(x=>({...x,_score:score(x)})).sort((x,y)=>y._score-x._score).filter(x=>{
+          const key=normalizeSearchText(x.display_name)||Number(x.lat).toFixed(5)+','+Number(x.lon).toFixed(5);
+          if(seen.has(key))return false;seen.add(key);return true;
+        }).slice(0,20).map(x=>{
+          const ad=x.address||{},road=ad.road||ad.pedestrian||ad.residential||'',nb=ad.suburb||ad.neighbourhood||ad.quarter||ad.city_district||'';
+          return {lat:Number(x.lat),lng:Number(x.lon),label:x.display_name,address:ad,kind:road?'road':(nb?'neighborhood':'place'),road,neighborhood:nb};
+        });
         return send(res,200,out);
       }catch(e){return send(res,400,{error:e.message||'Não foi possível buscar endereços.'});}
     }

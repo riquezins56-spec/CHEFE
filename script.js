@@ -255,14 +255,13 @@ const searchEl=document.querySelector('#addressSearch'), suggestions=document.qu
 searchEl?.addEventListener('input',()=>{
   clearTimeout(searchTimer);
   const q=searchEl.value.trim();
-  const bairro=(document.querySelector('#neighborhood')?.value||'').trim();
   if(q.length<2){suggestions?.classList.remove('show');const st=document.querySelector('#addressSearchStatus');if(st)st.textContent=q.length?'Digite mais uma letra para buscar.':'';return;}
   searchTimer=setTimeout(async()=>{
     const seq=++addressSearchSeq;
     const st=document.querySelector('#addressSearchStatus');
     if(st)st.textContent='Buscando ruas e endereços...';
     try{
-      const r=await fetch('/api/address-search?q='+encodeURIComponent(q)+'&neighborhood='+encodeURIComponent(bairro));
+      const r=await fetch('/api/address-search?q='+encodeURIComponent(q));
       const arr=await r.json(); if(!r.ok)throw Error(arr.error||'Erro na busca');
       suggestions.innerHTML=arr.map((x,i)=>`<div class="address-suggestion" data-i="${i}"><b>${esc((x.label||'').split(',').slice(0,2).join(','))}</b><small>${esc((x.label||'').split(',').slice(2).join(','))}</small></div>`).join('');
       suggestions.classList.toggle('show',arr.length>0);
@@ -278,6 +277,7 @@ searchEl?.addEventListener('input',()=>{
         if(num)document.querySelector('[name=number]').value=num;
         if(a.postcode)document.querySelector('#cep').value=a.postcode;
         document.querySelector('[name=number]')?.dispatchEvent(new Event('input',{bubbles:true}));
+        if(!road){if(st)st.textContent='Bairro/localidade encontrado. Continue digitando a rua no mesmo campo ou marque o ponto no mapa.';searchEl.focus();return;}
         await setConfirmedPoint(x.lat,x.lng,false);
       });
      }catch(e){suggestions.innerHTML='';suggestions.classList.remove('show');if(st)st.textContent=e?.name==='AbortError'?'A busca demorou demais. Digite parte do nome da rua e tente novamente.':(e.message||'Não foi possível buscar agora.');}
@@ -296,52 +296,22 @@ document.querySelector('#useLocation')?.addEventListener('click',()=>{
   },()=>{}, {enableHighAccuracy:true,timeout:15000,maximumAge:0});
 },true);
 
-document.querySelector('#neighborhood')?.addEventListener('change',()=>{
-  const bairro=document.querySelector('#neighborhood').value.trim();
-  const busca=document.querySelector('#addressSearch');
-  if(bairro && busca && !busca.value.trim()){
-    busca.placeholder='Buscar rua em '+bairro;
-  }
-});
-
 async function runAddressSearch(){
-  const input=document.querySelector('#addressSearch'),box=document.querySelector('#addressSuggestions'),status=document.querySelector('#addressSearchStatus');
-  const q=(input?.value||'').trim(),bairro=(document.querySelector('#neighborhood')?.value||'').trim();
-  if(q.length<2 && bairro.length<2){if(status)status.textContent='Digite uma rua ou informe o bairro.';return;}
-  if(status)status.textContent='Buscando ruas e endereços no mapa...';
+  const input=document.querySelector('#addressSearch'),box=document.querySelector('#addressSuggestions'),status=document.querySelector('#addressSearchStatus'),q=(input?.value||'').trim();
+  if(q.length<2){if(status)status.textContent='Digite parte da rua, bairro ou endereço.';return;}
+  if(status)status.textContent='Buscando rua, bairro e endereço juntos...';
   try{
-    const r=await fetch('/api/address-search?q='+encodeURIComponent(q)+'&neighborhood='+encodeURIComponent(bairro));
-    let arr=await r.json(); if(!r.ok)throw Error(arr.error||'Falha na busca.');
-    // Se o cliente informou somente bairro, usa o ponto do bairro para listar ruas mapeadas ao redor.
-    if(!q && bairro && arr.length){
-      const center=arr[0];
-      try{
-        const rr=await fetch(`/api/nearby-roads?lat=${encodeURIComponent(center.lat)}&lng=${encodeURIComponent(center.lng)}`);
-        const roads=await rr.json();
-        if(rr.ok && roads.length){
-          box.innerHTML=roads.map((x,i)=>`<div class="address-suggestion" data-road-i="${i}"><b>${esc(x.name)}</b><small>${esc(bairro)} • rua mapeada próxima</small></div>`).join('');
-          box.classList.add('show');status.textContent=roads.length+' rua(s) mapeada(s) encontrada(s).';
-          box.querySelectorAll('[data-road-i]').forEach(el=>el.onclick=()=>{
-            const x=roads[Number(el.dataset.roadI)];
-            input.value=x.name; document.querySelector('#street').value=x.name;
-            box.classList.remove('show'); status.textContent='Rua selecionada. Informe o número ou ajuste o ponto no mapa.';
-            runAddressSearch();
-          });
-          return;
-        }
-      }catch(e){}
-    }
-    if(!arr.length){box.innerHTML='';box.classList.remove('show');if(status)status.textContent='Nenhum endereço encontrado. Tente parte do nome da rua ou use o mapa/GPS.';return;}
+    const r=await fetch('/api/address-search?q='+encodeURIComponent(q)),arr=await r.json();if(!r.ok)throw Error(arr.error||'Falha na busca.');
+    if(!arr.length){box.innerHTML='';box.classList.remove('show');status.textContent='Nenhum resultado. Tente outra parte do nome ou use GPS/mapa.';return;}
     box.innerHTML=arr.map((x,i)=>`<div class="address-suggestion" data-manual-i="${i}"><b>${esc((x.label||'').split(',').slice(0,2).join(','))}</b><small>${esc((x.label||'').split(',').slice(2).join(','))}</small></div>`).join('');
     box.classList.add('show');status.textContent=arr.length+' resultado(s). Selecione o correto.';
     box.querySelectorAll('[data-manual-i]').forEach(el=>el.onclick=async()=>{
-      const x=arr[Number(el.dataset.manualI)],a=x.address||{};
-      input.value=x.label||q;box.classList.remove('show');
-      const road=a.road||a.pedestrian||a.residential||'',nb=a.suburb||a.neighbourhood||a.quarter||a.city_district||bairro;
+      const x=arr[Number(el.dataset.manualI)],ad=x.address||{};input.value=x.label||q;box.classList.remove('show');
+      const road=ad.road||ad.pedestrian||ad.residential||x.road||'',nb=ad.suburb||ad.neighbourhood||ad.quarter||ad.city_district||x.neighborhood||'';
       if(road)document.querySelector('#street').value=road;if(nb)document.querySelector('#neighborhood').value=nb;
-      if(a.house_number)document.querySelector('[name=number]').value=a.house_number;if(a.postcode)document.querySelector('#cep').value=a.postcode;
-      await refreshAddressFromPoint(x.lat,x.lng);
-      status.textContent='Endereço selecionado. Confira ou ajuste o ponto no mapa.';
+      if(ad.house_number)document.querySelector('[name=number]').value=ad.house_number;if(ad.postcode)document.querySelector('#cep').value=ad.postcode;
+      if(!road){status.textContent='Bairro/localidade encontrado. Continue digitando a rua no mesmo campo ou marque o ponto exato no mapa.';input.focus();return;}
+      await setConfirmedPoint(x.lat,x.lng,false);status.textContent='Rua encontrada. Confira o número e ajuste o pino se necessário.';
     });
   }catch(e){if(status)status.textContent=e.message||'Não foi possível buscar agora.';}
 }

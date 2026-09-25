@@ -134,3 +134,9 @@ body>#successModal.show{display:flex!important;align-items:center!important;just
 body>#successModal .success-card{width:min(520px,100%)!important;max-height:calc(100dvh - 32px)!important;overflow:auto!important}
 
 .status-tab{background:#171717;color:#fff;border:1px solid #383838;border-radius:12px;padding:10px 13px;font-weight:800;cursor:pointer}.status-card{max-width:520px}.customer-status-head{display:grid;gap:7px;margin-bottom:16px}.customer-status-head b{color:#ffbf27}.customer-status-head strong{font-size:22px}.customer-driver{margin:15px 0;padding:14px;background:#151515;border:1px solid #303030;border-radius:12px}.customer-driver a{color:#25d366;font-weight:800}.customer-track-link{display:block;text-align:center;text-decoration:none;margin-top:18px}
+
+/* V10.26 revisão geral */
+#customerStatusBtn{cursor:pointer;position:relative;z-index:5;touch-action:manipulation}
+@media(max-width:700px){
+ #customerStatusBtn{min-height:46px;padding:10px 14px;font-size:13px;white-space:nowrap}
+}
