@@ -241,6 +241,8 @@ async function geocodeBrazilAddress(x){
   for(const q of queries){
     try{
       const params=new URLSearchParams({format:'jsonv2',addressdetails:'1',limit:'20',countrycodes:'br',q});
+      // Quando a loja possui coordenadas, a consulta é enviesada para a região local.
+      // O filtro de cidade/UF abaixo continua sendo a proteção definitiva.
       const r=await fetch('https://nominatim.openstreetmap.org/search?'+params.toString(),{headers,signal:AbortSignal.timeout(6500)}); if(!r.ok)continue;
       const arr=await r.json(); candidates.push(...arr);
     }catch{}
@@ -252,6 +254,18 @@ async function geocodeBrazilAddress(x){
 
   const norm=v=>String(v||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().trim();
   const hav=(a,b,c,d)=>{const R=6371,toRad=v=>v*Math.PI/180,dl=toRad(c-a),dn=toRad(d-b);const z=Math.sin(dl/2)**2+Math.cos(toRad(a))*Math.cos(toRad(c))*Math.sin(dn/2)**2;return 2*R*Math.asin(Math.sqrt(z));};
+  // Nunca deixar um homônimo de outra cidade/UF vencer o ranking.
+  candidates=candidates.filter(c=>{
+    const a=c.address||{};
+    const cc=a.city||a.town||a.municipality||a.village||'';
+    const cs=a.state_code||a['ISO3166-2-lvl4']?.split('-').pop()||a.state||'';
+    const cityOk=!city||!cc||norm(cc)===norm(city);
+    const wantedState=norm(state),gotState=norm(cs);
+    const stateOk=!state||!cs||gotState===wantedState||gotState.endsWith('-'+wantedState);
+    return cityOk&&stateOk;
+  });
+  if(!candidates.length)throw Error('Não encontramos essa rua e bairro na cidade da loja. Confira os dados.');
+
   const scored=candidates.map(c=>{
     const a=c.address||{}; let score=0;
     const cCity=a.city||a.town||a.municipality||a.village||'';
@@ -440,6 +454,19 @@ async function api(req,res,pathname){
           if(hintCep&&String(ad.postcode||'').replace(/\D/g,'')===hintCep)n+=25;
           if(ad.house_number)n+=5;return n;
         };
+        // A busca da loja é local: elimina resultados claramente pertencentes a
+        // outra cidade/UF antes de exibir qualquer sugestão ao cliente.
+        const sameRegion=x=>{
+          const ad=x.address||{};
+          const c=ad.city||ad.town||ad.municipality||ad.village||'';
+          const st=ad.state_code||ad['ISO3166-2-lvl4']?.split('-').pop()||ad.state||'';
+          const cOk=!cityHint||!c||normalizeSearchText(c)===normalizeSearchText(cityHint);
+          const wantedState=normalizeSearchText(stateHint);
+          const gotState=normalizeSearchText(st);
+          const sOk=!stateHint||!st||gotState===wantedState||gotState.endsWith('-'+wantedState);
+          return cOk&&sOk;
+        };
+        all=all.filter(sameRegion);
         const seen=new Set();
         const out=all.map(x=>({...x,_score:score(x)})).sort((x,y)=>y._score-x._score).filter(x=>{
           const key=normalizeSearchText(x.display_name)||Number(x.lat).toFixed(5)+','+Number(x.lon).toFixed(5);
