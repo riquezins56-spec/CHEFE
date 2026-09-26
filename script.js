@@ -150,21 +150,14 @@ function scheduleAutomaticDelivery(){
   const key=[document.querySelector('#cep')?.value,document.querySelector('#street')?.value,document.querySelector('#neighborhood')?.value,document.querySelector('[name=number]')?.value].join('|');
   autoDeliveryTimer=setTimeout(async()=>{
     if(key===lastAutoAddress && document.querySelector('#customerLat')?.value) return;
-    const st=document.querySelector('#gpsStatus'); if(st)st.textContent='Calculando automaticamente a rota e a taxa...';
+    const st=document.querySelector('#gpsStatus');
+    const preview=document.querySelector('#deliveryFeePreview');
+    if(st)st.textContent='Localizando endereço e calculando a entrega...';
+    if(preview)preview.textContent='Calculando...';
     try{await calculateByTypedAddress();lastAutoAddress=key;}catch(e){}
   },700);
 }
 ['#street','#neighborhood','[name=number]'].forEach(sel=>document.querySelector(sel)?.addEventListener('input',scheduleAutomaticDelivery));
-document.querySelector('#calculateManualDelivery')?.addEventListener('click',async()=>{
-  const st=document.querySelector('#gpsStatus');
-  if(!addressReadyForQuote()){
-    if(st)st.textContent='Preencha Rua, Número e Bairro para calcular a entrega.';
-    return;
-  }
-  clearTimeout(autoDeliveryTimer);
-  if(st)st.textContent='Localizando o endereço e calculando a rota...';
-  try{await calculateByTypedAddress();}catch(e){}
-});
 
 document.querySelector('#cep')?.addEventListener('input',()=>{
   clearAddressQuote(); clearTimeout(autoCepTimer); clearTimeout(autoDeliveryTimer);

@@ -262,7 +262,9 @@ async function geocodeBrazilAddress(x){
     [street,neighborhood,city,state,cep,'Brasil'],
     [street,city,state,cep,'Brasil'],
     [street,number,city,state,'Brasil'],
-    [street,city,state,'Brasil']
+    [street,city,state,'Brasil'],
+    [street,number,city,'Brasil'],
+    [street,city,'Brasil']
   ].map(v=>v.filter(Boolean).join(', ')).filter((v,i,a)=>v&&a.indexOf(v)===i);
 
   let candidates=[];
@@ -276,8 +278,7 @@ async function geocodeBrazilAddress(x){
     }catch{}
   }
   if(!candidates.length){
-    if(cepPoint) return {lat:cepPoint.lat,lng:cepPoint.lng,displayName:[street,number,neighborhood,city,state,cep].filter(Boolean).join(', '),precision:'cep'};
-    throw Error('Não foi possível localizar essa rua nesse bairro. Confira rua, número e bairro.');
+    throw Error('Não conseguimos calcular este endereço. Confira os dados ou use Minha localização.');
   }
 
   const norm=v=>String(v||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().trim();
@@ -292,7 +293,7 @@ async function geocodeBrazilAddress(x){
     const stateOk=!state||!cs||gotState===wantedState||gotState.endsWith('-'+wantedState);
     return cityOk&&stateOk;
   });
-  if(!candidates.length)throw Error('Não encontramos essa rua e bairro na cidade da loja. Confira os dados.');
+  if(!candidates.length)throw Error('Não conseguimos calcular este endereço. Confira os dados ou use Minha localização.');
 
   const scored=candidates.map(c=>{
     const a=c.address||{}; let score=0;
@@ -320,7 +321,7 @@ async function geocodeBrazilAddress(x){
   const bestPost=String(ba.postcode||'').replace(/\D/g,'');
   if(city && bestCity && norm(bestCity)!==norm(city))throw Error('O endereço encontrado pertence a outra cidade. Confira os dados ou confirme no mapa.');
   if(street && bestRoad && searchSimilarity(street,bestRoad)<.60 && !norm(best.display_name).includes(norm(street)))
-    throw Error('Não foi possível confirmar essa rua com segurança. Confira rua e bairro.');
+    throw Error('Não conseguimos calcular este endereço. Confira os dados ou use Minha localização.');
   // O bairro digitado continua pesando no ranking, mas não bloqueia a entrega:
   // bases públicas frequentemente associam uma mesma rua a outro bairro adjacente.
   // A segurança fica na confirmação da rua + cidade/UF e, depois, na rota rodoviária.
