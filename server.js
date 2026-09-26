@@ -260,7 +260,9 @@ async function geocodeBrazilAddress(x){
     [street,number,neighborhood,city,state,cep,'Brasil'],
     [street,number,city,state,cep,'Brasil'],
     [street,neighborhood,city,state,cep,'Brasil'],
-    [street,city,state,cep,'Brasil']
+    [street,city,state,cep,'Brasil'],
+    [street,number,city,state,'Brasil'],
+    [street,city,state,'Brasil']
   ].map(v=>v.filter(Boolean).join(', ')).filter((v,i,a)=>v&&a.indexOf(v)===i);
 
   let candidates=[];
@@ -317,18 +319,11 @@ async function geocodeBrazilAddress(x){
   const bestRoad=ba.road||ba.pedestrian||ba.residential||'';
   const bestPost=String(ba.postcode||'').replace(/\D/g,'');
   if(city && bestCity && norm(bestCity)!==norm(city))throw Error('O endereço encontrado pertence a outra cidade. Confira os dados ou confirme no mapa.');
-  if(street && bestRoad && searchSimilarity(street,bestRoad)<.72 && !norm(best.display_name).includes(norm(street)))
+  if(street && bestRoad && searchSimilarity(street,bestRoad)<.60 && !norm(best.display_name).includes(norm(street)))
     throw Error('Não foi possível confirmar essa rua com segurança. Confira rua e bairro.');
-  if(neighborhood){
-    const bestNb=ba.suburb||ba.neighbourhood||ba.quarter||ba.city_district||'';
-    const nbSimilarity=bestNb?searchSimilarity(neighborhood,bestNb):0;
-    const roadSimilarity=bestRoad?searchSimilarity(street,bestRoad):0;
-    // O OpenStreetMap nem sempre atribui à rua o mesmo nome de bairro usado localmente.
-    // Se a rua/cidade já foram confirmadas com boa correspondência, a divergência do
-    // bairro não bloqueia o cálculo. O bairro continua sendo usado fortemente no ranking.
-    if(bestNb && nbSimilarity<.68 && roadSimilarity<.82)
-      throw Error('Não foi possível confirmar rua e bairro com segurança. Confira os dados.');
-  }
+  // O bairro digitado continua pesando no ranking, mas não bloqueia a entrega:
+  // bases públicas frequentemente associam uma mesma rua a outro bairro adjacente.
+  // A segurança fica na confirmação da rua + cidade/UF e, depois, na rota rodoviária.
   return {lat:Number(best.lat),lng:Number(best.lon),displayName:best.display_name,precision:number?'address':'street'};
 }
 

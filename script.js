@@ -155,6 +155,17 @@ function scheduleAutomaticDelivery(){
   },700);
 }
 ['#street','#neighborhood','[name=number]'].forEach(sel=>document.querySelector(sel)?.addEventListener('input',scheduleAutomaticDelivery));
+document.querySelector('#calculateManualDelivery')?.addEventListener('click',async()=>{
+  const st=document.querySelector('#gpsStatus');
+  if(!addressReadyForQuote()){
+    if(st)st.textContent='Preencha Rua, Número e Bairro para calcular a entrega.';
+    return;
+  }
+  clearTimeout(autoDeliveryTimer);
+  if(st)st.textContent='Localizando o endereço e calculando a rota...';
+  try{await calculateByTypedAddress();}catch(e){}
+});
+
 document.querySelector('#cep')?.addEventListener('input',()=>{
   clearAddressQuote(); clearTimeout(autoCepTimer); clearTimeout(autoDeliveryTimer);
   const cep=document.querySelector('#cep'),clean=(cep?.value||'').replace(/\D/g,'');
@@ -357,8 +368,6 @@ document.querySelector('#useLocationTop')?.addEventListener('click',()=>{
       if(rev.street)document.querySelector('#street').value=rev.street;
       if(rev.neighborhood)document.querySelector('#neighborhood').value=rev.neighborhood;
       if(rev.number)document.querySelector('[name=number]').value=rev.number;
-      const search=document.querySelector('#addressSearch');
-      if(search)search.value=[rev.street,rev.number,rev.neighborhood].filter(Boolean).join(', ');
       await setConfirmedPoint(lat,lng,false);
       if(st)st.textContent=`Localização encontrada (precisão aproximada ±${Math.round(pos.coords.accuracy)} m). Confira o número e o pino no mapa.`;
     }catch(e){
