@@ -109,8 +109,16 @@ async function lookupCepValue(cep){
 }
 async function quoteAddressDelivery(data){
   const payload={cep:data.cep||document.querySelector('#cep')?.value||'',street:data.street||document.querySelector('#street')?.value||'',number:data.number||document.querySelector('[name=number]')?.value||'',neighborhood:data.neighborhood||document.querySelector('#neighborhood')?.value||'',city:store?.settings?.storeCity||'',state:store?.settings?.storeState||''};
-  const r=await fetch('/api/delivery-quote-address',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)}); const j=await r.json();
-  if(!r.ok) throw Error(j.error||'Não foi possível localizar esse endereço.'); return j;
+  const ctrl=new AbortController(); const timer=setTimeout(()=>ctrl.abort(),18000);
+  try{
+    const r=await fetch('/api/delivery-quote-address',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload),signal:ctrl.signal});
+    const j=await r.json();
+    if(!r.ok) throw Error(j.error||'Não foi possível localizar esse endereço.');
+    return j;
+  }catch(e){
+    if(e?.name==='AbortError')throw Error('O cálculo da entrega demorou demais. Tente novamente ou use Minha localização.');
+    throw e;
+  }finally{clearTimeout(timer);}
 }
 function formatCepInput(el){let v=el.value.replace(/\D/g,'').slice(0,8);el.value=v.length>5?v.slice(0,5)+'-'+v.slice(5):v;}
 document.querySelector('#cep')?.addEventListener('input',e=>formatCepInput(e.target));
@@ -154,7 +162,12 @@ function scheduleAutomaticDelivery(){
     const preview=document.querySelector('#deliveryFeePreview');
     if(st)st.textContent='Localizando endereço e calculando a entrega...';
     if(preview)preview.textContent='Calculando...';
-    try{await calculateByTypedAddress();lastAutoAddress=key;}catch(e){}
+    try{
+      await calculateByTypedAddress(); lastAutoAddress=key;
+    }catch(e){
+      if(st)st.textContent=e.message||'Não foi possível calcular a entrega.';
+      if(preview)preview.textContent='Não calculado';
+    }
   },700);
 }
 ['#street','#neighborhood','[name=number]'].forEach(sel=>document.querySelector(sel)?.addEventListener('input',scheduleAutomaticDelivery));

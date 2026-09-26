@@ -194,6 +194,9 @@ async function roadRouteKm(storeLat,storeLng,customerLat,customerLng){
     const j=await r.json(); const meters=Number(j?.routes?.[0]?.distance);
     if(!Number.isFinite(meters)||meters<100)throw new Error('Rota inválida. Confirme o ponto correto da entrega no mapa.');
     return {km:meters/1000,source:'road'};
+  } catch(e) {
+    if(e?.name==='AbortError')throw new Error('A rota demorou para responder. Tente novamente em alguns segundos.');
+    throw e;
   } finally { clearTimeout(timer); }
 }
 
@@ -242,6 +245,8 @@ async function googleGeocodeBrazilAddress(x){
     const r=await fetch('https://maps.googleapis.com/maps/api/geocode/json?'+p.toString(),{signal:AbortSignal.timeout(7000)});
     if(!r.ok)return null;
     const j=await r.json();
+    if(j.status==='REQUEST_DENIED')throw Error('Google Geocoding recusou a chave/API. Verifique a chave e se a Geocoding API está ativada.');
+    if(j.status==='OVER_QUERY_LIMIT')throw Error('Limite do Google Geocoding atingido.');
     if(j.status!=='OK'||!j.results?.length)return null;
     const norm=v=>String(v||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().trim();
     const get=(res,type)=>{
@@ -259,7 +264,10 @@ async function googleGeocodeBrazilAddress(x){
     const lat=Number(loc?.lat),lng=Number(loc?.lng);
     if(!Number.isFinite(lat)||!Number.isFinite(lng))return null;
     return {lat,lng,displayName:best.formatted_address||address,precision:'google'};
-  }catch{return null;}
+  }catch(e){
+    if(String(e?.message||'').includes('Google Geocoding')||String(e?.message||'').includes('Limite do Google'))throw e;
+    return null;
+  }
 }
 
 async function geocodeBrazilAddress(x){
