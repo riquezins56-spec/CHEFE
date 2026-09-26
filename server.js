@@ -266,7 +266,7 @@ async function geocodeBrazilAddress(x){
   let candidates=[];
   for(const q of queries){
     try{
-      const params=new URLSearchParams({format:'jsonv2',addressdetails:'1',limit:'20',countrycodes:'br',q});
+      const params=new URLSearchParams({format:'jsonv2',addressdetails:'1',limit:'50',countrycodes:'br',q});
       // Quando a loja possui coordenadas, a consulta é enviesada para a região local.
       // O filtro de cidade/UF abaixo continua sendo a proteção definitiva.
       const r=await fetch('https://nominatim.openstreetmap.org/search?'+params.toString(),{headers,signal:AbortSignal.timeout(6500)}); if(!r.ok)continue;
@@ -450,7 +450,7 @@ async function api(req,res,pathname){
         if(all.length<10&&words.length&&Number.isFinite(storeLat)&&Number.isFinite(storeLng)){
           for(const overpassBase of ['https://overpass-api.de/api/interpreter','https://overpass.kumi.systems/api/interpreter']){
             try{
-              const oq=`[out:json][timeout:7];way(around:35000,${storeLat},${storeLng})["highway"]["name"];out tags center 1600;`;
+              const oq=`[out:json][timeout:7];way(around:45000,${storeLat},${storeLng})["highway"]["name"];out tags center 1600;`;
               const or=await fetch(overpassBase,{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded','User-Agent':'CHEFE-TELLES/10.31'},body:'data='+encodeURIComponent(oq),signal:AbortSignal.timeout(8000)});
               if(!or.ok)continue;
               const od=await or.json(),seenRoad=new Set();
