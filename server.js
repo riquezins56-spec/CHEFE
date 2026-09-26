@@ -229,7 +229,44 @@ async function lookupCep(cep){
   const j=await r.json(); if(j.erro) throw Error('CEP não encontrado.');
   return {cep:j.cep||c,street:j.logradouro||'',neighborhood:j.bairro||'',city:j.localidade||'',state:j.uf||''};
 }
+
+async function googleGeocodeBrazilAddress(x){
+  const key=String(process.env.GOOGLE_MAPS_API_KEY||'').trim();
+  if(!key)return null;
+  const street=String(x.street||'').trim(), number=String(x.number||'').trim();
+  const neighborhood=String(x.neighborhood||'').trim(), city=String(x.city||'').trim();
+  const state=String(x.state||'').trim(), cep=String(x.cep||'').replace(/\D/g,'');
+  const address=[street,number,neighborhood,city,state,cep,'Brasil'].filter(Boolean).join(', ');
+  try{
+    const p=new URLSearchParams({address,key,region:'br',language:'pt-BR'});
+    const r=await fetch('https://maps.googleapis.com/maps/api/geocode/json?'+p.toString(),{signal:AbortSignal.timeout(7000)});
+    if(!r.ok)return null;
+    const j=await r.json();
+    if(j.status!=='OK'||!j.results?.length)return null;
+    const norm=v=>String(v||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().trim();
+    const get=(res,type)=>{
+      const c=(res.address_components||[]).find(a=>(a.types||[]).includes(type));
+      return c?.short_name||c?.long_name||'';
+    };
+    const candidates=j.results.filter(res=>{
+      const cCity=get(res,'administrative_area_level_2')||get(res,'locality');
+      const cState=get(res,'administrative_area_level_1');
+      const cityOk=!city||!cCity||norm(cCity)===norm(city);
+      const stateOk=!state||!cState||norm(cState)===norm(state)||norm(cState).endsWith(norm(state));
+      return cityOk&&stateOk;
+    });
+    const best=candidates[0]||j.results[0], loc=best?.geometry?.location;
+    const lat=Number(loc?.lat),lng=Number(loc?.lng);
+    if(!Number.isFinite(lat)||!Number.isFinite(lng))return null;
+    return {lat,lng,displayName:best.formatted_address||address,precision:'google'};
+  }catch{return null;}
+}
+
 async function geocodeBrazilAddress(x){
+  // Endereço manual: Google primeiro quando a chave estiver configurada no servidor.
+  // Se Google estiver indisponível/sem resultado, preserva todo o fallback atual.
+  const googlePoint=await googleGeocodeBrazilAddress(x);
+  if(googlePoint)return googlePoint;
   const cep=String(x.cep||'').replace(/\D/g,'');
   let cepData={cep:'',street:'',neighborhood:'',city:'',state:''};
   if(cep.length===8){
