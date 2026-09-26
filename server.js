@@ -197,6 +197,32 @@ async function roadRouteKm(storeLat,storeLng,customerLat,customerLng){
   } finally { clearTimeout(timer); }
 }
 
+
+// Para endereço digitado, encaixa a coordenada geocodificada na via dirigível mais
+// próxima antes de calcular a rota. GPS/mapa continuam usando o ponto escolhido.
+async function snapAddressPointToRoad(lat,lng){
+  const la=Number(lat),lo=Number(lng);
+  if(!Number.isFinite(la)||!Number.isFinite(lo))throw Error('Coordenada de entrega inválida.');
+  const base=String(process.env.ROUTING_BASE_URL||'https://router.project-osrm.org').replace(/\/$/,'');
+  const url=`${base}/nearest/v1/driving/${lo},${la}?number=1`;
+  const ctrl=new AbortController(); const timer=setTimeout(()=>ctrl.abort(),6500);
+  try{
+    const r=await fetch(url,{headers:{'User-Agent':'CHEFE-TELLES/1.0'},signal:ctrl.signal});
+    if(!r.ok)return {lat:la,lng:lo};
+    const j=await r.json(),w=j?.waypoints?.[0],p=w?.location,dist=Number(w?.distance);
+    if(!Array.isArray(p)||p.length!==2)return {lat:la,lng:lo};
+    if(Number.isFinite(dist)&&dist>350)throw Error('Não foi possível ligar esse endereço a uma rua próxima. Confira rua, número e bairro.');
+    return {lat:Number(p[1]),lng:Number(p[0])};
+  }catch(e){
+    if(String(e?.message||'').includes('rua próxima'))throw e;
+    return {lat:la,lng:lo};
+  }finally{clearTimeout(timer);}
+}
+async function deliveryKmForTypedAddress(settings,lat,lng){
+  const p=await snapAddressPointToRoad(lat,lng);
+  return await deliveryKm(settings,p.lat,p.lng);
+}
+
 async function lookupCep(cep){
   const c=String(cep||'').replace(/\D/g,''); if(c.length!==8) throw Error('CEP inválido.');
   const r=await fetch(`https://viacep.com.br/ws/${c}/json/`,{headers:{'User-Agent':'CHEFE-TELLES/9.2'}}); if(!r.ok) throw Error('Não foi possível consultar o CEP.');
@@ -512,7 +538,7 @@ async function api(req,res,pathname){
       const addressInput={...b,city:String(b.city||d.settings.storeCity||'').trim(),state:String(b.state||d.settings.storeState||'').trim()};
       try{
         const geo=await geocodeBrazilAddress(addressInput);
-        const route=await deliveryKm(d.settings,geo.lat,geo.lng);
+        const route=await deliveryKmForTypedAddress(d.settings,geo.lat,geo.lng);
         const fee=resolveKmFee(d.deliveryKmRanges,route.km,d.settings);
         if(fee===null)return send(res,400,{error:'Endereço fora da distância máxima de entrega.',distanceKm:Number(route.km.toFixed(2))});
         return send(res,200,{lat:geo.lat,lng:geo.lng,addressFound:geo.displayName,distanceKm:Number(route.km.toFixed(2)),deliveryFee:fee,routeType:route.source});
@@ -535,14 +561,14 @@ async function api(req,res,pathname){
         deliveryFee=0;
       }else{
         if(!d.settings.storeLat||!d.settings.storeLng)return send(res,400,{error:'A localização da loja ainda não foi confirmada no painel do dono.'});
-        let lat=Number(b.customer?.lat),lng=Number(b.customer?.lng);
+        let lat=Number(b.customer?.lat),lng=Number(b.customer?.lng),typedAddressGeocoded=false;
         if(!Number.isFinite(lat)||!Number.isFinite(lng)||!lat||!lng){
           try{
             const geo=await geocodeBrazilAddress({...b.customer,city:String(b.customer?.city||d.settings.storeCity||'').trim(),state:String(b.customer?.state||d.settings.storeState||'').trim()});
-            lat=geo.lat;lng=geo.lng;b.customer.lat=lat;b.customer.lng=lng;
+            lat=geo.lat;lng=geo.lng;b.customer.lat=lat;b.customer.lng=lng;typedAddressGeocoded=true;
           }catch(e){return send(res,400,{error:e.message||'Não foi possível localizar o endereço para calcular a entrega.'});}
         }
-        const route=await deliveryKm(d.settings,lat,lng), resolved=resolveKmFee(d.deliveryKmRanges,route.km,d.settings);
+        const route=typedAddressGeocoded?await deliveryKmForTypedAddress(d.settings,lat,lng):await deliveryKm(d.settings,lat,lng), resolved=resolveKmFee(d.deliveryKmRanges,route.km,d.settings);
         if(resolved===null)return send(res,400,{error:'Endereço fora da distância máxima de entrega.',distanceKm:Number(route.km.toFixed(2))});
         deliveryFee=Number(resolved.toFixed(2)); b.deliveryDistanceKm=Number(route.km.toFixed(2)); b.deliveryRouteType=route.source;
       }
