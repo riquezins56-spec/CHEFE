@@ -185,19 +185,27 @@ async function roadRouteKm(storeLat,storeLng,customerLat,customerLng){
   const vals=[storeLat,storeLng,customerLat,customerLng].map(Number);
   if(vals.some(v=>!Number.isFinite(v)))throw new Error('Coordenadas inválidas');
   const [a,b,c,d]=vals;
-  const base=String(process.env.ROUTING_BASE_URL||'https://router.project-osrm.org').replace(/\/$/,'');
-  const url=`${base}/route/v1/driving/${b},${a};${d},${c}?overview=false&steps=false`;
-  const ctrl=new AbortController(); const timer=setTimeout(()=>ctrl.abort(),8000);
-  try{
-    const r=await fetch(url,{headers:{'User-Agent':'CHEFE-TELLES/1.0'},signal:ctrl.signal});
-    if(!r.ok)throw new Error('Roteador indisponível');
-    const j=await r.json(); const meters=Number(j?.routes?.[0]?.distance);
-    if(!Number.isFinite(meters)||meters<100)throw new Error('Rota inválida. Confirme o ponto correto da entrega no mapa.');
-    return {km:meters/1000,source:'road'};
-  } catch(e) {
-    if(e?.name==='AbortError')throw new Error('A rota demorou para responder. Tente novamente em alguns segundos.');
-    throw e;
-  } finally { clearTimeout(timer); }
+  // O roteador público principal pode oscilar. Tentamos uma segunda instância
+  // compatível antes de devolver erro ao cliente. Nenhum cálculo em linha reta
+  // é usado para cobrar a entrega.
+  const configured=String(process.env.ROUTING_BASE_URL||'').trim().replace(/\/$/,'');
+  const bases=[configured,'https://router.project-osrm.org','https://routing.openstreetmap.de/routed-car']
+    .filter(Boolean).filter((v,i,a)=>a.indexOf(v)===i);
+  let lastError=null;
+  for(const base of bases){
+    const url=`${base}/route/v1/driving/${b},${a};${d},${c}?overview=false&steps=false`;
+    const ctrl=new AbortController(); const timer=setTimeout(()=>ctrl.abort(),9000);
+    try{
+      const r=await fetch(url,{headers:{'User-Agent':'CHEFE-TELLES/10.49'},signal:ctrl.signal});
+      if(!r.ok){lastError=new Error('Roteador temporariamente indisponível');continue;}
+      const j=await r.json(); const meters=Number(j?.routes?.[0]?.distance);
+      if(!Number.isFinite(meters)||meters<100){lastError=new Error('Não foi encontrada uma rota válida pelas ruas.');continue;}
+      return {km:meters/1000,source:'road'};
+    }catch(e){
+      lastError=e?.name==='AbortError'?new Error('A rota demorou para responder.'):e;
+    }finally{clearTimeout(timer);}
+  }
+  throw new Error(lastError?.message||'Não foi possível calcular a rota agora. Tente novamente.');
 }
 
 
@@ -628,9 +636,13 @@ async function api(req,res,pathname){
         }catch(e){return send(res,400,{error:e.message||'Não foi possível identificar o bairro pelo GPS.'});}
       }
       if(!d.settings.storeLat||!d.settings.storeLng||!b.lat||!b.lng)return send(res,400,{error:'Localização da loja ou cliente não informada.'});
-      const route=await deliveryKm(d.settings,b.lat,b.lng), fee=resolveKmFee(d.deliveryKmRanges,route.km,d.settings);
-      if(fee===null)return send(res,400,{error:'Localização fora da distância máxima de entrega.',distanceKm:Number(route.km.toFixed(2))});
-      return send(res,200,{distanceKm:Number(route.km.toFixed(2)),deliveryFee:fee,routeType:route.source});
+      try{
+        const route=await deliveryKm(d.settings,b.lat,b.lng), fee=resolveKmFee(d.deliveryKmRanges,route.km,d.settings);
+        if(fee===null)return send(res,400,{error:'Localização fora da distância máxima de entrega.',distanceKm:Number(route.km.toFixed(2))});
+        return send(res,200,{distanceKm:Number(route.km.toFixed(2)),deliveryFee:fee,routeType:route.source});
+      }catch(e){
+        return send(res,400,{error:e.message||'Não foi possível calcular a rota da entrega agora.'});
+      }
     }
 
     if(req.method==='POST'&&pathname==='/api/orders'){
