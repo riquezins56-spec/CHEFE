@@ -108,6 +108,12 @@ $('#botForm').onsubmit=async e=>{e.preventDefault();const payload={botWhatsapp:$
 // V9: entregadores, faixas por KM, GPS e tempo estimado
 async function renderV9(){
  const d=state||{};
+ const mode=(d.settings||{}).deliveryMode||'route';
+ if($('#deliveryMode'))$('#deliveryMode').value=mode;
+ if($('#bairroDeliveryPanel'))$('#bairroDeliveryPanel').style.display=mode==='neighborhood'?'block':'none';
+ if($('#kmDeliveryPanel'))$('#kmDeliveryPanel').style.display=mode==='route'?'block':'none';
+ const zl=$('#zoneList'); if(zl) zl.innerHTML=(d.deliveryZones||[]).filter(x=>!x.street).sort((a,b)=>String(a.neighborhood).localeCompare(String(b.neighborhood),'pt-BR')).map(x=>`<article class="zone"><div><h3>${esc(x.neighborhood)}</h3><span class="tag">${money(x.fee)}</span></div><button class="btn" data-zone-del="${x.id}">Excluir</button></article>`).join('')||'<p>Nenhum bairro cadastrado.</p>';
+ $$('[data-zone-del]').forEach(b=>b.onclick=async()=>{await api('/api/delivery-zones/'+b.dataset.zoneDel,{method:'DELETE'});await refreshAll();renderV9()});
  const kl=$('#kmList'); if(kl) kl.innerHTML=(d.deliveryKmRanges||[]).sort((a,b)=>a.maxKm-b.maxKm).map(x=>`<article class="zone"><div><h3>Até ${Number(x.maxKm).toFixed(1)} km</h3><span class="tag">${money(x.fee)}</span></div><button class="btn" data-km-del="${x.id}">Excluir</button></article>`).join('')||'<p>Nenhuma faixa por km cadastrada.</p>';
  $$('[data-km-del]').forEach(b=>b.onclick=async()=>{await api('/api/delivery-km/'+b.dataset.kmDel,{method:'DELETE'});await refreshAll();renderV9()});
  const dl=$('#driversList'); if(dl) dl.innerHTML=(d.drivers||[]).map(x=>`<article class="zone"><div><h3>${esc(x.name)}</h3><p>${esc(x.phone||'')}</p></div><button class="btn" data-driver-del="${x.id}">Excluir</button></article>`).join('')||'<div class="panel">Nenhum entregador cadastrado.</div>';
@@ -116,10 +122,12 @@ async function renderV9(){
  if($('#extraKmFee'))$('#extraKmFee').value=Number(s.extraKmFee)||0;
  if($('#maxDeliveryKm'))$('#maxDeliveryKm').value=Number(s.maxDeliveryKm)||0;
 }
+$('#zoneForm')?.addEventListener('submit',async e=>{e.preventDefault();await api('/api/delivery-zones',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({neighborhood:$('#zoneNeighborhood').value.trim(),street:'',fee:Number($('#zoneFee').value)})});e.target.reset();await refreshAll();renderV9()});
+$('#saveDeliveryMode')?.addEventListener('click',async()=>{const deliveryMode=$('#deliveryMode').value;await api('/api/settings',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({deliveryMode})});state.settings={...state.settings,deliveryMode};renderV9();$('#deliveryModeMsg').textContent=deliveryMode==='neighborhood'?'Modo por bairro ativado.':'Modo por KM ativado.';setTimeout(()=>$('#deliveryModeMsg').textContent='',2500)});
 $('#kmForm')?.addEventListener('submit',async e=>{e.preventDefault();await api('/api/delivery-km',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({maxKm:Number($('#kmMax').value),fee:Number($('#kmFee').value)})});e.target.reset();await refreshAll();renderV9()});
 $('#driverForm')?.addEventListener('submit',async e=>{e.preventDefault();await api('/api/drivers',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:$('#driverName').value,phone:$('#driverPhone').value})});e.target.reset();await refreshAll();renderV9()});
 const oldRenderSettings=renderSettings;renderSettings=function(){oldRenderSettings();renderV9()};
-const oldSettingsSubmit=$('#settingsForm').onsubmit;$('#settingsForm').onsubmit=async e=>{e.preventDefault();const payload={name:$('#sName').value.trim(),whatsapp:$('#sWhatsapp').value.trim(),deliveryMode:'route',storeLat:$('#sStoreLat').value.trim(),storeLng:$('#sStoreLng').value.trim(),storeCep:$('#sStoreCep').value.trim(),storeStreet:$('#sStoreStreet').value.trim(),storeNumber:$('#sStoreNumber').value.trim(),storeNeighborhood:$('#sStoreNeighborhood').value.trim(),storeCity:$('#sStoreCity').value.trim(),storeState:$('#sStoreState').value.trim().toUpperCase(),defaultEtaMinutes:Number($('#sEta').value)||0};if($('#sPassword').value)payload.adminPassword=$('#sPassword').value;await api('/api/settings',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});$('#sPassword').value='';$('#settingsMsg').textContent='Configurações salvas.';state.settings={...state.settings,...payload};setTimeout(()=>$('#settingsMsg').textContent='',2500)};
+const oldSettingsSubmit=$('#settingsForm').onsubmit;$('#settingsForm').onsubmit=async e=>{e.preventDefault();const payload={name:$('#sName').value.trim(),whatsapp:$('#sWhatsapp').value.trim(),deliveryMode:(state.settings||{}).deliveryMode||'route',storeLat:$('#sStoreLat').value.trim(),storeLng:$('#sStoreLng').value.trim(),storeCep:$('#sStoreCep').value.trim(),storeStreet:$('#sStoreStreet').value.trim(),storeNumber:$('#sStoreNumber').value.trim(),storeNeighborhood:$('#sStoreNeighborhood').value.trim(),storeCity:$('#sStoreCity').value.trim(),storeState:$('#sStoreState').value.trim().toUpperCase(),defaultEtaMinutes:Number($('#sEta').value)||0};if($('#sPassword').value)payload.adminPassword=$('#sPassword').value;await api('/api/settings',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});$('#sPassword').value='';$('#settingsMsg').textContent='Configurações salvas.';state.settings={...state.settings,...payload};setTimeout(()=>$('#settingsMsg').textContent='',2500)};
 setTimeout(()=>renderV9(),300);
 
 // V9.3: cadastro amigável da localização da loja por CEP/endereço ou GPS
@@ -130,7 +138,7 @@ $('#useStoreGps')?.addEventListener('click',()=>{const m=$('#storeLocationMsg');
 $('#confirmStoreLocation')?.addEventListener('click',async()=>{
  const m=$('#storeLocationMsg');
  const savePoint=async(lat,lng,source)=>{
-   const savePayload={deliveryMode:'route',storeLat:String(lat),storeLng:String(lng),storeCep:$('#sStoreCep').value.trim(),storeStreet:$('#sStoreStreet').value.trim(),storeNumber:$('#sStoreNumber').value.trim(),storeNeighborhood:$('#sStoreNeighborhood').value.trim(),storeCity:$('#sStoreCity').value.trim(),storeState:$('#sStoreState').value.trim().toUpperCase()};
+   const savePayload={deliveryMode:(state.settings||{}).deliveryMode||'route',storeLat:String(lat),storeLng:String(lng),storeCep:$('#sStoreCep').value.trim(),storeStreet:$('#sStoreStreet').value.trim(),storeNumber:$('#sStoreNumber').value.trim(),storeNeighborhood:$('#sStoreNeighborhood').value.trim(),storeCity:$('#sStoreCity').value.trim(),storeState:$('#sStoreState').value.trim().toUpperCase()};
    await api('/api/settings',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(savePayload)});
    state.settings={...state.settings,...savePayload};
    m.textContent=source==='gps'?'Ponto da loja confirmado e salvo pelas coordenadas do GPS.':'Localização da loja confirmada e salva. O cálculo por km já pode ser usado.';
@@ -154,7 +162,7 @@ const _renderV93=renderV9;renderV9=function(){_renderV93();fillStoreAddress((sta
 
 // V9.8 — sistema único de entrega por rota
 $('#saveDeliveryRules')?.addEventListener('click',async()=>{
- const payload={deliveryMode:'route',extraKmFee:Number($('#extraKmFee').value)||0,maxDeliveryKm:Number($('#maxDeliveryKm').value)||0};
+ const payload={extraKmFee:Number($('#extraKmFee').value)||0,maxDeliveryKm:Number($('#maxDeliveryKm').value)||0};
  await api('/api/settings',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
  state.settings={...state.settings,...payload}; $('#deliveryRulesMsg').textContent='Regras de entrega salvas.';
  setTimeout(()=>$('#deliveryRulesMsg').textContent='',2500);
