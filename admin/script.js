@@ -141,12 +141,13 @@ $('#confirmStoreLocation')?.addEventListener('click',async()=>{
    const r=await api('/api/store-location/resolve',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
    $('#sStoreLat').value=r.lat;$('#sStoreLng').value=r.lng;
    await savePoint(r.lat,r.lng,'address');
+   m.textContent=r.source==='google'?'Localização da loja encontrada pelo Google e salva. O cálculo por km já pode ser usado.':'Localização da loja confirmada e salva. O cálculo por km já pode ser usado.';
  }catch(e){
    const lat=Number($('#sStoreLat').value),lng=Number($('#sStoreLng').value);
    if(Number.isFinite(lat)&&Number.isFinite(lng)&&lat&&lng){
      try{await savePoint(lat,lng,'gps');return}catch(saveErr){m.textContent='Não foi possível salvar o ponto da loja: '+saveErr.message;return}
    }
-   m.textContent='O endereço não gerou um ponto válido. Clique em “Usar minha localização” e depois confirme novamente.';
+   m.textContent=e.message||'O endereço não gerou um ponto válido. Use Minha localização para registrar o ponto exato.';
  }
 });
 const _renderV93=renderV9;renderV9=function(){_renderV93();fillStoreAddress((state||{}).settings||{})};
