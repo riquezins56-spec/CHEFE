@@ -66,9 +66,10 @@ function normalizeData(d){
   if(!Array.isArray(d.categories)){d.categories=['Hambúrgueres','Pizzas','Combos','Bebidas','Açaí na Garrafa'];changed=true;}
   if(!d.categories.includes('Açaí na Garrafa')){d.categories.push('Açaí na Garrafa');changed=true;}
   if(!Array.isArray(d.deliveryZones)){d.deliveryZones=[];changed=true;}
+  if(!Array.isArray(d.addressCache)){d.addressCache=[];changed=true;}
   if(!Array.isArray(d.deliveryKmRanges)){d.deliveryKmRanges=[];changed=true;}
   if(!Array.isArray(d.drivers)){d.drivers=[];changed=true;}
-  if(!['route','neighborhood'].includes(d.settings.deliveryMode)){d.settings.deliveryMode='route';changed=true;}
+  if(d.settings.deliveryMode!=='route'){d.settings.deliveryMode='route';changed=true;}
   if(d.settings.extraKmFee===undefined){d.settings.extraKmFee=0;changed=true;}
   if(d.settings.maxDeliveryKm===undefined){d.settings.maxDeliveryKm=0;changed=true;}
   if(d.settings.storeLat===undefined)d.settings.storeLat='';
@@ -278,7 +279,40 @@ async function googleGeocodeBrazilAddress(x){
   }
 }
 
-async function geocodeBrazilAddress(x){
+function addressCacheKey(x){
+  return [x.state,x.city,x.neighborhood,x.street,x.number].map(normalizeDeliveryText).join('|');
+}
+function findCachedAddress(cache,x){
+  const wantedStreet=normalizeDeliveryText(x.street), wantedNb=normalizeDeliveryText(x.neighborhood);
+  const wantedCity=normalizeDeliveryText(x.city), wantedState=normalizeDeliveryText(x.state);
+  const wantedNum=normalizeDeliveryText(x.number);
+  const rows=(cache||[]).filter(c=>{
+    if(wantedCity&&normalizeDeliveryText(c.city)!==wantedCity)return false;
+    if(wantedState&&normalizeDeliveryText(c.state)!==wantedState)return false;
+    if(wantedStreet&&searchSimilarity(wantedStreet,c.street)<.96)return false;
+    if(wantedNb&&c.neighborhood&&searchSimilarity(wantedNb,c.neighborhood)<.72)return false;
+    if(wantedNum&&normalizeDeliveryText(c.number)!==wantedNum)return false;
+    return true;
+  }).sort((a,b)=>{
+    const an=normalizeDeliveryText(a.number),bn=normalizeDeliveryText(b.number);
+    return (bn===wantedNum)-(an===wantedNum) || Number(b.hits||0)-Number(a.hits||0);
+  });
+  const c=rows[0];
+  if(!c)return null;
+  return {lat:Number(c.lat),lng:Number(c.lng),displayName:c.displayName||[c.street,c.number,c.neighborhood,c.city,c.state].filter(Boolean).join(', '),precision:'cache'};
+}
+function learnAddress(d,input,geo){
+  if(!d||!geo||!Number.isFinite(Number(geo.lat))||!Number.isFinite(Number(geo.lng)))return;
+  d.addressCache=Array.isArray(d.addressCache)?d.addressCache:[];
+  const row={street:String(input.street||'').trim(),number:String(input.number||'').trim(),neighborhood:String(input.neighborhood||'').trim(),city:String(input.city||'').trim(),state:String(input.state||'').trim().toUpperCase(),cep:String(input.cep||'').replace(/\D/g,''),lat:Number(geo.lat),lng:Number(geo.lng),displayName:String(geo.displayName||''),updatedAt:new Date().toISOString()};
+  if(!row.street||!row.city)return;
+  const key=addressCacheKey(row),i=d.addressCache.findIndex(c=>addressCacheKey(c)===key);
+  if(i>=0)d.addressCache[i]={...d.addressCache[i],...row,hits:Number(d.addressCache[i].hits||0)+1};
+  else d.addressCache.push({...row,hits:1});
+  if(d.addressCache.length>1000)d.addressCache=d.addressCache.sort((a,b)=>String(b.updatedAt).localeCompare(String(a.updatedAt))).slice(0,1000);
+}
+
+async function geocodeBrazilAddress(x,cache=[]){
   // V10.48: modo gratuito. Endereço manual usa os provedores públicos abaixo.
   // Google não é obrigatório e uma chave recusada nunca bloqueia o cadastro/entrega.
   const cep=String(x.cep||'').replace(/\D/g,'');
@@ -291,6 +325,9 @@ async function geocodeBrazilAddress(x){
   const neighborhood=String(x.neighborhood||cepData.neighborhood||'').trim();
   const city=String(x.city||cepData.city||'').trim();
   const state=String(x.state||cepData.state||'').trim();
+
+  const cached=findCachedAddress(cache,{street,number,neighborhood,city,state});
+  if(cached)return cached;
 
   // 1) tenta coordenadas do próprio CEP (BrasilAPI/OpenStreetMap), quando disponíveis.
   // Isso evita aceitar um endereço homônimo em outro bairro/cidade.
@@ -476,7 +513,7 @@ async function api(req,res,pathname){
     }
     if(req.method==='GET'&&pathname==='/api/store'){
       const d=await read();
-      return send(res,200,{settings:{name:d.settings.name,whatsapp:d.settings.whatsapp,pixKey:d.settings.pixKey||'',pixRecipient:d.settings.pixRecipient||'',pixType:d.settings.pixType||'',pixQr:d.settings.pixQr||'',botWhatsapp:d.settings.botWhatsapp||d.settings.whatsapp,botMessage:d.settings.botMessage||'',deliveryMode:d.settings.deliveryMode||'route',storeLat:d.settings.storeLat||'',storeLng:d.settings.storeLng||'',extraKmFee:Number(d.settings.extraKmFee)||0,maxDeliveryKm:Number(d.settings.maxDeliveryKm)||0},categories:d.categories,products:d.products.filter(p=>p.active),deliveryZones:d.deliveryZones.filter(z=>z.active!==false),deliveryKmRanges:(d.deliveryKmRanges||[]).filter(z=>z.active!==false)});
+      return send(res,200,{settings:{name:d.settings.name,whatsapp:d.settings.whatsapp,pixKey:d.settings.pixKey||'',pixRecipient:d.settings.pixRecipient||'',pixType:d.settings.pixType||'',pixQr:d.settings.pixQr||'',botWhatsapp:d.settings.botWhatsapp||d.settings.whatsapp,botMessage:d.settings.botMessage||'',deliveryMode:'route',storeLat:d.settings.storeLat||'',storeLng:d.settings.storeLng||'',storeCity:d.settings.storeCity||'',storeState:d.settings.storeState||'',storeNeighborhood:d.settings.storeNeighborhood||'',extraKmFee:Number(d.settings.extraKmFee)||0,maxDeliveryKm:Number(d.settings.maxDeliveryKm)||0},categories:d.categories,products:d.products.filter(p=>p.active),deliveryZones:[],addressHints:(d.addressCache||[]).slice(-300).map(a=>({street:a.street,neighborhood:a.neighborhood,city:a.city,state:a.state})),deliveryKmRanges:(d.deliveryKmRanges||[]).filter(z=>z.active!==false)});
     }
     if(req.method==='POST'&&pathname==='/api/login'){
       const b=await body(req),d=await read();
@@ -612,15 +649,11 @@ async function api(req,res,pathname){
       const b=await body(req),d=await read();
       if(!String(b.street||'').trim()||!String(b.number||'').trim()||!String(b.neighborhood||'').trim())
         return send(res,400,{error:'Informe rua, número e bairro para calcular a entrega.'});
-      if(d.settings.deliveryMode==='neighborhood'){
-        const fee=resolveDeliveryFee(d.deliveryZones,b.neighborhood,'');
-        if(fee===null)return send(res,400,{error:'Este bairro ainda não possui taxa de entrega cadastrada.'});
-        return send(res,200,{deliveryFee:fee,routeType:'neighborhood',neighborhood:String(b.neighborhood||'').trim()});
-      }
       const addressInput={...b,city:String(b.city||d.settings.storeCity||'').trim(),state:String(b.state||d.settings.storeState||'').trim()};
       try{
-        const geo=await geocodeBrazilAddress(addressInput);
+        const geo=await geocodeBrazilAddress(addressInput,d.addressCache);
         const route=await deliveryKmForTypedAddress(d.settings,geo.lat,geo.lng);
+        learnAddress(d,addressInput,geo); await write(d);
         const fee=resolveKmFee(d.deliveryKmRanges,route.km,d.settings);
         if(fee===null)return send(res,400,{error:'Endereço fora da distância máxima de entrega.',distanceKm:Number(route.km.toFixed(2))});
         return send(res,200,{lat:geo.lat,lng:geo.lng,addressFound:geo.displayName,distanceKm:Number(route.km.toFixed(2)),deliveryFee:fee,routeType:route.source});
@@ -628,13 +661,6 @@ async function api(req,res,pathname){
     }
     if(req.method==='POST'&&pathname==='/api/delivery-quote'){
       const b=await body(req),d=await read();
-      if(d.settings.deliveryMode==='neighborhood'){
-        try{
-          const rev=await reverseGeocodeBrazil(b.lat,b.lng), fee=resolveDeliveryFee(d.deliveryZones,rev.neighborhood,'');
-          if(fee===null)return send(res,400,{error:'O bairro identificado pelo GPS ainda não possui taxa cadastrada.'});
-          return send(res,200,{deliveryFee:fee,routeType:'neighborhood',neighborhood:rev.neighborhood||''});
-        }catch(e){return send(res,400,{error:e.message||'Não foi possível identificar o bairro pelo GPS.'});}
-      }
       if(!d.settings.storeLat||!d.settings.storeLng||!b.lat||!b.lng)return send(res,400,{error:'Localização da loja ou cliente não informada.'});
       try{
         const route=await deliveryKm(d.settings,b.lat,b.lng), fee=resolveKmFee(d.deliveryKmRanges,route.km,d.settings);
@@ -652,20 +678,19 @@ async function api(req,res,pathname){
       let deliveryFee=0;
       if(b.customer?.delivery==='Retirada'){
         deliveryFee=0;
-      }else if(d.settings.deliveryMode==='neighborhood'){
-        const resolved=resolveDeliveryFee(d.deliveryZones,b.customer?.neighborhood,'');
-        if(resolved===null)return send(res,400,{error:'Este bairro ainda não possui taxa de entrega cadastrada.'});
-        deliveryFee=Number(Number(resolved).toFixed(2)); b.deliveryRouteType='neighborhood';
       }else{
         if(!d.settings.storeLat||!d.settings.storeLng)return send(res,400,{error:'A localização da loja ainda não foi confirmada no painel do dono.'});
         let lat=Number(b.customer?.lat),lng=Number(b.customer?.lng),typedAddressGeocoded=false;
         if(!Number.isFinite(lat)||!Number.isFinite(lng)||!lat||!lng){
           try{
-            const geo=await geocodeBrazilAddress({...b.customer,city:String(b.customer?.city||d.settings.storeCity||'').trim(),state:String(b.customer?.state||d.settings.storeState||'').trim()});
-            lat=geo.lat;lng=geo.lng;b.customer.lat=lat;b.customer.lng=lng;typedAddressGeocoded=true;
+            const addressInput={...b.customer,city:String(b.customer?.city||d.settings.storeCity||'').trim(),state:String(b.customer?.state||d.settings.storeState||'').trim()};
+            const geo=await geocodeBrazilAddress(addressInput,d.addressCache);
+            lat=geo.lat;lng=geo.lng;b.customer.lat=lat;b.customer.lng=lng;b._learnAddress={input:addressInput,geo};typedAddressGeocoded=true;
           }catch(e){return send(res,400,{error:e.message||'Não foi possível localizar o endereço para calcular a entrega.'});}
         }
-        const route=typedAddressGeocoded?await deliveryKmForTypedAddress(d.settings,lat,lng):await deliveryKm(d.settings,lat,lng), resolved=resolveKmFee(d.deliveryKmRanges,route.km,d.settings);
+        const route=typedAddressGeocoded?await deliveryKmForTypedAddress(d.settings,lat,lng):await deliveryKm(d.settings,lat,lng);
+        if(b._learnAddress){learnAddress(d,b._learnAddress.input,b._learnAddress.geo);delete b._learnAddress;}
+        const resolved=resolveKmFee(d.deliveryKmRanges,route.km,d.settings);
         if(resolved===null)return send(res,400,{error:'Endereço fora da distância máxima de entrega.',distanceKm:Number(route.km.toFixed(2))});
         deliveryFee=Number(resolved.toFixed(2)); b.deliveryDistanceKm=Number(route.km.toFixed(2)); b.deliveryRouteType=route.source;
       }
@@ -699,13 +724,13 @@ async function api(req,res,pathname){
 
     if(req.method==='POST'&&pathname==='/api/store-location/resolve'){
       const b=await body(req);
-      try{const geo=await geocodeBrazilAddress(b);return send(res,200,{lat:geo.lat,lng:geo.lng,addressFound:geo.displayName,source:'fallback'});}
+      try{const geo=await geocodeBrazilAddress(b,d.addressCache);learnAddress(d,b,geo);await write(d);return send(res,200,{lat:geo.lat,lng:geo.lng,addressFound:geo.displayName,source:geo.precision||'free'});}
       catch(e){return send(res,400,{error:e.message||'Não foi possível localizar o endereço da loja.'});}
     }
 
     if(req.method==='GET'&&pathname==='/api/admin'){ const d=await read(); return send(res,200,d); }
     if(req.method==='PUT'&&pathname==='/api/settings'){
-      const b=await body(req),d=await read();if(b.adminPassword!==undefined&&String(b.adminPassword).trim()==='') delete b.adminPassword; d.settings={...d.settings,...b}; await write(d); return send(res,200,{ok:true});
+      const b=await body(req),d=await read();if(b.adminPassword!==undefined&&String(b.adminPassword).trim()==='') delete b.adminPassword; d.settings={...d.settings,...b,deliveryMode:'route'}; await write(d); return send(res,200,{ok:true});
     }
     if(req.method==='GET'&&pathname==='/api/orders')return send(res,200,(await read()).orders.slice().reverse());
     const om=pathname.match(/^\/api\/orders\/(\d+)$/);
