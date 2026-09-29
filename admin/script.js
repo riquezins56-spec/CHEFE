@@ -149,7 +149,7 @@ $('#confirmStoreLocation')?.addEventListener('click',async()=>{
    const r=await api('/api/store-location/resolve',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
    $('#sStoreLat').value=r.lat;$('#sStoreLng').value=r.lng;
    await savePoint(r.lat,r.lng,'address');
-   m.textContent=r.source==='google'?'Localização da loja encontrada pelo Google e salva. O cálculo por km já pode ser usado.':'Localização da loja confirmada e salva. O cálculo por km já pode ser usado.';
+   m.textContent='Localização da loja confirmada e salva. O cálculo por km já pode ser usado.';
  }catch(e){
    const lat=Number($('#sStoreLat').value),lng=Number($('#sStoreLng').value);
    if(Number.isFinite(lat)&&Number.isFinite(lng)&&lat&&lng){
