@@ -271,10 +271,8 @@ async function googleGeocodeBrazilAddress(x){
 }
 
 async function geocodeBrazilAddress(x){
-  // Endereço manual: Google primeiro quando a chave estiver configurada no servidor.
-  // Se Google estiver indisponível/sem resultado, preserva todo o fallback atual.
-  const googlePoint=await googleGeocodeBrazilAddress(x);
-  if(googlePoint)return googlePoint;
+  // V10.48: modo gratuito. Endereço manual usa os provedores públicos abaixo.
+  // Google não é obrigatório e uma chave recusada nunca bloqueia o cadastro/entrega.
   const cep=String(x.cep||'').replace(/\D/g,'');
   let cepData={cep:'',street:'',neighborhood:'',city:'',state:''};
   if(cep.length===8){
@@ -683,15 +681,13 @@ async function api(req,res,pathname){
     if(req.method==='POST'&&pathname==='/api/store-location/reverse'){
       const b=await body(req);
       try{
-        const google=await googleReverseGeocodeBrazil(b.lat,b.lng);
-        if(google)return send(res,200,{...google,source:'google'});
         return send(res,200,{...(await reverseGeocodeBrazil(b.lat,b.lng)),source:'osm'});
       }catch(e){return send(res,400,{error:e.message||'Não foi possível preencher o endereço pelo GPS.'});}
     }
 
     if(req.method==='POST'&&pathname==='/api/store-location/resolve'){
       const b=await body(req);
-      try{const geo=await geocodeBrazilAddress(b);return send(res,200,{lat:geo.lat,lng:geo.lng,addressFound:geo.displayName,source:geo.precision==='google'?'google':'fallback'});}
+      try{const geo=await geocodeBrazilAddress(b);return send(res,200,{lat:geo.lat,lng:geo.lng,addressFound:geo.displayName,source:'fallback'});}
       catch(e){return send(res,400,{error:e.message||'Não foi possível localizar o endereço da loja.'});}
     }
 
