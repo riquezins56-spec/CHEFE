@@ -68,7 +68,7 @@ function normalizeData(d){
   if(!Array.isArray(d.deliveryZones)){d.deliveryZones=[];changed=true;}
   if(!Array.isArray(d.deliveryKmRanges)){d.deliveryKmRanges=[];changed=true;}
   if(!Array.isArray(d.drivers)){d.drivers=[];changed=true;}
-  if(d.settings.deliveryMode!=='route'){d.settings.deliveryMode='route';changed=true;}
+  if(!['route','neighborhood'].includes(d.settings.deliveryMode)){d.settings.deliveryMode='route';changed=true;}
   if(d.settings.extraKmFee===undefined){d.settings.extraKmFee=0;changed=true;}
   if(d.settings.maxDeliveryKm===undefined){d.settings.maxDeliveryKm=0;changed=true;}
   if(d.settings.storeLat===undefined)d.settings.storeLat='';
@@ -470,7 +470,7 @@ async function api(req,res,pathname){
     }
     if(req.method==='GET'&&pathname==='/api/store'){
       const d=await read();
-      return send(res,200,{settings:{name:d.settings.name,whatsapp:d.settings.whatsapp,pixKey:d.settings.pixKey||'',pixRecipient:d.settings.pixRecipient||'',pixType:d.settings.pixType||'',pixQr:d.settings.pixQr||'',botWhatsapp:d.settings.botWhatsapp||d.settings.whatsapp,botMessage:d.settings.botMessage||'',deliveryMode:'route',storeLat:d.settings.storeLat||'',storeLng:d.settings.storeLng||'',extraKmFee:Number(d.settings.extraKmFee)||0,maxDeliveryKm:Number(d.settings.maxDeliveryKm)||0},categories:d.categories,products:d.products.filter(p=>p.active),deliveryZones:d.deliveryZones.filter(z=>z.active!==false),deliveryKmRanges:(d.deliveryKmRanges||[]).filter(z=>z.active!==false)});
+      return send(res,200,{settings:{name:d.settings.name,whatsapp:d.settings.whatsapp,pixKey:d.settings.pixKey||'',pixRecipient:d.settings.pixRecipient||'',pixType:d.settings.pixType||'',pixQr:d.settings.pixQr||'',botWhatsapp:d.settings.botWhatsapp||d.settings.whatsapp,botMessage:d.settings.botMessage||'',deliveryMode:d.settings.deliveryMode||'route',storeLat:d.settings.storeLat||'',storeLng:d.settings.storeLng||'',extraKmFee:Number(d.settings.extraKmFee)||0,maxDeliveryKm:Number(d.settings.maxDeliveryKm)||0},categories:d.categories,products:d.products.filter(p=>p.active),deliveryZones:d.deliveryZones.filter(z=>z.active!==false),deliveryKmRanges:(d.deliveryKmRanges||[]).filter(z=>z.active!==false)});
     }
     if(req.method==='POST'&&pathname==='/api/login'){
       const b=await body(req),d=await read();
@@ -606,6 +606,11 @@ async function api(req,res,pathname){
       const b=await body(req),d=await read();
       if(!String(b.street||'').trim()||!String(b.number||'').trim()||!String(b.neighborhood||'').trim())
         return send(res,400,{error:'Informe rua, número e bairro para calcular a entrega.'});
+      if(d.settings.deliveryMode==='neighborhood'){
+        const fee=resolveDeliveryFee(d.deliveryZones,b.neighborhood,'');
+        if(fee===null)return send(res,400,{error:'Este bairro ainda não possui taxa de entrega cadastrada.'});
+        return send(res,200,{deliveryFee:fee,routeType:'neighborhood',neighborhood:String(b.neighborhood||'').trim()});
+      }
       const addressInput={...b,city:String(b.city||d.settings.storeCity||'').trim(),state:String(b.state||d.settings.storeState||'').trim()};
       try{
         const geo=await geocodeBrazilAddress(addressInput);
@@ -617,6 +622,13 @@ async function api(req,res,pathname){
     }
     if(req.method==='POST'&&pathname==='/api/delivery-quote'){
       const b=await body(req),d=await read();
+      if(d.settings.deliveryMode==='neighborhood'){
+        try{
+          const rev=await reverseGeocodeBrazil(b.lat,b.lng), fee=resolveDeliveryFee(d.deliveryZones,rev.neighborhood,'');
+          if(fee===null)return send(res,400,{error:'O bairro identificado pelo GPS ainda não possui taxa cadastrada.'});
+          return send(res,200,{deliveryFee:fee,routeType:'neighborhood',neighborhood:rev.neighborhood||''});
+        }catch(e){return send(res,400,{error:e.message||'Não foi possível identificar o bairro pelo GPS.'});}
+      }
       if(!d.settings.storeLat||!d.settings.storeLng||!b.lat||!b.lng)return send(res,400,{error:'Localização da loja ou cliente não informada.'});
       const route=await deliveryKm(d.settings,b.lat,b.lng), fee=resolveKmFee(d.deliveryKmRanges,route.km,d.settings);
       if(fee===null)return send(res,400,{error:'Localização fora da distância máxima de entrega.',distanceKm:Number(route.km.toFixed(2))});
@@ -630,6 +642,10 @@ async function api(req,res,pathname){
       let deliveryFee=0;
       if(b.customer?.delivery==='Retirada'){
         deliveryFee=0;
+      }else if(d.settings.deliveryMode==='neighborhood'){
+        const resolved=resolveDeliveryFee(d.deliveryZones,b.customer?.neighborhood,'');
+        if(resolved===null)return send(res,400,{error:'Este bairro ainda não possui taxa de entrega cadastrada.'});
+        deliveryFee=Number(Number(resolved).toFixed(2)); b.deliveryRouteType='neighborhood';
       }else{
         if(!d.settings.storeLat||!d.settings.storeLng)return send(res,400,{error:'A localização da loja ainda não foi confirmada no painel do dono.'});
         let lat=Number(b.customer?.lat),lng=Number(b.customer?.lng),typedAddressGeocoded=false;
