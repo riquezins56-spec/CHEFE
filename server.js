@@ -373,6 +373,36 @@ async function geocodeBrazilAddress(x){
   return {lat:Number(best.lat),lng:Number(best.lon),displayName:best.display_name,precision:number?'address':'street'};
 }
 
+
+async function googleReverseGeocodeBrazil(lat,lng){
+  const key=String(process.env.GOOGLE_MAPS_API_KEY||'').trim();
+  lat=Number(lat);lng=Number(lng);
+  if(!key||!Number.isFinite(lat)||!Number.isFinite(lng))return null;
+  try{
+    const p=new URLSearchParams({latlng:`${lat},${lng}`,key,language:'pt-BR',region:'br'});
+    const r=await fetch('https://maps.googleapis.com/maps/api/geocode/json?'+p.toString(),{signal:AbortSignal.timeout(7000)});
+    if(!r.ok)return null;
+    const j=await r.json();
+    if(j.status==='REQUEST_DENIED')throw Error('Google Geocoding recusou a chave/API. Verifique as restrições da chave.');
+    if(j.status!=='OK'||!j.results?.length)return null;
+    const best=j.results[0];
+    const get=(type)=>{const c=(best.address_components||[]).find(a=>(a.types||[]).includes(type));return c?.short_name||c?.long_name||''};
+    return {
+      lat,lng,
+      cep:get('postal_code'),
+      street:get('route'),
+      number:get('street_number'),
+      neighborhood:get('sublocality_level_1')||get('sublocality')||get('neighborhood'),
+      city:get('administrative_area_level_2')||get('locality'),
+      state:get('administrative_area_level_1'),
+      addressFound:best.formatted_address||''
+    };
+  }catch(e){
+    if(String(e?.message||'').includes('Google Geocoding'))throw e;
+    return null;
+  }
+}
+
 async function reverseGeocodeBrazil(lat,lng){
   lat=Number(lat); lng=Number(lng);
   if(!Number.isFinite(lat)||!Number.isFinite(lng)) throw Error('Coordenadas inválidas.');
@@ -636,13 +666,16 @@ async function api(req,res,pathname){
 
     if(req.method==='POST'&&pathname==='/api/store-location/reverse'){
       const b=await body(req);
-      try{return send(res,200,await reverseGeocodeBrazil(b.lat,b.lng));}
-      catch(e){return send(res,400,{error:e.message||'Não foi possível preencher o endereço pelo GPS.'});}
+      try{
+        const google=await googleReverseGeocodeBrazil(b.lat,b.lng);
+        if(google)return send(res,200,{...google,source:'google'});
+        return send(res,200,{...(await reverseGeocodeBrazil(b.lat,b.lng)),source:'osm'});
+      }catch(e){return send(res,400,{error:e.message||'Não foi possível preencher o endereço pelo GPS.'});}
     }
 
     if(req.method==='POST'&&pathname==='/api/store-location/resolve'){
       const b=await body(req);
-      try{const geo=await geocodeBrazilAddress(b);return send(res,200,{lat:geo.lat,lng:geo.lng,addressFound:geo.displayName});}
+      try{const geo=await geocodeBrazilAddress(b);return send(res,200,{lat:geo.lat,lng:geo.lng,addressFound:geo.displayName,source:geo.precision==='google'?'google':'fallback'});}
       catch(e){return send(res,400,{error:e.message||'Não foi possível localizar o endereço da loja.'});}
     }
 
