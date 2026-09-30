@@ -181,7 +181,7 @@ function scheduleAutomaticDelivery(){
     }
   },700);
 }
-['#street','#neighborhood','[name=number]'].forEach(sel=>document.querySelector(sel)?.addEventListener('input',scheduleAutomaticDelivery));
+// V10.54: não calcula enquanto o cliente digita; a busca confirma a rua primeiro.
 document.querySelector('#neighborhood')?.addEventListener('input',()=>{clearTimeout(directoryTimer);directoryTimer=setTimeout(refreshJequieDirectory,250)});document.querySelector('#neighborhood')?.addEventListener('change',refreshJequieDirectory);setTimeout(()=>refreshJequieDirectory(),300);
 
 document.querySelector('#cep')?.addEventListener('input',()=>{
@@ -204,24 +204,7 @@ document.querySelector('#cep')?.addEventListener('input',()=>{
 // O GPS permanece como alternativa. O cálculo por endereço não exige botão.
 
 
-// V10.53 — busca manual visível: usa o mesmo diretório interno e o cálculo por rota/KM.
-document.querySelector('#searchAddressBtn')?.addEventListener('click',async()=>{
-  if(document.querySelector('#deliveryType')?.value==='Retirada')return;
-  const st=document.querySelector('#gpsStatus'),preview=document.querySelector('#deliveryFeePreview');
-  if(!addressReadyForQuote()){
-    if(st)st.textContent='Informe Bairro, Rua e Número para buscar o endereço.';
-    document.querySelector('#neighborhood')?.focus();
-    return;
-  }
-  clearTimeout(autoDeliveryTimer);
-  if(st)st.textContent='Buscando endereço e calculando a rota...';
-  if(preview)preview.textContent='Calculando...';
-  try{
-    await calculateByTypedAddress();
-    lastAutoAddress=[document.querySelector('#street')?.value,document.querySelector('#neighborhood')?.value,document.querySelector('[name=number]')?.value].join('|');
-  }catch(e){if(st)st.textContent=e.message||'Não foi possível localizar este endereço.';if(preview)preview.textContent='Não calculado';}
-});
-
+// V10.54 — Buscar endereço é tratado no fluxo de seleção abaixo.
 // V10 — envio do pedido pelo WhatsApp em iOS/Android/PC
 document.querySelector('#sendOrderWhatsapp')?.addEventListener('click',()=>{
   if(!window.lastOrderWhatsappUrl)return alert('Finalize o pedido primeiro.');
@@ -362,29 +345,49 @@ document.querySelector('#useLocation')?.addEventListener('click',()=>{
   },()=>{}, {enableHighAccuracy:true,timeout:15000,maximumAge:0});
 },true);
 
+let selectedManualAddress=false;
+function renderAddressResults(items){
+  const box=document.querySelector('#addressSearchResults');if(!box)return;
+  if(!items?.length){box.innerHTML='';box.classList.remove('show');return;}
+  box.innerHTML=items.map((x,i)=>`<button type="button" class="address-result" data-i="${i}"><b>${esc(x.street||x.label||'Endereço')}</b><span>${esc(x.neighborhood||'Jequié')} • Jequié/BA</span></button>`).join('');
+  box.classList.add('show');
+  box.querySelectorAll('[data-i]').forEach(el=>el.onclick=()=>{
+    const x=items[Number(el.dataset.i)];
+    if(x.street)document.querySelector('#street').value=x.street;
+    if(x.neighborhood)document.querySelector('#neighborhood').value=x.neighborhood;
+    selectedManualAddress=true;box.classList.remove('show');
+    clearAddressQuote();
+    const st=document.querySelector('#gpsStatus');if(st)st.textContent='Rua selecionada. Informe o número para calcular a entrega.';
+    document.querySelector('[name=number]')?.focus();
+  });
+}
 async function runAddressSearch(){
-  const input=document.querySelector('#addressSearch'),box=document.querySelector('#addressSuggestions'),status=document.querySelector('#addressSearchStatus'),q=(input?.value||'').trim();
-  if(q.length<2){if(status)status.textContent='Digite parte da rua, bairro ou endereço. CEP é opcional.';return;}
-  if(status)status.textContent='Buscando rua, bairro e endereço juntos...';
+  if(document.querySelector('#deliveryType')?.value==='Retirada')return;
+  const nb=(document.querySelector('#neighborhood')?.value||'').trim(),street=(document.querySelector('#street')?.value||'').trim();
+  const st=document.querySelector('#gpsStatus');
+  if(nb.length<2||street.length<2){if(st)st.textContent='Informe o Bairro e pelo menos parte do nome da Rua para buscar.';return;}
+  selectedManualAddress=false;clearAddressQuote();if(st)st.textContent='Buscando ruas neste bairro...';
   try{
-    const street=(document.querySelector('#street')?.value||'').trim(),number=(document.querySelector('[name=number]')?.value||'').trim(),neighborhood=(document.querySelector('#neighborhood')?.value||'').trim(),cep=(document.querySelector('#cep')?.value||'').trim();
-    const params=new URLSearchParams({q});if(street)params.set('street',street);if(number)params.set('number',number);if(neighborhood)params.set('neighborhood',neighborhood);if(cep)params.set('cep',cep);
-    const r=await fetch('/api/address-search?'+params.toString()),arr=await r.json();if(!r.ok)throw Error(arr.error||'Falha na busca.');
-    if(!arr.length){box.innerHTML='';box.classList.remove('show');status.textContent='Não encontramos uma correspondência segura. Confira uma sugestão parecida, tente outro trecho do nome ou marque o ponto no mapa.';return;}
-    box.innerHTML=arr.map((x,i)=>`<div class="address-suggestion" data-manual-i="${i}"><b>${esc((x.label||'').split(',').slice(0,2).join(','))}</b><small>${esc((x.label||'').split(',').slice(2).join(','))}</small></div>`).join('');
-    box.classList.add('show');status.textContent=arr.length+' resultado(s). Selecione o correto.';
-    box.querySelectorAll('[data-manual-i]').forEach(el=>el.onclick=async()=>{
-      const x=arr[Number(el.dataset.manualI)],ad=x.address||{};input.value=x.label||q;box.classList.remove('show');
-      const road=ad.road||ad.pedestrian||ad.residential||x.road||'',nb=ad.suburb||ad.neighbourhood||ad.quarter||ad.city_district||x.neighborhood||'';
-      if(road)document.querySelector('#street').value=road;if(nb)document.querySelector('#neighborhood').value=nb;
-      if(ad.house_number)document.querySelector('[name=number]').value=ad.house_number;if(ad.postcode)document.querySelector('#cep').value=ad.postcode;
-      if(!road){status.textContent='Bairro/localidade encontrado. Continue digitando a rua no mesmo campo ou marque o ponto exato no mapa.';input.focus();return;}
-      await setConfirmedPoint(x.lat,x.lng,false);status.textContent='Rua encontrada. Confira o número e ajuste o pino se necessário.';
-    });
-  }catch(e){if(status)status.textContent=e.message||'Não foi possível buscar agora.';}
+    const dir=await loadJequieDirectory(nb);let items=[];
+    const norm=v=>normalizeText(v);
+    if(dir?.streets?.length){items=dir.streets.filter(x=>norm(x).includes(norm(street))||norm(street).includes(norm(x))).slice(0,20).map(x=>({street:x,neighborhood:dir.selectedNeighborhood||nb}));}
+    if(!items.length){
+      const params=new URLSearchParams({q:street,street,neighborhood:nb});
+      const r=await fetch('/api/address-search?'+params),arr=await r.json();if(!r.ok)throw Error(arr.error||'Não foi possível buscar o endereço.');
+      items=(arr||[]).map(x=>{const a=x.address||{};return {street:a.road||a.pedestrian||a.residential||x.road||street,neighborhood:a.suburb||a.neighbourhood||a.quarter||a.city_district||x.neighborhood||nb,label:x.label};}).filter((x,i,a)=>x.street&&a.findIndex(y=>norm(y.street)+'|'+norm(y.neighborhood)===norm(x.street)+'|'+norm(x.neighborhood))===i).slice(0,20);
+    }
+    if(!items.length){renderAddressResults([]);if(st)st.textContent='Nenhuma rua correspondente foi encontrada nesse bairro. Confira os nomes ou use Minha localização.';return;}
+    renderAddressResults(items);if(st)st.textContent=items.length+' opção(ões) encontrada(s). Selecione a rua correta.';
+  }catch(e){renderAddressResults([]);if(st)st.textContent=e.message||'Não foi possível buscar o endereço agora.';}
 }
 document.querySelector('#searchAddressBtn')?.addEventListener('click',runAddressSearch);
-document.querySelector('#addressSearch')?.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();runAddressSearch();}});
+document.querySelector('#street')?.addEventListener('input',()=>{selectedManualAddress=false;renderAddressResults([]);clearAddressQuote();});
+document.querySelector('#neighborhood')?.addEventListener('input',()=>{selectedManualAddress=false;renderAddressResults([]);clearAddressQuote();});
+document.querySelector('[name=number]')?.addEventListener('input',()=>{
+  clearTimeout(autoDeliveryTimer);clearAddressQuote();
+  const num=(document.querySelector('[name=number]')?.value||'').trim();if(!selectedManualAddress||!num)return;
+  autoDeliveryTimer=setTimeout(async()=>{const st=document.querySelector('#gpsStatus'),preview=document.querySelector('#deliveryFeePreview');if(st)st.textContent='Calculando rota e taxa de entrega...';if(preview)preview.textContent='Calculando...';try{await calculateByTypedAddress();}catch(e){if(st)st.textContent=e.message||'Não foi possível calcular a entrega.';if(preview)preview.textContent='Não calculado';}},650);
+});
 
 // Localização organizada: GPS ou busca de endereço.
 document.querySelector('#toggleAddressSearch')?.addEventListener('click',()=>{

@@ -764,8 +764,8 @@ async function api(req,res,pathname){
     }
 
     if(req.method==='POST'&&pathname==='/api/store-location/resolve'){
-      const b=await body(req);
-      try{const input=await enrichJequieAddress({...b,city:b.city||'Jequié',state:b.state||'BA'});const geo=await geocodeBrazilAddress(input,d.addressCache);learnAddress(d,input,geo);await write(d);return send(res,200,{lat:geo.lat,lng:geo.lng,addressFound:geo.displayName,source:input.directoryMatch?'diretorio-jequie':(geo.precision||'free')});}
+      const b=await body(req),d=await read();
+      try{const input=await enrichJequieAddress({...b,city:b.city||'Jequié',state:b.state||'BA'});const geo=await geocodeBrazilAddress(input,d.addressCache||[]);learnAddress(d,input,geo);await write(d);return send(res,200,{lat:geo.lat,lng:geo.lng,addressFound:geo.displayName,source:input.directoryMatch?'diretorio-jequie':(geo.precision||'free')});}
       catch(e){return send(res,400,{error:e.message||'Não foi possível localizar o endereço da loja.'});}
     }
 
