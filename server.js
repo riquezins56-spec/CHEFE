@@ -68,6 +68,8 @@ function normalizeData(d){
   if(!Array.isArray(d.deliveryZones)){d.deliveryZones=[];changed=true;}
   if(!Array.isArray(d.addressCache)){d.addressCache=[];changed=true;}
   if(!Array.isArray(d.deliveryKmRanges)){d.deliveryKmRanges=[];changed=true;}
+  if(d.deliveryKmRanges.length===0){d.deliveryKmRanges=[{id:1001,maxKm:1,fee:5,active:true},{id:1002,maxKm:2,fee:8,active:true},{id:1003,maxKm:4,fee:10,active:true},{id:1004,maxKm:6,fee:12,active:true},{id:1005,maxKm:8,fee:15,active:true},{id:1006,maxKm:9,fee:18,active:true}];changed=true;}
+  if(d.settings.deliveryTableVersion===undefined){d.settings.deliveryTableVersion=1;changed=true;}
   if(!Array.isArray(d.drivers)){d.drivers=[];changed=true;}
   if(d.settings.deliveryMode!=='route'){d.settings.deliveryMode='route';changed=true;}
   if(d.settings.extraKmFee===undefined){d.settings.extraKmFee=0;changed=true;}
@@ -160,24 +162,14 @@ function resolveKmFee(ranges,km,settings={}){
   const maxDeliveryKm=Number(settings.maxDeliveryKm||0);
   if(maxDeliveryKm>0&&d>maxDeliveryKm)return null;
 
-  // Cada faixa representa um ponto da tabela. Entre dois pontos, o preço cresce
-  // proporcionalmente por km. Ex.: 2km=R$5, 4km=R$10 -> 4,2km continua crescendo.
-  if(d<=Number(active[0].maxKm)){
-    // A primeira faixa é a TAXA MÍNIMA.
-    // Ex.: 2 km = R$5 => qualquer rota até 2 km custa R$5.
-    return Math.round(Number(active[0].fee||0)*100)/100;
-  }
-  for(let i=1;i<active.length;i++){
-    const prev=active[i-1], cur=active[i];
-    const aKm=Number(prev.maxKm), bKm=Number(cur.maxKm);
-    if(d<=bKm){
-      const aFee=Number(prev.fee||0), bFee=Number(cur.fee||0);
-      const rate=(bFee-aFee)/(bKm-aKm);
-      return Math.round((aFee+(d-aKm)*rate)*100)/100;
-    }
+  // Tabela por faixas fechadas: o cliente paga o valor da primeira faixa
+  // cujo limite inclui a distância da rota. Ex.: 2,1 a 4 km = valor de 4 km.
+  for(const range of active){
+    if(d<=Number(range.maxKm))return Math.round(Number(range.fee||0)*100)/100;
   }
   const last=active[active.length-1];
   const extra=Number(settings.extraKmFee||0);
+  if(extra<=0)return null;
   return Math.round((Number(last.fee||0)+(d-Number(last.maxKm))*extra)*100)/100;
 }
 
@@ -776,6 +768,8 @@ async function api(req,res,pathname){
     if(req.method==='POST'&&pathname==='/api/drivers'){const b=await body(req),d=await read();const x={id:Date.now(),name:String(b.name||'').trim(),phone:String(b.phone||'').trim(),active:b.active!==false};if(!x.name)return send(res,400,{error:'Informe o nome do entregador'});d.drivers.push(x);await write(d);return send(res,201,x);}
     const dm=pathname.match(/^\/api\/drivers\/(\d+)$/);if(dm&&req.method==='DELETE'){const d=await read();d.drivers=d.drivers.filter(x=>String(x.id)!==dm[1]);await write(d);return send(res,200,{ok:true});}
     if(req.method==='POST'&&pathname==='/api/delivery-km'){const b=await body(req),d=await read();const x={id:Date.now(),maxKm:Number(b.maxKm)||0,fee:Number(b.fee)||0,active:true};if(x.maxKm<=0)return send(res,400,{error:'Informe a distância'});d.deliveryKmRanges.push(x);await write(d);return send(res,201,x);}
+    if(req.method==='PUT'&&pathname==='/api/delivery-km-table'){const b=await body(req),d=await read();const rows=Array.isArray(b.ranges)?b.ranges:[];if(!rows.length)return send(res,400,{error:'Informe a tabela de entrega'});d.deliveryKmRanges=rows.map((x,i)=>({id:Number(x.id)||Date.now()+i,maxKm:Number(x.maxKm)||0,fee:Number(x.fee)||0,active:true})).filter(x=>x.maxKm>0).sort((a,b)=>a.maxKm-b.maxKm);if(!d.deliveryKmRanges.length)return send(res,400,{error:'Tabela inválida'});await write(d);return send(res,200,{ok:true,deliveryKmRanges:d.deliveryKmRanges});}
+    if(req.method==='POST'&&pathname==='/api/delivery-km-defaults'){const d=await read();d.deliveryKmRanges=[{id:1001,maxKm:1,fee:5,active:true},{id:1002,maxKm:2,fee:8,active:true},{id:1003,maxKm:4,fee:10,active:true},{id:1004,maxKm:6,fee:12,active:true},{id:1005,maxKm:8,fee:15,active:true},{id:1006,maxKm:9,fee:18,active:true}];d.settings.maxDeliveryKm=9;d.settings.extraKmFee=0;await write(d);return send(res,200,{ok:true,deliveryKmRanges:d.deliveryKmRanges,settings:d.settings});}
     const km=pathname.match(/^\/api\/delivery-km\/(\d+)$/);if(km&&req.method==='DELETE'){const d=await read();d.deliveryKmRanges=d.deliveryKmRanges.filter(x=>String(x.id)!==km[1]);await write(d);return send(res,200,{ok:true});}
 
     if(req.method==='POST'&&pathname==='/api/delivery-zones'){
