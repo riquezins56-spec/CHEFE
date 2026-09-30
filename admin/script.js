@@ -109,7 +109,7 @@ $('#botForm').onsubmit=async e=>{e.preventDefault();const payload={botWhatsapp:$
 async function renderV9(){
  const d=state||{};
  if($('#kmDeliveryPanel'))$('#kmDeliveryPanel').style.display='block';
- const kl=$('#kmList'); if(kl) kl.innerHTML=(d.deliveryKmRanges||[]).sort((a,b)=>a.maxKm-b.maxKm).map(x=>`<article class="zone"><div><h3>Até ${Number(x.maxKm).toFixed(1)} km</h3><span class="tag">${money(x.fee)}</span></div><button class="btn" data-km-del="${x.id}">Excluir</button></article>`).join('')||'<p>Nenhuma faixa por km cadastrada.</p>';
+ const kl=$('#kmList'); if(kl) kl.innerHTML=(d.deliveryKmRanges||[]).sort((a,b)=>a.maxKm-b.maxKm).map(x=>`<article class="zone" data-km-row="${x.id}"><div><h3>Até ${Number(x.maxKm).toFixed(1)} km</h3><div class="inline-form"><input class="km-edit-max" type="number" step="0.1" min="0.1" value="${Number(x.maxKm)}" aria-label="Limite em km"><input class="km-edit-fee" type="number" step="0.01" min="0" value="${Number(x.fee).toFixed(2)}" aria-label="Taxa em reais"></div></div><button class="btn" data-km-del="${x.id}">Excluir</button></article>`).join('')||'<p>Nenhuma faixa por km cadastrada.</p>';
  $$('[data-km-del]').forEach(b=>b.onclick=async()=>{await api('/api/delivery-km/'+b.dataset.kmDel,{method:'DELETE'});await refreshAll();renderV9()});
  const dl=$('#driversList'); if(dl) dl.innerHTML=(d.drivers||[]).map(x=>`<article class="zone"><div><h3>${esc(x.name)}</h3><p>${esc(x.phone||'')}</p></div><button class="btn" data-driver-del="${x.id}">Excluir</button></article>`).join('')||'<div class="panel">Nenhum entregador cadastrado.</div>';
  $$('[data-driver-del]').forEach(b=>b.onclick=async()=>{await api('/api/drivers/'+b.dataset.driverDel,{method:'DELETE'});await refreshAll();renderV9()});
@@ -117,6 +117,9 @@ async function renderV9(){
  if($('#extraKmFee'))$('#extraKmFee').value=Number(s.extraKmFee)||0;
  if($('#maxDeliveryKm'))$('#maxDeliveryKm').value=Number(s.maxDeliveryKm)||0;
 }
+
+$('#applyDefaultKmTable')?.addEventListener('click',async()=>{const r=await api('/api/delivery-km-defaults',{method:'POST'});state.deliveryKmRanges=r.deliveryKmRanges||[];state.settings={...state.settings,...(r.settings||{})};renderV9();const m=$('#kmTableMsg');if(m){m.textContent='Tabela padrão aplicada e salva.';setTimeout(()=>m.textContent='',2500)}});
+$('#saveKmTable')?.addEventListener('click',async()=>{const ranges=$$('[data-km-row]').map(row=>({id:Number(row.dataset.kmRow),maxKm:Number(row.querySelector('.km-edit-max').value),fee:Number(row.querySelector('.km-edit-fee').value)})).filter(x=>x.maxKm>0);await api('/api/delivery-km-table',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({ranges})});await refreshAll();renderV9();const m=$('#kmTableMsg');if(m){m.textContent='Tabela de entrega salva.';setTimeout(()=>m.textContent='',2500)}});
 $('#kmForm')?.addEventListener('submit',async e=>{e.preventDefault();await api('/api/delivery-km',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({maxKm:Number($('#kmMax').value),fee:Number($('#kmFee').value)})});e.target.reset();await refreshAll();renderV9()});
 $('#driverForm')?.addEventListener('submit',async e=>{e.preventDefault();await api('/api/drivers',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:$('#driverName').value,phone:$('#driverPhone').value})});e.target.reset();await refreshAll();renderV9()});
 const oldRenderSettings=renderSettings;renderSettings=function(){oldRenderSettings();renderV9()};
