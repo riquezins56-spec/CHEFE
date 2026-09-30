@@ -24,6 +24,17 @@ function renderCart(){document.querySelector('#cartCount').textContent=cart.redu
 function openCart(){document.querySelector('#cart').classList.add('open');document.querySelector('#overlay').classList.add('show')}function closeCart(){document.querySelector('#cart').classList.remove('open');document.querySelector('#overlay').classList.remove('show')}
 document.querySelector('#cartBtn').onclick=openCart;document.querySelector('#clearCart').onclick=()=>{cart=[];renderCart();closeCart();};document.querySelector('#closeCart').onclick=closeCart;document.querySelector('#overlay').onclick=closeCart;document.querySelector('#checkoutBtn').onclick=()=>{if(!cart.length)return alert('Adicione pelo menos um produto.');document.querySelector('#checkoutModal').classList.add('show');closeCart()};document.querySelector('#closeModal').onclick=()=>document.querySelector('#checkoutModal').classList.remove('show');
 let deliveryZones=[];const normalizeText=v=>String(v??'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/\s+/g,' ').trim();function findDeliveryZone(neighborhood,street){const nb=normalizeText(neighborhood),st=normalizeText(street);if(!nb)return null;const same=deliveryZones.filter(z=>z.active!==false&&normalizeText(z.neighborhood)===nb);if(!same.length)return null;const bairro=same.find(z=>!normalizeText(z.street));return bairro||null;}
+
+async function loadJequieDirectory(neighborhood=''){
+  try{const r=await fetch('/api/address-directory?'+new URLSearchParams({neighborhood}));const x=await r.json();if(!r.ok)return null;return x}catch{return null}
+}
+let directoryTimer=null;
+async function refreshJequieDirectory(){
+  const nb=document.querySelector('#neighborhood'),nl=document.querySelector('#neighborhoodList'),sl=document.querySelector('#streetList');if(!nb||!nl||!sl)return;
+  const x=await loadJequieDirectory(nb.value.trim());if(!x)return;
+  if(Array.isArray(x.neighborhoods)&&x.neighborhoods.length)nl.innerHTML=x.neighborhoods.map(v=>`<option value="${esc(v)}">`).join('');
+  if(Array.isArray(x.streets)&&x.streets.length)sl.innerHTML=x.streets.map(v=>`<option value="${esc(v)}">`).join('');
+}
 function setupDelivery(){deliveryZones=store.addressHints||[];const type=document.querySelector('#deliveryType'),bairro=document.querySelector('#neighborhood'),rua=document.querySelector('#street'),fee=document.querySelector('#deliveryFee'),feePreview=document.querySelector('#deliveryFeePreview'),fields=document.querySelector('#deliveryFields'),addr=document.querySelector('#address'),addrLabel=document.querySelector('#addressLabel'),hint=document.querySelector('#deliveryHint'),nbList=document.querySelector('#neighborhoodList'),streetList=document.querySelector('#streetList');if(!type||!bairro)return;nbList.innerHTML=[...new Set(deliveryZones.map(z=>z.neighborhood).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'pt-BR')).map(x=>`<option value="${esc(x)}">`).join('');function refreshStreetSuggestions(){const nb=normalizeText(bairro.value);streetList.innerHTML=[...new Set(deliveryZones.filter(z=>(!nb||normalizeText(z.neighborhood)===nb)&&normalizeText(z.street)).map(z=>z.street))].sort((a,b)=>a.localeCompare(b,'pt-BR')).map(x=>`<option value="${esc(x)}">`).join('');}function buildAddress(){if(type.value==='Retirada'){addr.value='Retirada na loja';return;}const street=rua.value.trim(),num=document.querySelector('[name=number]').value.trim(),comp=document.querySelector('[name=complement]').value.trim(),ref=(document.querySelector('[name=reference]')?.value||'').trim();addr.value=[street,num&&('Nº '+num),bairro.value.trim(),comp,ref&&('Referência: '+ref)].filter(Boolean).join(', ');}function update(){const retirada=type.value==='Retirada';syncOrderTypeUI();fields.style.display=retirada?'none':'block';addrLabel.style.display=retirada?'none':'block';addr.required=!retirada;bairro.required=!retirada;rua.required=!retirada;document.querySelector('[name=number]').required=!retirada;
 const cepEl=document.querySelector('#cep'),compEl=document.querySelector('[name=complement]'),refEl=document.querySelector('[name=reference]');
 for(const el of [cepEl,bairro,rua,document.querySelector('[name=number]'),compEl,refEl]){if(el)el.disabled=retirada;}if(retirada){
@@ -33,7 +44,7 @@ for(const el of [cepEl,bairro,rua,document.querySelector('[name=number]'),compEl
   const mapWrap=document.querySelector('#deliveryMapWrap'),searchArea=document.querySelector('#addressSearchArea'),rs=document.querySelector('#routeSummary');
   if(mapWrap)mapWrap.classList.remove('show');if(searchArea)searchArea.classList.remove('show');if(rs)rs.style.display='none';
   return;
-}refreshStreetSuggestions();if(!document.querySelector('#customerLat')?.value){fee.value='0';feePreview.textContent='Aguardando endereço';hint.textContent='Informe CEP, rua, bairro e número. O sistema localiza o endereço e calcula a taxa somente pelos KM da rota.';}buildAddress();}type.onchange=update;bairro.oninput=update;bairro.onchange=update;rua.oninput=update;rua.onchange=update;document.querySelector('[name=number]').oninput=buildAddress;document.querySelector('[name=complement]').oninput=buildAddress;update();}
+}refreshStreetSuggestions();if(!document.querySelector('#customerLat')?.value){fee.value='0';feePreview.textContent='Aguardando endereço';hint.textContent='Informe bairro, rua e número. O sistema reconhece o endereço e calcula a taxa pelos KM da rota.';}buildAddress();}type.onchange=update;bairro.oninput=update;bairro.onchange=update;rua.oninput=update;rua.onchange=update;document.querySelector('[name=number]').oninput=buildAddress;document.querySelector('[name=complement]').oninput=buildAddress;update();}
 
 function syncOrderTypeUI(){
   const retirada=document.querySelector('#deliveryType')?.value==='Retirada';
@@ -171,6 +182,7 @@ function scheduleAutomaticDelivery(){
   },700);
 }
 ['#street','#neighborhood','[name=number]'].forEach(sel=>document.querySelector(sel)?.addEventListener('input',scheduleAutomaticDelivery));
+document.querySelector('#neighborhood')?.addEventListener('input',()=>{clearTimeout(directoryTimer);directoryTimer=setTimeout(refreshJequieDirectory,250)});document.querySelector('#neighborhood')?.addEventListener('change',refreshJequieDirectory);setTimeout(()=>refreshJequieDirectory(),300);
 
 document.querySelector('#cep')?.addEventListener('input',()=>{
   clearAddressQuote(); clearTimeout(autoCepTimer); clearTimeout(autoDeliveryTimer);

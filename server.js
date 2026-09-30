@@ -11,6 +11,45 @@ let PORT = DEFAULT_PORT;
 const ROOT = __dirname;
 const DB = path.join(ROOT, 'data.json');
 
+// V10.52 — diretório interno Jequié: bairro -> rua -> CEP (CEP invisível no checkout)
+const JEQUIE_BASE_FILE=path.join(ROOT,'jequie-address-base.json');
+let jequieBase={city:'Jequié',state:'BA',neighborhoods:[],entries:[]};
+try{jequieBase=JSON.parse(fs.readFileSync(JEQUIE_BASE_FILE,'utf8'));}catch{}
+const directoryMemory=new Map();
+function normAddress(v){return String(v||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,' ').trim();}
+function htmlText(v){return String(v||'').replace(/<[^>]*>/g,' ').replace(/&nbsp;/g,' ').replace(/&ordf;/g,'ª').replace(/&ordm;/g,'º').replace(/&aacute;/g,'á').replace(/&eacute;/g,'é').replace(/&iacute;/g,'í').replace(/&oacute;/g,'ó').replace(/&uacute;/g,'ú').replace(/&ccedil;/g,'ç').replace(/&atilde;/g,'ã').replace(/&otilde;/g,'õ').replace(/&amp;/g,'&').replace(/&#(\d+);/g,(_,n)=>String.fromCharCode(Number(n))).replace(/\s+/g,' ').trim();}
+function neighborhoodSlug(v){const n=normAddress(v);const special={'km iii':'km-iii','km iv':'km-iv','km 3':'km-3','km 4':'km-4','caixa d agua':'caixa-dagua'};return special[n]||n.replace(/ /g,'-');}
+function seedDirectoryFor(nb){const n=normAddress(nb);return (jequieBase.entries||[]).filter(x=>normAddress(x.neighborhood)===n);}
+async function loadJequieNeighborhood(nb){
+  const key=normAddress(nb); if(!key)return [];
+  if(directoryMemory.has(key))return directoryMemory.get(key);
+  let rows=seedDirectoryFor(nb);
+  // Fonte pública estruturada por bairro. Falha externa nunca bloqueia o checkout: usa base/cache + geocodificador.
+  try{
+    const slug=neighborhoodSlug(nb),u=`https://codigo-postal.org/pt-br/brasil/ba/jequie/${slug}/`;
+    const r=await fetch(u,{headers:{'User-Agent':'CHEFE-TELLES/10.52 address directory','Accept-Language':'pt-BR'},signal:AbortSignal.timeout(6500)});
+    if(r.ok){const h=await r.text();const trs=h.match(/<tr[\s\S]*?<\/tr>/gi)||[];const parsed=[];
+      for(const tr of trs){const td=[...tr.matchAll(/<td[^>]*>([\s\S]*?)<\/td>/gi)].map(m=>htmlText(m[1]));if(td.length>=4&&/^\d{5}-?\d{3}$/.test(td[0]))parsed.push({cep:td[0],street:td[1],complement:td[2]||'',neighborhood:td[3]||nb});}
+      if(parsed.length)rows=parsed;
+    }
+  }catch{}
+  const uniq=[];const seen=new Set();for(const x of rows){const k=[normAddress(x.neighborhood),normAddress(x.street),String(x.cep).replace(/\D/g,''),normAddress(x.complement)].join('|');if(!seen.has(k)){seen.add(k);uniq.push(x)}}
+  directoryMemory.set(key,uniq);return uniq;
+}
+function pickDirectoryRow(rows,street,number){
+  const sn=normAddress(street),num=Number(String(number||'').match(/\d+/)?.[0]||0);
+  let same=rows.filter(x=>normAddress(x.street)===sn);if(!same.length)same=rows.filter(x=>normAddress(x.street).includes(sn)||sn.includes(normAddress(x.street)));if(!same.length)return null;if(same.length===1)return same[0];
+  const parity=same.find(x=>/lado par/i.test(x.complement||'')&&num%2===0)||same.find(x=>/lado (?:impar|ímpar)/i.test(x.complement||'')&&num%2===1);if(parity)return parity;
+  for(const x of same){const m=String(x.complement||'').match(/at[eé]\s+(\d+)(?:\/(\d+))?/i);if(m&&num&&num<=Math.max(Number(m[1]),Number(m[2]||0)))return x;}
+  return same[0];
+}
+async function enrichJequieAddress(x){
+  const city=String(x.city||'Jequié').trim(),state=String(x.state||'BA').trim();if(normAddress(city)!=='jequie'||normAddress(state)!=='ba')return {...x};
+  const rows=await loadJequieNeighborhood(x.neighborhood);const row=pickDirectoryRow(rows,x.street,x.number);if(!row)return {...x,city:'Jequié',state:'BA'};
+  return {...x,street:row.street||x.street,neighborhood:row.neighborhood||x.neighborhood,cep:String(row.cep||'').replace(/\D/g,''),city:'Jequié',state:'BA',directoryMatch:true};
+}
+
+
 const seed = {
   categories: ['Hambúrgueres','Pizzas','Combos','Bebidas','Açaí na Garrafa'],
   settings: {
@@ -635,14 +674,22 @@ async function api(req,res,pathname){
       catch(e){return send(res,400,{error:e.message||'Não foi possível identificar o endereço desse ponto.'});}
     }
 
+    if(req.method==='GET'&&pathname==='/api/address-directory'){
+      const d=await read(),nb=String(searchUrl.searchParams.get('neighborhood')||'').trim();
+      if(!nb)return send(res,200,{neighborhoods:jequieBase.neighborhoods||[],streets:[]});
+      const rows=await loadJequieNeighborhood(nb);const streets=[...new Set(rows.map(x=>x.street).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'pt-BR'));
+      return send(res,200,{neighborhoods:jequieBase.neighborhoods||[],streets});
+    }
+
     const cepMatch=pathname.match(/^\/api\/cep\/(\d{8})$/);
     if(req.method==='GET'&&cepMatch){try{return send(res,200,await lookupCep(cepMatch[1]));}catch(e){return send(res,404,{error:e.message});}}
     if(req.method==='POST'&&pathname==='/api/delivery-quote-address'){
       const b=await body(req),d=await read();
       if(!String(b.street||'').trim()||!String(b.number||'').trim()||!String(b.neighborhood||'').trim())
         return send(res,400,{error:'Informe rua, número e bairro para calcular a entrega.'});
-      const addressInput={...b,city:String(b.city||d.settings.storeCity||'').trim(),state:String(b.state||d.settings.storeState||'').trim()};
+      let addressInput={...b,city:String(b.city||d.settings.storeCity||'Jequié').trim(),state:String(b.state||d.settings.storeState||'BA').trim()};
       try{
+        addressInput=await enrichJequieAddress(addressInput);
         const geo=await geocodeBrazilAddress(addressInput,d.addressCache);
         const route=await deliveryKmForTypedAddress(d.settings,geo.lat,geo.lng);
         learnAddress(d,addressInput,geo); await write(d);
@@ -675,7 +722,8 @@ async function api(req,res,pathname){
         let lat=Number(b.customer?.lat),lng=Number(b.customer?.lng),typedAddressGeocoded=false;
         if(!Number.isFinite(lat)||!Number.isFinite(lng)||!lat||!lng){
           try{
-            const addressInput={...b.customer,city:String(b.customer?.city||d.settings.storeCity||'').trim(),state:String(b.customer?.state||d.settings.storeState||'').trim()};
+            let addressInput={...b.customer,city:String(b.customer?.city||d.settings.storeCity||'Jequié').trim(),state:String(b.customer?.state||d.settings.storeState||'BA').trim()};
+            addressInput=await enrichJequieAddress(addressInput);
             const geo=await geocodeBrazilAddress(addressInput,d.addressCache);
             lat=geo.lat;lng=geo.lng;b.customer.lat=lat;b.customer.lng=lng;b._learnAddress={input:addressInput,geo};typedAddressGeocoded=true;
           }catch(e){return send(res,400,{error:e.message||'Não foi possível localizar o endereço para calcular a entrega.'});}
@@ -716,7 +764,7 @@ async function api(req,res,pathname){
 
     if(req.method==='POST'&&pathname==='/api/store-location/resolve'){
       const b=await body(req);
-      try{const geo=await geocodeBrazilAddress(b,d.addressCache);learnAddress(d,b,geo);await write(d);return send(res,200,{lat:geo.lat,lng:geo.lng,addressFound:geo.displayName,source:geo.precision||'free'});}
+      try{const input=await enrichJequieAddress({...b,city:b.city||'Jequié',state:b.state||'BA'});const geo=await geocodeBrazilAddress(input,d.addressCache);learnAddress(d,input,geo);await write(d);return send(res,200,{lat:geo.lat,lng:geo.lng,addressFound:geo.displayName,source:input.directoryMatch?'diretorio-jequie':(geo.precision||'free')});}
       catch(e){return send(res,400,{error:e.message||'Não foi possível localizar o endereço da loja.'});}
     }
 

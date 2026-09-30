@@ -1,0 +1,261 @@
+{
+  "city": "Jequié",
+  "state": "BA",
+  "neighborhoods": [
+    "Agenor Coelho de Aragão",
+    "Água Branca",
+    "Alto do Cemitério",
+    "Amaralina",
+    "Área Rural de Jequié",
+    "Baixa do Bonfim",
+    "Baixão",
+    "Barro Preto",
+    "Boaçu",
+    "Caixa D'Água",
+    "Campo do América",
+    "Cansanção",
+    "Centro",
+    "Chácara Alvorada",
+    "Chácara Borda da Mata",
+    "Cidade Nova",
+    "Curral Novo",
+    "Espírito Santo",
+    "Florestal",
+    "Itaigara",
+    "Itajuru",
+    "Jequiezinho",
+    "Joaquim Romão",
+    "Kennedy",
+    "km-3",
+    "km-4",
+    "KM III",
+    "KM IV",
+    "Mandacaru",
+    "Monte Branco",
+    "Oriente Novo",
+    "Parque da Colina",
+    "Pompílio Sampaio",
+    "São José",
+    "São Judas Tadeu",
+    "São Luís",
+    "Suíssa",
+    "Tropical",
+    "Vila Rodoviária"
+  ],
+  "entries": [
+    {
+      "cep": "45200-603",
+      "street": "Caminho 1",
+      "neighborhood": "Joaquim Romão",
+      "complement": ""
+    },
+    {
+      "cep": "45202-025",
+      "street": "Avenida Americano da Costa",
+      "neighborhood": "Joaquim Romão",
+      "complement": ""
+    },
+    {
+      "cep": "45201-070",
+      "street": "1ª Travessa Aiquara",
+      "neighborhood": "Joaquim Romão",
+      "complement": ""
+    },
+    {
+      "cep": "45201-041",
+      "street": "1ª Travessa Capitão Oscar Sá",
+      "neighborhood": "Joaquim Romão",
+      "complement": ""
+    },
+    {
+      "cep": "45200-723",
+      "street": "1ª Travessa Delson Andrade Machado",
+      "neighborhood": "Joaquim Romão",
+      "complement": ""
+    },
+    {
+      "cep": "45200-571",
+      "street": "1ª Travessa Lagoa Dourada",
+      "neighborhood": "Joaquim Romão",
+      "complement": ""
+    },
+    {
+      "cep": "45200-699",
+      "street": "2ª Travessa Doutor Juiz Wanderly Malta Veiga",
+      "neighborhood": "Joaquim Romão",
+      "complement": ""
+    },
+    {
+      "cep": "45200-599",
+      "street": "6ª Travessa Governador Lomanto Júnior",
+      "neighborhood": "Joaquim Romão",
+      "complement": ""
+    },
+    {
+      "cep": "45200-066",
+      "street": "1ª Travessa Laudionor Araújo Silva",
+      "neighborhood": "Centro",
+      "complement": ""
+    },
+    {
+      "cep": "45200-005",
+      "street": "Avenida Alves Pereira",
+      "neighborhood": "Centro",
+      "complement": ""
+    },
+    {
+      "cep": "45200-200",
+      "street": "Avenida Castelo Branco",
+      "neighborhood": "Centro",
+      "complement": "lado par"
+    },
+    {
+      "cep": "45200-130",
+      "street": "Avenida Franz Gedeon",
+      "neighborhood": "Centro",
+      "complement": "até 325/326"
+    },
+    {
+      "cep": "45200-100",
+      "street": "Avenida Governador Lomanto Júnior",
+      "neighborhood": "Centro",
+      "complement": "até 268/269"
+    },
+    {
+      "cep": "45200-160",
+      "street": "Avenida Landulfo Caribé",
+      "neighborhood": "Centro",
+      "complement": "até 318/319"
+    },
+    {
+      "cep": "45208-401",
+      "street": "1ª Travessa Agapito Fernandes",
+      "neighborhood": "Jequiezinho",
+      "complement": ""
+    },
+    {
+      "cep": "45208-335",
+      "street": "1ª Travessa Ary Barroso",
+      "neighborhood": "Jequiezinho",
+      "complement": ""
+    },
+    {
+      "cep": "45208-011",
+      "street": "1ª Travessa Corredor Costa Brito",
+      "neighborhood": "Jequiezinho",
+      "complement": ""
+    },
+    {
+      "cep": "45208-571",
+      "street": "1ª Travessa João Rosa",
+      "neighborhood": "Jequiezinho",
+      "complement": ""
+    },
+    {
+      "cep": "45208-005",
+      "street": "2ª Travessa dos Operários",
+      "neighborhood": "Jequiezinho",
+      "complement": ""
+    },
+    {
+      "cep": "45208-771",
+      "street": "1ª Travessa M",
+      "neighborhood": "Espírito Santo",
+      "complement": "Urbis IV"
+    },
+    {
+      "cep": "45208-587",
+      "street": "Avenida Braz Arléo",
+      "neighborhood": "Espírito Santo",
+      "complement": ""
+    },
+    {
+      "cep": "45208-589",
+      "street": "Caminho 1",
+      "neighborhood": "Espírito Santo",
+      "complement": "Urbis III"
+    },
+    {
+      "cep": "45211-120",
+      "street": "1ª Travessa da Luz",
+      "neighborhood": "KM III",
+      "complement": ""
+    },
+    {
+      "cep": "45211-144",
+      "street": "1ª Travessa Santana",
+      "neighborhood": "KM III",
+      "complement": ""
+    },
+    {
+      "cep": "45211-176",
+      "street": "1ª Travessa São Francisco",
+      "neighborhood": "KM III",
+      "complement": ""
+    },
+    {
+      "cep": "45208-360",
+      "street": "Avenida Rio Bahia",
+      "neighborhood": "km-4",
+      "complement": ""
+    },
+    {
+      "cep": "45208-440",
+      "street": "Estrada da Barragem das Pedras",
+      "neighborhood": "km-4",
+      "complement": ""
+    },
+    {
+      "cep": "45208-420",
+      "street": "Estrada da Pedra",
+      "neighborhood": "km-4",
+      "complement": ""
+    },
+    {
+      "cep": "45207-305",
+      "street": "Caminho 1",
+      "neighborhood": "Vila Rodoviária",
+      "complement": "Lot Jd Eldorado"
+    },
+    {
+      "cep": "45207-323",
+      "street": "Rua 1",
+      "neighborhood": "Vila Rodoviária",
+      "complement": "Lot Jd Eldorado"
+    },
+    {
+      "cep": "45207-440",
+      "street": "Rua 1",
+      "neighborhood": "Vila Rodoviária",
+      "complement": "Lot A Branca II"
+    },
+    {
+      "cep": "45210-474",
+      "street": "Rua 1",
+      "neighborhood": "Itaigara",
+      "complement": "Zimbrune"
+    },
+    {
+      "cep": "45206-689",
+      "street": "Rua U",
+      "neighborhood": "Água Branca",
+      "complement": "Lot A Branca"
+    },
+    {
+      "cep": "45210-212",
+      "street": "Avenida Ulisses Coelho Lima",
+      "neighborhood": "Mandacaru",
+      "complement": ""
+    },
+    {
+      "cep": "45211-899",
+      "street": "Área Rural",
+      "neighborhood": "Área Rural de Jequié",
+      "complement": ""
+    }
+  ],
+  "sources": [
+    "https://www.ruacep.com.br/ba/jequie/logradouros/",
+    "https://codigo-postal.org/pt-br/brasil/ba/jequie/"
+  ]
+}
