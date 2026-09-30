@@ -203,6 +203,25 @@ document.querySelector('#cep')?.addEventListener('input',()=>{
 });
 // O GPS permanece como alternativa. O cálculo por endereço não exige botão.
 
+
+// V10.53 — busca manual visível: usa o mesmo diretório interno e o cálculo por rota/KM.
+document.querySelector('#searchAddressBtn')?.addEventListener('click',async()=>{
+  if(document.querySelector('#deliveryType')?.value==='Retirada')return;
+  const st=document.querySelector('#gpsStatus'),preview=document.querySelector('#deliveryFeePreview');
+  if(!addressReadyForQuote()){
+    if(st)st.textContent='Informe Bairro, Rua e Número para buscar o endereço.';
+    document.querySelector('#neighborhood')?.focus();
+    return;
+  }
+  clearTimeout(autoDeliveryTimer);
+  if(st)st.textContent='Buscando endereço e calculando a rota...';
+  if(preview)preview.textContent='Calculando...';
+  try{
+    await calculateByTypedAddress();
+    lastAutoAddress=[document.querySelector('#street')?.value,document.querySelector('#neighborhood')?.value,document.querySelector('[name=number]')?.value].join('|');
+  }catch(e){if(st)st.textContent=e.message||'Não foi possível localizar este endereço.';if(preview)preview.textContent='Não calculado';}
+});
+
 // V10 — envio do pedido pelo WhatsApp em iOS/Android/PC
 document.querySelector('#sendOrderWhatsapp')?.addEventListener('click',()=>{
   if(!window.lastOrderWhatsappUrl)return alert('Finalize o pedido primeiro.');

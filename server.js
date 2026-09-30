@@ -19,9 +19,10 @@ const directoryMemory=new Map();
 function normAddress(v){return String(v||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,' ').trim();}
 function htmlText(v){return String(v||'').replace(/<[^>]*>/g,' ').replace(/&nbsp;/g,' ').replace(/&ordf;/g,'ª').replace(/&ordm;/g,'º').replace(/&aacute;/g,'á').replace(/&eacute;/g,'é').replace(/&iacute;/g,'í').replace(/&oacute;/g,'ó').replace(/&uacute;/g,'ú').replace(/&ccedil;/g,'ç').replace(/&atilde;/g,'ã').replace(/&otilde;/g,'õ').replace(/&amp;/g,'&').replace(/&#(\d+);/g,(_,n)=>String.fromCharCode(Number(n))).replace(/\s+/g,' ').trim();}
 function neighborhoodSlug(v){const n=normAddress(v);const special={'km iii':'km-iii','km iv':'km-iv','km 3':'km-3','km 4':'km-4','caixa d agua':'caixa-dagua'};return special[n]||n.replace(/ /g,'-');}
-function seedDirectoryFor(nb){const n=normAddress(nb);return (jequieBase.entries||[]).filter(x=>normAddress(x.neighborhood)===n);}
+function bestNeighborhoodName(nb){const n=normAddress(nb);if(!n)return '';const names=jequieBase.neighborhoods||[];const exact=names.find(x=>normAddress(x)===n);if(exact)return exact;const partial=names.find(x=>normAddress(x).includes(n)||n.includes(normAddress(x)));return partial||String(nb||'').trim();}
+function seedDirectoryFor(nb){const chosen=bestNeighborhoodName(nb),n=normAddress(chosen);return (jequieBase.entries||[]).filter(x=>normAddress(x.neighborhood)===n);}
 async function loadJequieNeighborhood(nb){
-  const key=normAddress(nb); if(!key)return [];
+  nb=bestNeighborhoodName(nb); const key=normAddress(nb); if(!key)return [];
   if(directoryMemory.has(key))return directoryMemory.get(key);
   let rows=seedDirectoryFor(nb);
   // Fonte pública estruturada por bairro. Falha externa nunca bloqueia o checkout: usa base/cache + geocodificador.
@@ -675,10 +676,10 @@ async function api(req,res,pathname){
     }
 
     if(req.method==='GET'&&pathname==='/api/address-directory'){
-      const d=await read(),nb=String(searchUrl.searchParams.get('neighborhood')||'').trim();
-      if(!nb)return send(res,200,{neighborhoods:jequieBase.neighborhoods||[],streets:[]});
+      const d=await read(),rawNb=String(searchUrl.searchParams.get('neighborhood')||'').trim(),nb=bestNeighborhoodName(rawNb);
+      if(!rawNb)return send(res,200,{neighborhoods:jequieBase.neighborhoods||[],streets:[],selectedNeighborhood:''});
       const rows=await loadJequieNeighborhood(nb);const streets=[...new Set(rows.map(x=>x.street).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'pt-BR'));
-      return send(res,200,{neighborhoods:jequieBase.neighborhoods||[],streets});
+      return send(res,200,{neighborhoods:jequieBase.neighborhoods||[],streets,selectedNeighborhood:nb});
     }
 
     const cepMatch=pathname.match(/^\/api\/cep\/(\d{8})$/);
