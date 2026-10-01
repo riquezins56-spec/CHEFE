@@ -21,20 +21,46 @@ function htmlText(v){return String(v||'').replace(/<[^>]*>/g,' ').replace(/&nbsp
 function neighborhoodSlug(v){const n=normAddress(v);const special={'km iii':'km-3','km iv':'km-4','km 3':'km-3','km 4':'km-4','caixa d agua':'caixa-dagua'};return special[n]||n.replace(/ /g,'-');}
 function bestNeighborhoodName(nb){let n=normAddress(nb);if(!n)return '';const alias=jequieBase.neighborhoodAliases?.[n];if(alias)return alias;const names=jequieBase.neighborhoods||[];const exact=names.find(x=>normAddress(x)===n);if(exact)return exact;const partial=names.find(x=>normAddress(x).includes(n)||n.includes(normAddress(x)));return partial||String(nb||'').trim();}
 function seedDirectoryFor(nb){const chosen=bestNeighborhoodName(nb),n=normAddress(chosen);return (jequieBase.entries||[]).filter(x=>normAddress(x.neighborhood)===n);}
+function publicNeighborhoods(){
+  const out=[],seen=new Set();
+  for(const raw of (jequieBase.neighborhoods||[])){
+    const canonical=bestNeighborhoodName(raw),k=normAddress(canonical);
+    if(k&&!seen.has(k)){seen.add(k);out.push(canonical);}
+  }
+  return out.sort((a,b)=>a.localeCompare(b,'pt-BR'));
+}
+
 async function loadJequieNeighborhood(nb){
   nb=bestNeighborhoodName(nb); const key=normAddress(nb); if(!key)return [];
   if(directoryMemory.has(key))return directoryMemory.get(key);
   let rows=seedDirectoryFor(nb);
-  // A base local é a fonte primária: se já conhecemos o bairro, devolvemos imediatamente.
-  // Isso elimina diferenças entre PC/celular causadas por timeout ou mudança de site externo.
+  // Resposta de produção deve ser rápida no celular/PC. Se já existe base local,
+  // ela é usada imediatamente; nunca fazemos o cliente esperar um site externo.
   if(rows.length){directoryMemory.set(key,rows);return rows;}
-  // Fonte externa serve SOMENTE para complementar bairros ainda ausentes da base local.
+  // Para bairro ainda ausente, tentamos fontes públicas sem substituir a base.
   try{
     const slug=neighborhoodSlug(nb),u=`https://codigo-postal.org/pt-br/brasil/ba/jequie/${slug}/`;
-    const r=await fetch(u,{headers:{'User-Agent':'CHEFE-TELLES/10.57 address directory','Accept-Language':'pt-BR'},signal:AbortSignal.timeout(6500)});
+    const r=await fetch(u,{headers:{'User-Agent':'CHEFE-TELLES/10.58 address directory','Accept-Language':'pt-BR'},signal:AbortSignal.timeout(6500)});
     if(r.ok){const h=await r.text();const trs=h.match(/<tr[\s\S]*?<\/tr>/gi)||[];const parsed=[];
       for(const tr of trs){const td=[...tr.matchAll(/<td[^>]*>([\s\S]*?)<\/td>/gi)].map(m=>htmlText(m[1]));if(td.length>=4&&/^\d{5}-?\d{3}$/.test(td[0]))parsed.push({cep:td[0],street:td[1],complement:td[2]||'',neighborhood:td[3]||nb});}
-      if(parsed.length)rows=parsed;
+      if(parsed.length)rows=rows.concat(parsed);
+    }
+  }catch{}
+  // Segunda fonte pública de apoio. Serve para preencher bairros cuja primeira
+  // fonte esteja indisponível ou incompleta; nunca substitui registros existentes.
+  try{
+    const slug=neighborhoodSlug(nb),u=`https://www.cepsdobrasil.com.br/cep/ba/jequie/bairro/${slug}`;
+    const r=await fetch(u,{headers:{'User-Agent':'Mozilla/5.0 CHEFE-TELLES/10.58','Accept-Language':'pt-BR'},signal:AbortSignal.timeout(6500)});
+    if(r.ok){
+      const h=await r.text(),trs=h.match(/<tr[\s\S]*?<\/tr>/gi)||[],parsed=[];
+      for(const tr of trs){
+        const td=[...tr.matchAll(/<td[^>]*>([\s\S]*?)<\/td>/gi)].map(m=>htmlText(m[1]));
+        const cepCell=td.find(v=>/^\d{5}-?\d{3}$/.test(v));
+        if(!cepCell)continue;
+        const streetCell=td.find(v=>v&&v!==cepCell&&!/^Jequi[eé]\s*\/\s*BA$/i.test(v)&&normAddress(v)!==normAddress(nb));
+        if(streetCell)parsed.push({cep:cepCell,street:streetCell,complement:'',neighborhood:nb});
+      }
+      if(parsed.length)rows=rows.concat(parsed);
     }
   }catch{}
   const uniq=[];const seen=new Set();for(const x of rows){const k=[normAddress(x.neighborhood),normAddress(x.street),String(x.cep).replace(/\D/g,''),normAddress(x.complement)].join('|');if(!seen.has(k)){seen.add(k);uniq.push(x)}}
@@ -62,7 +88,25 @@ const seed = {
     adminPassword: '1234',
     autoPrint: true,
     printerPort: 'COM11',
-    printerBaud: 9600
+    printerBaud: 9600,
+    deliveryMode: 'route',
+    storeLat: '',
+    storeLng: '',
+    storeCep: '',
+    storeStreet: '',
+    storeNumber: '',
+    storeNeighborhood: '',
+    storeCity: 'Jequié',
+    storeState: 'BA',
+    defaultEtaMinutes: 0,
+    extraKmFee: 0,
+    maxDeliveryKm: 0,
+    pixKey: '',
+    pixRecipient: '',
+    pixType: '',
+    pixQr: '',
+    botWhatsapp: '',
+    botMessage: ''
   },
   products: [
     {id:1,name:'X-Bacon',cat:'Hambúrgueres',price:29.90,emoji:'🍔',desc:'Pão brioche, burger artesanal, queijo, bacon crocante e molho da casa.',image:'',active:true},
@@ -550,7 +594,7 @@ async function api(req,res,pathname){
     if(req.method==='GET'&&pathname==='/api/print-agent/orders'){
       if(!printAgentAuthorized(req))return send(res,401,{error:'Agente de impressão não autorizado'});
       const d=await read();
-      return send(res,200,d.orders.slice().reverse());
+      return send(res,200,d.orders.filter(o=>(o.status||'Novo')==='Novo').slice().reverse());
     }
 
     if(req.method==='GET'&&pathname==='/api/health')return send(res,200,{ok:true,store:'CHEFE TELLES',version:'2.0.0'});
@@ -704,9 +748,9 @@ async function api(req,res,pathname){
     if(req.method==='GET'&&pathname==='/api/address-directory'){
       const directoryUrl=new URL(req.url,'http://localhost');
       const d=await read(),rawNb=String(directoryUrl.searchParams.get('neighborhood')||'').trim(),nb=bestNeighborhoodName(rawNb);
-      if(!rawNb)return send(res,200,{neighborhoods:jequieBase.neighborhoods||[],streets:[],selectedNeighborhood:''});
+      if(!rawNb)return send(res,200,{neighborhoods:publicNeighborhoods(),streets:[],selectedNeighborhood:''});
       const rows=await loadJequieNeighborhood(nb);const streets=[...new Set(rows.map(x=>x.street).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'pt-BR'));
-      return send(res,200,{neighborhoods:jequieBase.neighborhoods||[],streets,selectedNeighborhood:nb});
+      return send(res,200,{neighborhoods:publicNeighborhoods(),streets,selectedNeighborhood:nb});
     }
 
     const cepMatch=pathname.match(/^\/api\/cep\/(\d{8})$/);
