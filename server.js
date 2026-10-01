@@ -18,8 +18,8 @@ try{jequieBase=JSON.parse(fs.readFileSync(JEQUIE_BASE_FILE,'utf8'));}catch{}
 const directoryMemory=new Map();
 function normAddress(v){return String(v||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,' ').trim();}
 function htmlText(v){return String(v||'').replace(/<[^>]*>/g,' ').replace(/&nbsp;/g,' ').replace(/&ordf;/g,'ª').replace(/&ordm;/g,'º').replace(/&aacute;/g,'á').replace(/&eacute;/g,'é').replace(/&iacute;/g,'í').replace(/&oacute;/g,'ó').replace(/&uacute;/g,'ú').replace(/&ccedil;/g,'ç').replace(/&atilde;/g,'ã').replace(/&otilde;/g,'õ').replace(/&amp;/g,'&').replace(/&#(\d+);/g,(_,n)=>String.fromCharCode(Number(n))).replace(/\s+/g,' ').trim();}
-function neighborhoodSlug(v){const n=normAddress(v);const special={'km iii':'km-iii','km iv':'km-iv','km 3':'km-3','km 4':'km-4','caixa d agua':'caixa-dagua'};return special[n]||n.replace(/ /g,'-');}
-function bestNeighborhoodName(nb){const n=normAddress(nb);if(!n)return '';const names=jequieBase.neighborhoods||[];const exact=names.find(x=>normAddress(x)===n);if(exact)return exact;const partial=names.find(x=>normAddress(x).includes(n)||n.includes(normAddress(x)));return partial||String(nb||'').trim();}
+function neighborhoodSlug(v){const n=normAddress(v);const special={'km iii':'km-3','km iv':'km-4','km 3':'km-3','km 4':'km-4','caixa d agua':'caixa-dagua'};return special[n]||n.replace(/ /g,'-');}
+function bestNeighborhoodName(nb){let n=normAddress(nb);if(!n)return '';const alias=jequieBase.neighborhoodAliases?.[n];if(alias)return alias;const names=jequieBase.neighborhoods||[];const exact=names.find(x=>normAddress(x)===n);if(exact)return exact;const partial=names.find(x=>normAddress(x).includes(n)||n.includes(normAddress(x)));return partial||String(nb||'').trim();}
 function seedDirectoryFor(nb){const chosen=bestNeighborhoodName(nb),n=normAddress(chosen);return (jequieBase.entries||[]).filter(x=>normAddress(x.neighborhood)===n);}
 async function loadJequieNeighborhood(nb){
   nb=bestNeighborhoodName(nb); const key=normAddress(nb); if(!key)return [];
@@ -31,7 +31,7 @@ async function loadJequieNeighborhood(nb){
     const r=await fetch(u,{headers:{'User-Agent':'CHEFE-TELLES/10.52 address directory','Accept-Language':'pt-BR'},signal:AbortSignal.timeout(6500)});
     if(r.ok){const h=await r.text();const trs=h.match(/<tr[\s\S]*?<\/tr>/gi)||[];const parsed=[];
       for(const tr of trs){const td=[...tr.matchAll(/<td[^>]*>([\s\S]*?)<\/td>/gi)].map(m=>htmlText(m[1]));if(td.length>=4&&/^\d{5}-?\d{3}$/.test(td[0]))parsed.push({cep:td[0],street:td[1],complement:td[2]||'',neighborhood:td[3]||nb});}
-      if(parsed.length)rows=parsed;
+      if(parsed.length)rows=[...rows,...parsed];
     }
   }catch{}
   const uniq=[];const seen=new Set();for(const x of rows){const k=[normAddress(x.neighborhood),normAddress(x.street),String(x.cep).replace(/\D/g,''),normAddress(x.complement)].join('|');if(!seen.has(k)){seen.add(k);uniq.push(x)}}
@@ -247,20 +247,25 @@ async function roadRouteKm(storeLat,storeLng,customerLat,customerLng){
 async function snapAddressPointToRoad(lat,lng){
   const la=Number(lat),lo=Number(lng);
   if(!Number.isFinite(la)||!Number.isFinite(lo))throw Error('Coordenada de entrega inválida.');
-  const base=String(process.env.ROUTING_BASE_URL||'https://router.project-osrm.org').replace(/\/$/,'');
-  const url=`${base}/nearest/v1/driving/${lo},${la}?number=1`;
-  const ctrl=new AbortController(); const timer=setTimeout(()=>ctrl.abort(),6500);
-  try{
-    const r=await fetch(url,{headers:{'User-Agent':'CHEFE-TELLES/1.0'},signal:ctrl.signal});
-    if(!r.ok)return {lat:la,lng:lo};
-    const j=await r.json(),w=j?.waypoints?.[0],p=w?.location,dist=Number(w?.distance);
-    if(!Array.isArray(p)||p.length!==2)return {lat:la,lng:lo};
-    if(Number.isFinite(dist)&&dist>350)throw Error('Não foi possível ligar esse endereço a uma rua próxima. Confira rua, número e bairro.');
-    return {lat:Number(p[1]),lng:Number(p[0])};
-  }catch(e){
-    if(String(e?.message||'').includes('rua próxima'))throw e;
-    return {lat:la,lng:lo};
-  }finally{clearTimeout(timer);}
+  const configured=String(process.env.ROUTING_BASE_URL||'').trim().replace(/\/$/,'');
+  const bases=[configured,'https://router.project-osrm.org','https://routing.openstreetmap.de/routed-car']
+    .filter(Boolean).filter((v,i,a)=>a.indexOf(v)===i);
+  let best=null;
+  for(const base of bases){
+    const ctrl=new AbortController(),timer=setTimeout(()=>ctrl.abort(),6500);
+    try{
+      const r=await fetch(`${base}/nearest/v1/driving/${lo},${la}?number=1`,{headers:{'User-Agent':'CHEFE-TELLES/10.55'},signal:ctrl.signal});
+      if(!r.ok)continue;
+      const j=await r.json(),w=j?.waypoints?.[0],p=w?.location,dist=Number(w?.distance);
+      if(!Array.isArray(p)||p.length!==2)continue;
+      const found={lat:Number(p[1]),lng:Number(p[0]),distance:Number.isFinite(dist)?dist:999999};
+      if(!best||found.distance<best.distance)best=found;
+      if(found.distance<=120)break;
+    }catch{}finally{clearTimeout(timer);}
+  }
+  if(!best)return {lat:la,lng:lo};
+  if(best.distance>500)throw Error('O endereço foi localizado, mas ficou longe de uma rua trafegável. Confira o endereço ou use Minha localização.');
+  return {lat:best.lat,lng:best.lng};
 }
 async function deliveryKmForTypedAddress(settings,lat,lng){
   const p=await snapAddressPointToRoad(lat,lng);
@@ -566,6 +571,16 @@ async function api(req,res,pathname){
       const raw=[q,hintStreet,hintNumber,hintNeighborhood].filter(Boolean).join(', ').trim();
       if(raw.length<2)return send(res,200,[]);
       try{
+        // V10.55: com bairro informado, o diretório de Jequié é a fonte primária.
+        // Evita misturar ruas de outros bairros só porque o nome é parecido.
+        if(hintNeighborhood){
+          const nb=bestNeighborhoodName(hintNeighborhood),rows=await loadJequieNeighborhood(nb),wanted=normAddress(hintStreet||q);
+          const local=rows.map(x=>({x,sim:searchSimilarity(wanted,x.street)}))
+            .filter(o=>!wanted||normAddress(o.x.street).includes(wanted)||wanted.includes(normAddress(o.x.street))||o.sim>=.72)
+            .sort((a,b)=>b.sim-a.sim).slice(0,25)
+            .map(o=>({lat:'',lon:'',display_name:[o.x.street,o.x.neighborhood,'Jequié','BA','Brasil'].join(', '),type:'road',class:'directory',directory:true,cep:o.x.cep,address:{road:o.x.street,suburb:o.x.neighborhood,city:'Jequié',state:'BA',postcode:o.x.cep}}));
+          if(local.length)return send(res,200,local);
+        }
         const d=await read(),city=String(d.settings.storeCity||'').trim(),state=String(d.settings.storeState||'').trim();
         const storeLat=Number(d.settings.storeLat),storeLng=Number(d.settings.storeLng);
         const headers={'User-Agent':'CHEFE-TELLES/10.31 (resilient unified search)','Accept-Language':'pt-BR'};
