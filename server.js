@@ -251,7 +251,7 @@ const adminTokens = new Set();
 const customerOtp = new Map();
 const customerTokens = new Map();
 function cleanPhone(v){return String(v||'').replace(/\D/g,'').replace(/^55(?=\d{10,11}$)/,'');}
-function customerByToken(req,d){const h=String(req.headers['x-customer-token']||'');const phone=customerTokens.get(h);return phone?(d.customers||[]).find(c=>c.phone===phone):null;}
+function customerByToken(req,d){const h=String(req.headers['x-customer-token']||'');if(!h)return null;const phone=customerTokens.get(h);return phone?(d.customers||[]).find(c=>c.phone===phone):((d.customers||[]).find(c=>c.sessionToken===h)||null);}
 function auth(req){ const h=req.headers.authorization||''; return h.startsWith('Bearer ') && adminTokens.has(h.slice(7)); }
 function normalizeDeliveryText(v){return String(v??'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/\s+/g,' ').trim();}
 function resolveDeliveryFee(zones, neighborhood, street){
@@ -594,7 +594,7 @@ async function deliveryKm(settings,lat,lng){
 async function printEndpoint(req,res,pathname){
   if(req.method!=='GET') return false;
   if(pathname==='/print/test'){
-    const e=[]; addText(e,'CHEFE TELLES',1,1,2); addText(e,'TESTE DE IMPRESSÃO',1,1,1); addText(e,'--------------------------------'); addText(e,'Android / Thermer OK'); addText(e,'iPhone / bprint OK'); addText(e,'PC / QZ Tray OK'); addText(e,' '); addText(e,' ');
+    const e=[]; addText(e,'CHEFE TELLES',1,1,2); addText(e,'TESTE DE IMPRESSÃO',1,1,1); addText(e,'--------------------------------'); addText(e,'Android / Thermer OK'); addText(e,'iPhone / Thermer manual'); addText(e,'PC / QZ Tray OK'); addText(e,' '); addText(e,' ');
     return send(res,200,JSON.parse(printJson(e)));
   }
   const m=pathname.match(/^\/print\/(\d+)$/); if(!m)return false;
@@ -602,7 +602,7 @@ async function printEndpoint(req,res,pathname){
   const e=[]; addText(e,'CHEFE TELLES',1,1,2); addText(e,'PEDIDO '+String(o.number).padStart(2,'0'),1,1,1); addText(e,new Date(o.createdAt).toLocaleString('pt-BR',{timeZone:'America/Sao_Paulo'}),0,1,0); addText(e,'--------------------------------');
   addText(e,'STATUS: '+(o.status||'Novo')); addText(e,'CLIENTE: '+(o.customer?.name||'')); if(o.customer?.phone)addText(e,'WHATSAPP: '+o.customer.phone); if(o.customer?.reference)addText(e,'PONTO DE REFERÊNCIA: '+o.customer.reference); addText(e,'--------------------------------');
   for(const i of (o.items||[])) addText(e,`${i.qty}x ${i.name} - R$ ${(Number(i.price||0)*Number(i.qty||0)).toFixed(2)}`);
-  addText(e,'--------------------------------'); addText(e,'SUBTOTAL: R$ '+Number(o.subtotal||o.total||0).toFixed(2)); addText(e,'ENTREGA: R$ '+Number(o.deliveryFee||0).toFixed(2)); addText(e,'TOTAL: R$ '+Number(o.total||0).toFixed(2),1,0,1); addText(e,'PAGAMENTO: '+(o.customer?.payment||'')); addText(e,o.customer?.delivery==='Retirada'?'TIPO: RETIRADA NA LOJA':'ENDEREÇO: '+(o.customer?.address||'')); if(o.deliveryDistanceKm)addText(e,'DISTÂNCIA: '+o.deliveryDistanceKm+' km'); addText(e,'OBS: '+(o.customer?.note||'Nenhuma')); addText(e,' '); addText(e,' ');
+  addText(e,'--------------------------------'); addText(e,'SUBTOTAL: R$ '+Number(o.subtotal||o.total||0).toFixed(2)); addText(e,'ENTREGA: R$ '+Number(o.deliveryFee||0).toFixed(2)); addText(e,'TOTAL: R$ '+Number(o.total||0).toFixed(2),1,0,1); addText(e,'FORMA DE PAGAMENTO: '+(o.customer?.payment||'')); addText(e,o.customer?.delivery==='Retirada'?'TIPO: RETIRADA NA LOJA':'ENDEREÇO: '+(o.customer?.address||'')); if(o.deliveryDistanceKm)addText(e,'DISTÂNCIA: '+o.deliveryDistanceKm+' km'); addText(e,'OBS: '+(o.customer?.note||'Nenhuma')); addText(e,' '); addText(e,' ');
   return send(res,200,JSON.parse(printJson(e)));
 }
 
@@ -644,7 +644,7 @@ async function api(req,res,pathname){
       if(!hit||hit.expires<Date.now()||String(b.code||'')!==hit.code)return send(res,400,{error:'Código inválido ou expirado.'});
       customerOtp.delete(phone);const d=await read();let c=(d.customers||[]).find(x=>x.phone===phone);
       if(!c){c={id:crypto.randomUUID(),phone,name:'',verifiedAt:new Date().toISOString(),address:{},createdAt:new Date().toISOString(),updatedAt:new Date().toISOString()};d.customers.push(c);await write(d);}
-      const token=crypto.randomBytes(32).toString('hex');customerTokens.set(token,phone);return send(res,200,{ok:true,token,customer:c});
+      const token=crypto.randomBytes(32).toString('hex');customerTokens.set(token,phone);c.sessionToken=token;c.updatedAt=new Date().toISOString();await write(d);return send(res,200,{ok:true,token,customer:c});
     }
     if(req.method==='GET'&&pathname==='/api/customer/me'){
       const d=await read(),c=customerByToken(req,d);if(!c)return send(res,401,{error:'Sessão do cliente inválida.'});return send(res,200,c);

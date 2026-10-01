@@ -521,14 +521,18 @@ document.querySelector('#closeCustomerStatus')?.addEventListener('click',()=>doc
 // V10.68 — cadastro persistente do cliente, com OTP em modo de teste até conectar SMS/WhatsApp real.
 let customerProfile=null;
 const customerToken=()=>localStorage.getItem('chefeTellesCustomerToken')||'';
-function fillCheckoutFromCustomer(c){
+function fillCheckoutFromCustomer(c,{recalculate=false}={}){
  if(!c)return;customerProfile=c;const f=document.querySelector('#orderForm');if(!f)return;
  if(f.elements.name&&!f.elements.name.value)f.elements.name.value=c.name||'';
  if(f.elements.phone&&!f.elements.phone.value)f.elements.phone.value=c.phone||'';
- const a=c.address||{};[['neighborhood','neighborhood'],['street','street'],['number','number'],['complement','complement'],['reference','reference']].forEach(([field,key])=>{if(f.elements[field]&&!f.elements[field].value)f.elements[field].value=a[key]||''});
- if(a.lat&&!document.querySelector('#customerLat').value)document.querySelector('#customerLat').value=a.lat;
- if(a.lng&&!document.querySelector('#customerLng').value)document.querySelector('#customerLng').value=a.lng;
- if(a.address)document.querySelector('#address').value=a.address;
+ const a=c.address||{};
+ [['neighborhood','neighborhood'],['street','street'],['number','number'],['complement','complement'],['reference','reference']].forEach(([field,key])=>{if(f.elements[field]&&!f.elements[field].value)f.elements[field].value=a[key]||''});
+ if(a.address)document.querySelector('#address').value=a.address; else buildAddress();
+ if(recalculate && f.elements.delivery?.value!=='Retirada' && (f.elements.street?.value||'').trim() && (f.elements.neighborhood?.value||'').trim()){
+   document.querySelector('#customerLat').value='';document.querySelector('#customerLng').value='';
+   document.querySelector('#deliveryFee').value='0';document.querySelector('#deliveryFeePreview').textContent='Calculando...';
+   setTimeout(()=>scheduleAutomaticDelivery(),80);
+ }
 }
 async function loadCustomerProfile(){
  const token=customerToken();if(!token){document.querySelector('#customerRegisterModal')?.classList.add('show');return;}
@@ -548,11 +552,23 @@ document.querySelector('#verifyCustomerCode')?.addEventListener('click',async()=
  localStorage.setItem('chefeTellesCustomerToken',j.token);customerProfile=j.customer;document.querySelector('#registerCodeStep').style.display='none';document.querySelector('#registerAddressStep').style.display='block';st.textContent='Celular confirmado.';
 });
 async function saveRegisterProfile(skip=false){
- const token=customerToken(),name=sessionStorage.getItem('chefeTellesRegisterName')||'',address=skip?{}:{neighborhood:document.querySelector('#registerNeighborhood').value.trim(),street:document.querySelector('#registerStreet').value.trim(),number:document.querySelector('#registerNumber').value.trim(),complement:document.querySelector('#registerComplement').value.trim(),reference:document.querySelector('#registerReference').value.trim()};
+ const token=customerToken(),name=sessionStorage.getItem('chefeTellesRegisterName')||'',st=document.querySelector('#registerStatus');
+ const address=skip?{}:{neighborhood:document.querySelector('#registerNeighborhood').value.trim(),street:document.querySelector('#registerStreet').value.trim(),number:document.querySelector('#registerNumber').value.trim(),complement:document.querySelector('#registerComplement').value.trim(),reference:document.querySelector('#registerReference').value.trim()};
+ if(!skip){
+   if(!address.neighborhood||!address.street){st.textContent='Escolha o bairro/localidade e informe uma rua válida.';return}
+   try{
+     const r0=await fetch('/api/address-directory?neighborhood='+encodeURIComponent(address.neighborhood)),d0=await r0.json();
+     const n=v=>String(v||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,' ').trim();
+     const exact=(d0.streets||[]).find(x=>n(x)===n(address.street));
+     if(!exact){st.textContent='Essa rua não foi encontrada nesse bairro/localidade. Escolha uma rua da nossa base antes de salvar.';return}
+     address.street=exact;
+   }catch{st.textContent='Não foi possível validar o endereço agora. Tente novamente.';return}
+ }
+
  const r=await fetch('/api/customer/profile',{method:'PUT',headers:{'Content-Type':'application/json','X-Customer-Token':token},body:JSON.stringify({name,address})}),j=await r.json();if(!r.ok){document.querySelector('#registerStatus').textContent=j.error||'Não foi possível salvar.';return}
  fillCheckoutFromCustomer(j);document.querySelector('#customerRegisterModal').classList.remove('show');sessionStorage.removeItem('chefeTellesRegisterName');sessionStorage.removeItem('chefeTellesRegisterPhone');
 }
 document.querySelector('#saveCustomerProfile')?.addEventListener('click',()=>saveRegisterProfile(false));
 document.querySelector('#skipCustomerAddress')?.addEventListener('click',()=>saveRegisterProfile(true));
-document.querySelector('#checkoutBtn')?.addEventListener('click',()=>setTimeout(()=>fillCheckoutFromCustomer(customerProfile),0));
+document.querySelector('#checkoutBtn')?.addEventListener('click',()=>setTimeout(()=>fillCheckoutFromCustomer(customerProfile,{recalculate:true}),0));
 loadCustomerProfile();
