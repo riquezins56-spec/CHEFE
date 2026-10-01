@@ -362,33 +362,35 @@ function renderAddressResults(items){
   });
 }
 async function runAddressSearch(){
-  if(document.querySelector('#deliveryType')?.value==='Retirada')return;
-  const nb=(document.querySelector('#neighborhood')?.value||'').trim(),street=(document.querySelector('#street')?.value||'').trim();
+  const nb=(document.querySelector('#neighborhood')?.value||'').trim();
+  const street=(document.querySelector('#street')?.value||'').trim();
   const st=document.querySelector('#gpsStatus');
-  if(nb.length<2||street.length<2){if(st)st.textContent='Informe o Bairro e pelo menos parte do nome da Rua para buscar.';return;}
+  if(nb.length<2){if(st)st.textContent='Informe o Bairro para listar as ruas.';return;}
   selectedManualAddress=false;clearAddressQuote();if(st)st.textContent='Buscando ruas neste bairro...';
   try{
     const dir=await loadJequieDirectory(nb);let items=[];
-    const norm=v=>normalizeText(v);
+    const norm=v=>normalizeText(v),wanted=norm(street);
     if(dir?.streets?.length){
-      const wanted=norm(street);
-      items=dir.streets.map(x=>{
-        const nx=norm(x);let score=0;
-        if(nx===wanted)score=100;
-        else if(nx.startsWith(wanted)||wanted.startsWith(nx))score=90;
-        else if(nx.includes(wanted)||wanted.includes(nx))score=80;
-        else {const wa=wanted.split(' ').filter(w=>w.length>1),xa=nx.split(' ');const hits=wa.filter(w=>xa.some(z=>z===w||z.startsWith(w)||w.startsWith(z))).length;score=wa.length?Math.round(hits/wa.length*70):0;}
-        return {x,score};
-      }).filter(o=>o.score>=65).sort((a,b)=>b.score-a.score||a.x.localeCompare(b.x,'pt-BR'))
-        .slice(0,20).map(o=>({street:o.x,neighborhood:dir.selectedNeighborhood||nb}));
+      if(!wanted){
+        items=dir.streets.slice().sort((a,b)=>a.localeCompare(b,'pt-BR')).map(x=>({street:x,neighborhood:dir.selectedNeighborhood||nb}));
+      }else{
+        items=dir.streets.map(x=>{
+          const nx=norm(x);let score=0;
+          if(nx===wanted)score=100;
+          else if(nx.startsWith(wanted)||wanted.startsWith(nx))score=95;
+          else if(nx.includes(wanted)||wanted.includes(nx))score=90;
+          else {const wa=wanted.split(' ').filter(w=>w.length>1),xa=nx.split(' ');const hits=wa.filter(w=>xa.some(z=>z===w||z.startsWith(w)||w.startsWith(z))).length;score=wa.length?Math.round(hits/wa.length*80):0;}
+          return {x,score};
+        }).filter(o=>o.score>=60).sort((a,b)=>b.score-a.score||a.x.localeCompare(b.x,'pt-BR')).map(o=>({street:o.x,neighborhood:dir.selectedNeighborhood||nb}));
+      }
       if(!items.length){renderAddressResults([]);if(st)st.textContent='Essa rua não apareceu na base deste bairro. Confira a escrita ou use Minha localização.';return;}
-    }else{
+    }else if(wanted){
       const params=new URLSearchParams({q:street,street,neighborhood:nb});
       const r=await fetch('/api/address-search?'+params),arr=await r.json();if(!r.ok)throw Error(arr.error||'Não foi possível buscar o endereço.');
-      items=(arr||[]).map(x=>{const a=x.address||{};return {street:a.road||a.pedestrian||a.residential||x.road||street,neighborhood:a.suburb||a.neighbourhood||a.quarter||a.city_district||x.neighborhood||nb,label:x.label};}).filter((x,i,a)=>x.street&&a.findIndex(y=>norm(y.street)+'|'+norm(y.neighborhood)===norm(x.street)+'|'+norm(x.neighborhood))===i).slice(0,20);
+      items=(arr||[]).map(x=>{const a=x.address||{};return {street:a.road||a.pedestrian||a.residential||x.road||street,neighborhood:a.suburb||a.neighbourhood||a.quarter||a.city_district||x.neighborhood||nb,label:x.label};}).filter((x,i,a)=>x.street&&a.findIndex(y=>norm(y.street)+'|'+norm(y.neighborhood)===norm(x.street)+'|'+norm(x.neighborhood))===i);
     }
-    if(!items.length){renderAddressResults([]);if(st)st.textContent='Nenhuma rua correspondente foi encontrada nesse bairro. Confira os nomes ou use Minha localização.';return;}
-    renderAddressResults(items);if(st)st.textContent=items.length+' opção(ões) encontrada(s). Selecione a rua correta.';
+    if(!items.length){renderAddressResults([]);if(st)st.textContent=wanted?'Nenhuma rua correspondente foi encontrada nesse bairro.':'Nenhuma rua cadastrada foi encontrada nesse bairro.';return;}
+    renderAddressResults(items);if(st)st.textContent=items.length+' rua(s) encontrada(s). '+(wanted?'Selecione a rua correta.':'Digite parte do nome da rua para filtrar ou selecione na lista.');
   }catch(e){renderAddressResults([]);if(st)st.textContent=e.message||'Não foi possível buscar o endereço agora.';}
 }
 document.querySelector('#searchAddressBtn')?.addEventListener('click',runAddressSearch);
