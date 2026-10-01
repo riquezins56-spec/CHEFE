@@ -78,7 +78,7 @@ document.querySelector('#orderForm').onsubmit=async e=>{e.preventDefault();if(!c
 }
 const order={customer:formData,items:cart.map(({id,name,price,qty})=>({id,name,price,qty})),subtotal,deliveryFee:formData.delivery==='Retirada'?0:Number(formData.deliveryFee||0),total:subtotal+(formData.delivery==='Retirada'?0:Number(formData.deliveryFee||0))};try{const r=await fetch('/api/orders',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(order)});const saved=await r.json();
     chefeTone('done');if(!r.ok)throw Error(saved.error||'Erro');const itens=saved.items.map(i=>`${i.qty}x ${i.name} — ${money(i.price*i.qty)}`).join('\n');const tipoPedido=saved.customer.delivery==='Retirada'?'RETIRADA NA LOJA':'ENTREGA';
-const msg=`NOVO PEDIDO ${String(saved.number).padStart(2,'0')}\nDATA/HORA: ${saved.createdAtText||new Date(saved.createdAt).toLocaleString('pt-BR')}\nTIPO: ${tipoPedido}\n\nCliente: ${saved.customer.name}\nWhatsApp: ${saved.customer.phone}\n\nPEDIDO:\n${itens}\n\nSUBTOTAL: ${money(saved.subtotal)}\nENTREGA: ${money(saved.deliveryFee)}\nTOTAL: ${money(saved.total)}\n\n${saved.customer.delivery==='Retirada'?'RETIRADA NA LOJA':'ENDEREÇO:\n'+saved.customer.address}\n\nPAGAMENTO: ${saved.customer.payment}\n\nOBSERVAÇÃO:\n${saved.customer.note||'Nenhuma'}\n\nACOMPANHAR PEDIDO:\n${location.origin+'/acompanhar.html?t='+saved.trackingToken}`;window.lastOrderWhatsappUrl='https://wa.me/'+String(store.settings.whatsapp||'').replace(/\D/g,'')+'?text='+encodeURIComponent(msg);cart=[];renderCart();document.querySelector('#checkoutModal').classList.remove('show');document.querySelector('#successTitle').textContent=`Pedido ${String(saved.number).padStart(2,'0')} confirmado!`;document.querySelector('#successText').textContent=`Pedido realizado em ${saved.createdAtText||new Date(saved.createdAt).toLocaleString('pt-BR')}. Toque em ENVIAR PEDIDO para abrir o WhatsApp.`;if(saved.trackingToken)localStorage.setItem('chefeTellesTrackingToken',saved.trackingToken);const sendBtn=document.querySelector('#sendOrderWhatsapp');
+const msg=`NOVO PEDIDO ${String(saved.number).padStart(2,'0')}\nDATA/HORA: ${saved.createdAtText||new Date(saved.createdAt).toLocaleString('pt-BR')}\nTIPO: ${tipoPedido}\n\nCliente: ${saved.customer.name}\nWhatsApp: ${saved.customer.phone}\n\nPEDIDO:\n${itens}\n\nSUBTOTAL: ${money(saved.subtotal)}\nENTREGA: ${money(saved.deliveryFee)}\nTOTAL: ${money(saved.total)}\n\n${saved.customer.delivery==='Retirada'?'RETIRADA NA LOJA':'ENDEREÇO:\n'+saved.customer.address}\n\nFORMA DE PAGAMENTO: ${saved.customer.payment}\n\nOBSERVAÇÃO:\n${saved.customer.note||'Nenhuma'}\n\nACOMPANHAR PEDIDO:\n${location.origin+'/acompanhar.html?t='+saved.trackingToken}`;window.lastOrderWhatsappUrl='https://wa.me/'+String(store.settings.whatsapp||'').replace(/\D/g,'')+'?text='+encodeURIComponent(msg);cart=[];renderCart();document.querySelector('#checkoutModal').classList.remove('show');document.querySelector('#successTitle').textContent=`Pedido ${String(saved.number).padStart(2,'0')} confirmado!`;document.querySelector('#successText').textContent=`Pedido realizado em ${saved.createdAtText||new Date(saved.createdAt).toLocaleString('pt-BR')}. Toque em ENVIAR PEDIDO para abrir o WhatsApp.`;if(saved.trackingToken)localStorage.setItem('chefeTellesTrackingToken',saved.trackingToken);const sendBtn=document.querySelector('#sendOrderWhatsapp');
 if(sendBtn)sendBtn.style.display='block';
 const success=document.querySelector('#successModal');
 document.querySelector('#checkoutModal')?.classList.remove('show');
@@ -109,7 +109,7 @@ new MutationObserver(()=>{const sm=document.querySelector('#successModal');if(re
 
 
 async function quoteRoadDelivery(lat,lng){const r=await fetch('/api/delivery-quote',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({lat,lng})});const j=await r.json();if(!r.ok)throw Error(j.error||'Não foi possível calcular a rota.');return j}
-document.querySelector('#useLocation')?.addEventListener('click',()=>{const st=document.querySelector('#gpsStatus');if(!navigator.geolocation){st.textContent='GPS não disponível neste aparelho.';return}st.textContent='Obtendo localização e calculando rota pelas ruas...';navigator.geolocation.getCurrentPosition(async pos=>{const lat=pos.coords.latitude,lng=pos.coords.longitude;document.querySelector('#customerLat').value=lat;document.querySelector('#customerLng').value=lng;if(true){try{const x=await quoteRoadDelivery(lat,lng);document.querySelector('#deliveryFee').value=x.deliveryFee;document.querySelector('#deliveryFeePreview').textContent=money(x.deliveryFee);st.textContent=`Rota calculada • ${Number(x.distanceKm).toFixed(1)} km • taxa ${money(x.deliveryFee)} • rota pelas ruas`;}catch(e){document.querySelector('#deliveryFee').value='0';document.querySelector('#deliveryFeePreview').textContent='Fora da área';st.textContent=e.message}}},()=>{st.textContent='Não foi possível acessar a localização. Permita o GPS no navegador.'},{enableHighAccuracy:true,timeout:12000,maximumAge:60000})});
+document.querySelector('#useLocationLegacyDisabled')?.addEventListener('click',()=>{const st=document.querySelector('#gpsStatus');if(!navigator.geolocation){st.textContent='GPS não disponível neste aparelho.';return}st.textContent='Obtendo localização e calculando rota pelas ruas...';navigator.geolocation.getCurrentPosition(async pos=>{const lat=pos.coords.latitude,lng=pos.coords.longitude;document.querySelector('#customerLat').value=lat;document.querySelector('#customerLng').value=lng;if(true){try{const x=await quoteRoadDelivery(lat,lng);document.querySelector('#deliveryFee').value=x.deliveryFee;document.querySelector('#deliveryFeePreview').textContent=money(x.deliveryFee);st.textContent=`Rota calculada • ${Number(x.distanceKm).toFixed(1)} km • taxa ${money(x.deliveryFee)} • rota pelas ruas`;}catch(e){document.querySelector('#deliveryFee').value='0';document.querySelector('#deliveryFeePreview').textContent='Fora da área';st.textContent=e.message}}},()=>{st.textContent='Não foi possível acessar a localização. Permita o GPS no navegador.'},{enableHighAccuracy:true,timeout:12000,maximumAge:60000})});
 
 
 // V9.2 — CEP + endereço editável + geocodificação e rota real
@@ -373,14 +373,23 @@ searchEl?.addEventListener('input',()=>{
 
 // Reforça o GPS: mostra o ponto obtido no mapa para o cliente corrigir se necessário.
 document.querySelector('#useLocation')?.addEventListener('click',()=>{
-  if(!navigator.geolocation)return;
+  const st=document.querySelector('#gpsStatus');
+  if(!navigator.geolocation){if(st)st.textContent='GPS não disponível neste aparelho.';return;}
+  if(st)st.textContent='Obtendo localização e preenchendo endereço...';
   navigator.geolocation.getCurrentPosition(async pos=>{
     const {latitude:lat,longitude:lng,accuracy}=pos.coords;
     ensureDeliveryMap(lat,lng);
-    await setConfirmedPoint(lat,lng,false);
-    const st=document.querySelector('#gpsStatus');
-    if(st)st.textContent += ` • precisão GPS ±${Math.round(accuracy)} m. Arraste o pino se necessário.`;
-  },()=>{}, {enableHighAccuracy:true,timeout:15000,maximumAge:0});
+    try{
+      await refreshAddressFromPoint(lat,lng);
+      const street=document.querySelector('#street')?.value.trim()||'',num=document.querySelector('[name=number]')?.value.trim()||'',nb=document.querySelector('#neighborhood')?.value.trim()||'',comp=document.querySelector('[name=complement]')?.value.trim()||'',ref=document.querySelector('[name=reference]')?.value.trim()||'';
+      const addr=document.querySelector('#address');if(addr)addr.value=[street,num&&('Nº '+num),nb,comp,ref&&('Referência: '+ref)].filter(Boolean).join(', ');
+      const search=document.querySelector('#addressSearch');if(search&&!search.value)search.value=[street,num,nb].filter(Boolean).join(', ');
+      if(st)st.textContent=`✓ Localização preenchida • precisão GPS ±${Math.round(accuracy)} m. Confira os dados e o pino.`;
+    }catch(e){
+      await setConfirmedPoint(lat,lng,false);
+      if(st)st.textContent=`GPS localizado (±${Math.round(accuracy)} m). Complete somente o que faltar; número e complemento são opcionais.`;
+    }
+  },()=>{if(st)st.textContent='Não foi possível acessar sua localização. Permita o GPS ou use Buscar endereço.';},{enableHighAccuracy:true,timeout:15000,maximumAge:0});
 },true);
 
 let selectedManualAddress=false;
