@@ -589,19 +589,46 @@ async function deliveryKm(settings,lat,lng){
 
 async function printEndpoint(req,res,pathname){
   if(req.method!=='GET') return false;
+  // Thermer/iPhone: uma unica entrada de texto e o formato mais tolerante.
+  // O app interpreta <br /> como quebra de linha no conteudo recebido pela Web Print.
+  const oneText=(lines,bold=0,align=0,format=0)=>({
+    0:{type:0,content:lines.map(x=>String(x??'')).join('<br />'),bold,align,format}
+  });
   if(pathname==='/print/test'){
-    const e=[]; addText(e,'CHEFE TELLES',1,1,2); addText(e,'TESTE DE IMPRESSÃO',1,1,1); addText(e,'--------------------------------'); addText(e,'Android / Thermer OK'); addText(e,'iPhone / Thermer manual'); addText(e,'PC / QZ Tray OK'); addText(e,' '); addText(e,' ');
-    return send(res,200,JSON.parse(printJson(e)));
+    return send(res,200,oneText([
+      'CHEFE TELLES',
+      'TESTE DE IMPRESSAO',
+      '--------------------------------',
+      'THERMER WEB PRINT OK',
+      new Date().toLocaleString('pt-BR',{timeZone:'America/Sao_Paulo'}),
+      '',
+      ''
+    ]));
   }
   const m=pathname.match(/^\/print\/(\d+)$/); if(!m)return false;
-  const d=await read(),o=d.orders.find(x=>String(x.id)===m[1]); if(!o)return send(res,404,{error:'Pedido não encontrado'});
-  const e=[]; addText(e,'CHEFE TELLES',1,1,2); addText(e,'PEDIDO '+String(o.number).padStart(2,'0'),1,1,1); addText(e,new Date(o.createdAt).toLocaleString('pt-BR',{timeZone:'America/Sao_Paulo'}),0,1,0); addText(e,'--------------------------------');
-  addText(e,'STATUS: '+(o.status||'Novo')); addText(e,'CLIENTE: '+(o.customer?.name||'')); if(o.customer?.phone)addText(e,'WHATSAPP: '+o.customer.phone); if(o.customer?.reference)addText(e,'PONTO DE REFERÊNCIA: '+o.customer.reference); addText(e,'--------------------------------');
-  for(const i of (o.items||[])) addText(e,`${i.qty}x ${i.name} - R$ ${(Number(i.price||0)*Number(i.qty||0)).toFixed(2)}`);
-  addText(e,'--------------------------------'); addText(e,'SUBTOTAL: R$ '+Number(o.subtotal||o.total||0).toFixed(2)); if(o.customer?.delivery!=='Retirada')addText(e,'ENTREGA: R$ '+Number(o.deliveryFee||0).toFixed(2)); addText(e,'TOTAL: R$ '+Number(o.total||0).toFixed(2),1,0,1); addText(e,'FORMA DE PAGAMENTO: '+(o.customer?.payment||'')); addText(e,o.customer?.delivery==='Retirada'?'TIPO: RETIRADA NA LOJA':'ENDEREÇO: '+(o.customer?.address||'')); if(o.deliveryDistanceKm)addText(e,'DISTÂNCIA: '+o.deliveryDistanceKm+' km'); addText(e,'OBS: '+(o.customer?.note||'Nenhuma')); addText(e,' '); addText(e,' ');
-  return send(res,200,JSON.parse(printJson(e)));
+  const d=await read(),o=d.orders.find(x=>String(x.id)===m[1]); if(!o)return send(res,404,{error:'Pedido nao encontrado'});
+  const lines=[];
+  lines.push('CHEFE TELLES');
+  lines.push('PEDIDO '+String(o.number).padStart(2,'0'));
+  lines.push(new Date(o.createdAt).toLocaleString('pt-BR',{timeZone:'America/Sao_Paulo'}));
+  lines.push('--------------------------------');
+  lines.push('STATUS: '+(o.status||'Novo'));
+  lines.push('CLIENTE: '+(o.customer?.name||''));
+  if(o.customer?.phone)lines.push('WHATSAPP: '+o.customer.phone);
+  if(o.customer?.reference)lines.push('PONTO DE REFERENCIA: '+o.customer.reference);
+  lines.push('--------------------------------');
+  for(const i of (o.items||[])) lines.push(`${i.qty}x ${i.name} - R$ ${(Number(i.price||0)*Number(i.qty||0)).toFixed(2)}`);
+  lines.push('--------------------------------');
+  lines.push('SUBTOTAL: R$ '+Number(o.subtotal||o.total||0).toFixed(2));
+  if(o.customer?.delivery!=='Retirada')lines.push('ENTREGA: R$ '+Number(o.deliveryFee||0).toFixed(2));
+  lines.push('TOTAL: R$ '+Number(o.total||0).toFixed(2));
+  lines.push('FORMA DE PAGAMENTO: '+(o.customer?.payment||''));
+  lines.push(o.customer?.delivery==='Retirada'?'TIPO: RETIRADA NA LOJA':'ENDERECO: '+(o.customer?.address||''));
+  if(o.deliveryDistanceKm)lines.push('DISTANCIA: '+o.deliveryDistanceKm+' km');
+  lines.push('OBS: '+(o.customer?.note||'Nenhuma'));
+  lines.push(''); lines.push('');
+  return send(res,200,oneText(lines));
 }
-
 
 function printAgentAuthorized(req){
   const configured=String(process.env.PRINT_AGENT_KEY||'').trim();
