@@ -765,6 +765,22 @@ async function api(req,res,pathname){
       catch(e){return send(res,400,{error:e.message||'Não foi possível identificar o endereço desse ponto.'});}
     }
 
+    if(req.method==='GET'&&pathname==='/api/address-suggest-local'){
+      const u=new URL(req.url,'http://localhost'),q=String(u.searchParams.get('q')||'').trim(),nq=normAddress(q);
+      if(nq.length<2)return send(res,200,[]);
+      const out=[],seen=new Set(),push=(x)=>{const k=[x.type,normAddress(x.label),normAddress(x.neighborhood),normAddress(x.street)].join('|');if(!seen.has(k)){seen.add(k);out.push(x)}};
+      for(const label of publicNeighborhoods()){
+        const nl=normAddress(label),sim=searchSimilarity(nq,nl);
+        if(nl.includes(nq)||nq.includes(nl)||sim>=.68)push({type:'locality',label,neighborhood:label,score:nl===nq?120:(nl.startsWith(nq)?110:Math.round(sim*100))});
+      }
+      for(const x of (jequieBase.entries||[])){
+        const ns=normAddress(x.street),nn=normAddress(x.neighborhood),hay=ns+' '+nn+' '+normAddress(x.complement||''),sim=Math.max(searchSimilarity(nq,ns),searchSimilarity(nq,hay));
+        if(ns.includes(nq)||nn.includes(nq)||hay.includes(nq)||sim>=.76)push({type:'street',label:x.street,street:x.street,neighborhood:x.neighborhood,cep:x.cep||'',complement:x.complement||'',score:ns===nq?118:(ns.startsWith(nq)?108:Math.round(sim*100))});
+      }
+      out.sort((a,b)=>(b.score||0)-(a.score||0)||a.label.localeCompare(b.label,'pt-BR'));
+      return send(res,200,out.slice(0,40));
+    }
+
     if(req.method==='GET'&&pathname==='/api/address-directory'){
       const directoryUrl=new URL(req.url,'http://localhost');
       const d=await read(),rawNb=String(directoryUrl.searchParams.get('neighborhood')||'').trim(),nb=bestNeighborhoodName(rawNb);

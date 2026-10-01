@@ -35,7 +35,7 @@ async function refreshJequieDirectory(){
   if(Array.isArray(x.neighborhoods)&&x.neighborhoods.length)nl.innerHTML=x.neighborhoods.map(v=>`<option value="${esc(v)}">`).join('');
   if(Array.isArray(x.streets)&&x.streets.length)sl.innerHTML=x.streets.map(v=>`<option value="${esc(v)}">`).join('');
 }
-function setupDelivery(){deliveryZones=store.addressHints||[];const type=document.querySelector('#deliveryType'),bairro=document.querySelector('#neighborhood'),rua=document.querySelector('#street'),fee=document.querySelector('#deliveryFee'),feePreview=document.querySelector('#deliveryFeePreview'),fields=document.querySelector('#deliveryFields'),addr=document.querySelector('#address'),addrLabel=document.querySelector('#addressLabel'),hint=document.querySelector('#deliveryHint'),nbList=document.querySelector('#neighborhoodList'),streetList=document.querySelector('#streetList');if(!type||!bairro)return;nbList.innerHTML=[...new Set(deliveryZones.map(z=>z.neighborhood).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'pt-BR')).map(x=>`<option value="${esc(x)}">`).join('');function refreshStreetSuggestions(){const nb=normalizeText(bairro.value);streetList.innerHTML=[...new Set(deliveryZones.filter(z=>(!nb||normalizeText(z.neighborhood)===nb)&&normalizeText(z.street)).map(z=>z.street))].sort((a,b)=>a.localeCompare(b,'pt-BR')).map(x=>`<option value="${esc(x)}">`).join('');}function buildAddress(){if(type.value==='Retirada'){addr.value='Retirada na loja';return;}const street=rua.value.trim(),num=document.querySelector('[name=number]').value.trim(),comp=document.querySelector('[name=complement]').value.trim(),ref=(document.querySelector('[name=reference]')?.value||'').trim();addr.value=[street,num&&('Nº '+num),bairro.value.trim(),comp,ref&&('Referência: '+ref)].filter(Boolean).join(', ');}function update(){const retirada=type.value==='Retirada';syncOrderTypeUI();fields.style.display=retirada?'none':'block';addrLabel.style.display=retirada?'none':'block';addr.required=!retirada;bairro.required=!retirada;rua.required=!retirada;document.querySelector('[name=number]').required=!retirada;
+function setupDelivery(){deliveryZones=store.addressHints||[];const type=document.querySelector('#deliveryType'),bairro=document.querySelector('#neighborhood'),rua=document.querySelector('#street'),fee=document.querySelector('#deliveryFee'),feePreview=document.querySelector('#deliveryFeePreview'),fields=document.querySelector('#deliveryFields'),addr=document.querySelector('#address'),addrLabel=document.querySelector('#addressLabel'),hint=document.querySelector('#deliveryHint'),nbList=document.querySelector('#neighborhoodList'),streetList=document.querySelector('#streetList');if(!type||!bairro)return;nbList.innerHTML=[...new Set(deliveryZones.map(z=>z.neighborhood).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'pt-BR')).map(x=>`<option value="${esc(x)}">`).join('');refreshJequieDirectory();function refreshStreetSuggestions(){const nb=normalizeText(bairro.value);streetList.innerHTML=[...new Set(deliveryZones.filter(z=>(!nb||normalizeText(z.neighborhood)===nb)&&normalizeText(z.street)).map(z=>z.street))].sort((a,b)=>a.localeCompare(b,'pt-BR')).map(x=>`<option value="${esc(x)}">`).join('');}function buildAddress(){if(type.value==='Retirada'){addr.value='Retirada na loja';return;}const street=rua.value.trim(),num=document.querySelector('[name=number]').value.trim(),comp=document.querySelector('[name=complement]').value.trim(),ref=(document.querySelector('[name=reference]')?.value||'').trim();addr.value=[street,num&&('Nº '+num),bairro.value.trim(),comp,ref&&('Referência: '+ref)].filter(Boolean).join(', ');}function update(){const retirada=type.value==='Retirada';syncOrderTypeUI();fields.style.display=retirada?'none':'block';addrLabel.style.display=retirada?'none':'block';addr.required=!retirada;bairro.required=!retirada;rua.required=!retirada;document.querySelector('[name=number]').required=!retirada;
 const cepEl=document.querySelector('#cep'),compEl=document.querySelector('[name=complement]'),refEl=document.querySelector('[name=reference]');
 for(const el of [cepEl,bairro,rua,document.querySelector('[name=number]'),compEl,refEl]){if(el)el.disabled=retirada;}if(retirada){
   fee.disabled=false;fee.value='0';feePreview.textContent=money(0);hint.textContent='Retirada na loja: sem taxa de entrega.';addr.value='Retirada na loja';
@@ -304,6 +304,34 @@ document.querySelector('#confirmMapPoint')?.addEventListener('click',async()=>{
   document.querySelector('#addressDetails')?.scrollIntoView({behavior:'smooth',block:'center'});
 });
 
+const smartSearch=document.querySelector('#smartAddressSearch'),smartSuggestions=document.querySelector('#smartAddressSuggestions');
+let smartTimer=null,smartSeq=0;
+function hideSmart(){if(smartSuggestions){smartSuggestions.innerHTML='';smartSuggestions.classList.remove('show')}}
+smartSearch?.addEventListener('input',()=>{
+  clearTimeout(smartTimer);const q=smartSearch.value.trim();
+  if(q.length<2){hideSmart();return;}
+  smartTimer=setTimeout(async()=>{
+    const seq=++smartSeq;
+    try{
+      const r=await fetch('/api/address-suggest-local?'+new URLSearchParams({q}));const arr=await r.json();if(seq!==smartSeq||!r.ok)return;
+      smartSuggestions.innerHTML=arr.map((x,i)=>`<button type="button" class="address-result" data-smart="${i}"><b>${esc(x.label)}</b><span>${esc(x.type==='locality'?'Bairro / localidade':[(x.neighborhood||''),x.complement||'',x.cep||''].filter(Boolean).join(' • '))}</span></button>`).join('');
+      smartSuggestions.classList.toggle('show',arr.length>0);
+      smartSuggestions.querySelectorAll('[data-smart]').forEach(el=>el.onclick=async()=>{
+        const x=arr[Number(el.dataset.smart)];hideSmart();smartSearch.value=x.label;
+        const nb=document.querySelector('#neighborhood'),street=document.querySelector('#street'),st=document.querySelector('#gpsStatus');
+        if(x.type==='locality'){
+          nb.value=x.neighborhood||x.label;street.value='';selectedManualAddress=false;clearAddressQuote();await refreshJequieDirectory();
+          if(st)st.textContent='Localidade selecionada. Digite a rua ou toque em BUSCAR ENDEREÇO para ver todas as ruas.';
+          street.focus();return;
+        }
+        nb.value=x.neighborhood||nb.value;street.value=x.street||x.label;if(x.cep)document.querySelector('#cep').value=x.cep;
+        selectedManualAddress=true;clearAddressQuote();await refreshJequieDirectory();
+        if(st)st.textContent='Rua selecionada. Informe o número para calcular a entrega.';
+        document.querySelector('[name=number]')?.focus();
+      });
+    }catch{hideSmart()}
+  },120);
+});
 const searchEl=document.querySelector('#addressSearch'), suggestions=document.querySelector('#addressSuggestions');
 searchEl?.addEventListener('input',()=>{
   clearTimeout(searchTimer);
