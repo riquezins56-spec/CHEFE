@@ -21,7 +21,11 @@ function openTab(id){$$('.tab').forEach(x=>x.classList.toggle('active',x.id===id
 $$('.nav').forEach(b=>b.onclick=()=>openTab(b.dataset.tab));$$('[data-go]').forEach(b=>b.onclick=()=>openTab(b.dataset.go));$('#refresh').onclick=refreshAll;$('#refreshOrders').onclick=loadOrders;
 async function refreshAll(){state=await api('/api/admin');renderDashboard();renderSettings();await loadOrders();await loadCategories();await loadProducts();renderV9();$('#serverAddress').textContent=location.origin+'/'; await loadNetworkLinks();}
 
-async function loadNetworkLinks(){const box=$('#serverLinks');if(!box)return;try{const d=await api('/api/network');const port=location.port||'3000';const ips=d.ips||[];box.innerHTML=ips.length?ips.map(ip=>`<div><span>ACESSO PELO CELULAR</span><b>http://${ip}:${port}/</b><br><small>PAINEL: http://${ip}:${port}/admin</small></div>`).join(''):'<div><span>REDE</span><b>IP não detectado</b></div>';}catch{box.innerHTML='<div><span>REDE</span><b>Execute o servidor pelo INICIAR.bat.</b></div>';}}
+async function loadNetworkLinks(){
+ const box=$('#serverLinks');if(!box)return;
+ const base=location.origin+'/';
+ box.innerHTML=`<div><span>SERVIDOR ONLINE</span><b>${esc(base)}</b><br><small>O Thermer busca cada pedido diretamente neste servidor.</small></div>`;
+}
 
 function renderDashboard(){
  const now=new Date(),today=now.toLocaleDateString('en-CA',{timeZone:'America/Sao_Paulo'}),month=today.slice(0,7),all=state.orders||[];
@@ -35,7 +39,7 @@ function renderDashboard(){
 }
 async function loadOrders(){try{const os=await api('/api/orders');state.orders=os;renderDashboard();const drivers=state.drivers||[];$('#ordersList').innerHTML=os.length?os.map(o=>`<article class="order"><div><h3>PEDIDO ${String(o.number).padStart(2,'0')}</h3><p><b>${esc(o.customer?.name||'Cliente')}</b> · ${esc(o.customer?.phone||'')}</p><p>${o.customer?.delivery==='Retirada'?'Retirada na loja':'Entrega · '+esc(o.customer?.address||'')}</p><p>${(o.items||[]).map(i=>`${i.qty}x ${esc(i.name)}`).join(' · ')}</p><p><b>Feito em:</b> ${esc(orderDateTime(o))}</p><p class="total">${money(o.total)} <span class="tag">${esc(o.customer?.payment||'')}</span></p></div><div class="order-actions order-manage"><label>Status<select data-status="${o.id}">${['Novo','Em preparo','Pronto','Saiu para entrega','Entregue','Cancelado'].map(s=>`<option ${o.status===s?'selected':''}>${s}</option>`).join('')}</select></label>${o.customer?.delivery==='Retirada'?'':`<label>Motoboy<select data-driver="${o.id}"><option value="">Sem entregador</option>${drivers.filter(d=>d.active!==false).map(d=>`<option value="${d.id}" ${String(o.driverId||'')===String(d.id)?'selected':''}>${esc(d.name)}${d.phone?' · '+esc(d.phone):''}</option>`).join('')}</select></label>`}<button class="btn" data-print="${o.id}">Imprimir</button><button class="btn" data-order-del="${o.id}">Excluir</button></div></article>`).join(''):'<div class="panel">Nenhum pedido ainda.</div>';$$('[data-status]').forEach(x=>x.onchange=async()=>{await api('/api/orders/'+x.dataset.status,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({status:x.value})});await loadOrders()});$$('[data-driver]').forEach(x=>x.onchange=async()=>{await api('/api/orders/'+x.dataset.driver,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({driverId:x.value||null})});await loadOrders()});$$('[data-print]').forEach(b=>b.onclick=()=>printOrder(b.dataset.print));$$('[data-order-del]').forEach(b=>b.onclick=async()=>{if(confirm('Excluir este pedido definitivamente? Somente o dono pode fazer isso.')){await api('/api/orders/'+b.dataset.orderDel,{method:'DELETE'});const ids=autoPrintedIds();ids.delete(String(b.dataset.orderDel));saveAutoPrinted(ids);await refreshAll();}})}catch(err){if(token)$('#ordersList').innerHTML='<div class="panel error">'+esc(err.message)+'</div>'}}
 function printOrder(id){
-  const u=location.origin+'/print/'+id;
+  const u=location.origin+'/print/'+encodeURIComponent(id)+'?v='+Date.now();
   const ua=navigator.userAgent.toLowerCase();
 
   // Mantém o Painel do Dono aberto. O protocolo é disparado fora da navegação da aba.
