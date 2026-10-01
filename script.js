@@ -255,6 +255,18 @@ async function reverseCustomerPoint(lat,lng){
   const x=await r.json(); if(!r.ok)throw Error(x.error||'Não foi possível identificar o ponto.');
   return x;
 }
+function fillCustomerAddressFromReverse(rev={}){
+  const cep=document.querySelector('#cep'),street=document.querySelector('#street'),nb=document.querySelector('#neighborhood');
+  const num=document.querySelector('[name=number]'),addr=document.querySelector('#address'),search=document.querySelector('#addressSearch');
+  if(cep)cep.value=rev.cep||'';
+  if(street)street.value=rev.street||'';
+  if(nb)nb.value=rev.neighborhood||'';
+  if(num)num.value=rev.number||'';
+  const parts=[rev.street,rev.number&&('Nº '+rev.number),rev.neighborhood].filter(Boolean);
+  if(addr)addr.value=parts.join(', ');
+  if(search)search.value=[rev.street,rev.number,rev.neighborhood].filter(Boolean).join(', ');
+  return parts.length>0;
+}
 async function setConfirmedPoint(lat,lng,fromDrag=false){
   document.querySelector('#customerLat').value=Number(lat).toFixed(7);
   document.querySelector('#customerLng').value=Number(lng).toFixed(7);
@@ -284,12 +296,7 @@ async function refreshAddressFromPoint(lat,lng){
   try{
     if(st)st.textContent='Identificando rua e bairro deste ponto...';
     const rev=await reverseCustomerPoint(lat,lng);
-    if(rev.cep)document.querySelector('#cep').value=rev.cep;
-    if(rev.street)document.querySelector('#street').value=rev.street;
-    if(rev.neighborhood)document.querySelector('#neighborhood').value=rev.neighborhood;
-    if(rev.number)document.querySelector('[name=number]').value=rev.number;
-    const search=document.querySelector('#addressSearch');
-    if(search)search.value=[rev.street,rev.number,rev.neighborhood].filter(Boolean).join(', ');
+    fillCustomerAddressFromReverse(rev);
   }catch(e){}
   await setConfirmedPoint(lat,lng,false);
 }
@@ -460,26 +467,31 @@ document.querySelector('#toggleAddressSearch')?.addEventListener('click',()=>{
 document.querySelector('#useLocationTop')?.addEventListener('click',()=>{
   renderAddressResults([]);selectedManualAddress=false;clearAddressQuote();
   const st=document.querySelector('#gpsStatus');
+  if(!window.isSecureContext){if(st)st.textContent='A localização exige HTTPS.';return;}
   if(!navigator.geolocation){if(st)st.textContent='GPS não disponível neste aparelho.';return;}
-  if(st)st.textContent='Obtendo sua localização...';
+  if(st)st.textContent='Obtendo sua localização e preenchendo o endereço...';
   navigator.geolocation.getCurrentPosition(async pos=>{
-    const lat=pos.coords.latitude,lng=pos.coords.longitude;
+    const lat=pos.coords.latitude,lng=pos.coords.longitude,accuracy=pos.coords.accuracy;
+    document.querySelector('#customerLat').value=Number(lat).toFixed(7);
+    document.querySelector('#customerLng').value=Number(lng).toFixed(7);
+    ensureDeliveryMap(lat,lng);
     try{
       const rev=await reverseCustomerPoint(lat,lng);
-      if(rev.cep)document.querySelector('#cep').value=rev.cep;
-      if(rev.street)document.querySelector('#street').value=rev.street;
-      if(rev.neighborhood)document.querySelector('#neighborhood').value=rev.neighborhood;
-      if(rev.number)document.querySelector('[name=number]').value=rev.number;
+      fillCustomerAddressFromReverse(rev);
       await setConfirmedPoint(lat,lng,false);
-      if(st)st.textContent=`Localização encontrada (precisão aproximada ±${Math.round(pos.coords.accuracy)} m). Confira o pino; número e complemento são opcionais.`;
+      setTimeout(()=>{
+        const street=document.querySelector('#street')?.value.trim()||'';
+        const nb=document.querySelector('#neighborhood')?.value.trim()||'';
+        if(st)st.textContent=(street||nb)
+          ?`✓ Localização preenchida • precisão GPS ±${Math.round(accuracy)} m. Confira rua e bairro.`
+          :`GPS encontrado (±${Math.round(accuracy)} m), mas o serviço não informou rua/bairro. Você pode preencher esses dados sem perder a rota.`;
+      },450);
     }catch(e){
-      ensureDeliveryMap(lat,lng);
       await setConfirmedPoint(lat,lng,false);
-      if(st)st.textContent='GPS localizado. Complete o que faltar no endereço e confira o pino.';
+      setTimeout(()=>{if(st)st.textContent=`GPS encontrado (±${Math.round(accuracy)} m). A rota foi mantida; preencha somente rua/bairro se estiverem vazios.`;},450);
     }
-  },()=>{
-    if(st)st.textContent='Não foi possível acessar sua localização. Permita o GPS ou use Buscar endereço.';
-  },{enableHighAccuracy:true,timeout:15000,maximumAge:0});
+  },()=>{if(st)st.textContent='Não foi possível acessar sua localização. Permita o GPS ou use Buscar endereço.';},
+  {enableHighAccuracy:true,timeout:20000,maximumAge:0});
 });
 
 document.addEventListener('DOMContentLoaded',()=>setTimeout(syncOrderTypeUI,0));
