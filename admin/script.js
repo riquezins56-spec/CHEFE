@@ -57,8 +57,8 @@ function printOrder(id){
     // Android: envia o pedido direto ao Thermer/Bluetooth Print sem trocar a página do painel.
     abrirAppImpressao('my.bluetoothprint.scheme://');
   }else if(/iphone|ipad|ipod/.test(ua)){
-    // iPhone: mantém o fluxo BPrint sem trocar a página do painel.
-    abrirAppImpressao('bprint://');
+    // iPhone: impressão manual; o toque abre o Thermer já integrado ao projeto.
+    window.location.href='my.bluetoothprint.scheme://'+u;
   }else{
     // PC: mantém o método já existente em janela separada.
     window.open('/thermer-test.html?order='+encodeURIComponent(id),'chefePrint','width=520,height=720');
