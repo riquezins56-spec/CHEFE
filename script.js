@@ -76,7 +76,7 @@ document.querySelector('#orderForm').onsubmit=async e=>{e.preventDefault();if(!c
     formData.deliveryFee=q.deliveryFee;document.querySelector('#deliveryFee').value=q.deliveryFee;
   }catch(err){alert(err.message||'Não foi possível validar a rota da entrega.');return;}
 }
-const order={customer:formData,items:cart.map(({id,name,price,qty})=>({id,name,price,qty})),subtotal,deliveryFee:formData.delivery==='Retirada'?0:Number(formData.deliveryFee||0),total:subtotal+(formData.delivery==='Retirada'?0:Number(formData.deliveryFee||0))};try{const r=await fetch('/api/orders',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(order)});const saved=await r.json();
+const order={customer:formData,items:cart.map(({id,name,price,qty})=>({id,name,price,qty})),subtotal,deliveryFee:formData.delivery==='Retirada'?0:Number(formData.deliveryFee||0),total:subtotal+(formData.delivery==='Retirada'?0:Number(formData.deliveryFee||0))};try{const r=await fetch('/api/orders',{method:'POST',headers:{'Content-Type':'application/json','X-Customer-Token':(localStorage.getItem('chefeTellesCustomerToken')||'')},body:JSON.stringify(order)});const saved=await r.json();
     chefeTone('done');if(!r.ok)throw Error(saved.error||'Erro');const itens=saved.items.map(i=>`${i.qty}x ${i.name} — ${money(i.price*i.qty)}`).join('\n');const tipoPedido=saved.customer.delivery==='Retirada'?'RETIRADA NA LOJA':'ENTREGA';
 const msg=`NOVO PEDIDO ${String(saved.number).padStart(2,'0')}\nDATA/HORA: ${saved.createdAtText||new Date(saved.createdAt).toLocaleString('pt-BR')}\nTIPO: ${tipoPedido}\n\nCliente: ${saved.customer.name}\nWhatsApp: ${saved.customer.phone}\n\nPEDIDO:\n${itens}\n\nSUBTOTAL: ${money(saved.subtotal)}\nENTREGA: ${money(saved.deliveryFee)}\nTOTAL: ${money(saved.total)}\n\n${saved.customer.delivery==='Retirada'?'RETIRADA NA LOJA':'ENDEREÇO:\n'+saved.customer.address}\n\nFORMA DE PAGAMENTO: ${saved.customer.payment}\n\nOBSERVAÇÃO:\n${saved.customer.note||'Nenhuma'}\n\nACOMPANHAR PEDIDO:\n${location.origin+'/acompanhar.html?t='+saved.trackingToken}`;window.lastOrderWhatsappUrl='https://wa.me/'+String(store.settings.whatsapp||'').replace(/\D/g,'')+'?text='+encodeURIComponent(msg);cart=[];renderCart();document.querySelector('#checkoutModal').classList.remove('show');document.querySelector('#successTitle').textContent=`Pedido ${String(saved.number).padStart(2,'0')} confirmado!`;document.querySelector('#successText').textContent=`Pedido realizado em ${saved.createdAtText||new Date(saved.createdAt).toLocaleString('pt-BR')}. Toque em ENVIAR PEDIDO para abrir o WhatsApp.`;if(saved.trackingToken)localStorage.setItem('chefeTellesTrackingToken',saved.trackingToken);const sendBtn=document.querySelector('#sendOrderWhatsapp');
 if(sendBtn)sendBtn.style.display='block';
@@ -517,3 +517,42 @@ document.querySelector('#customerStatusBtn')?.addEventListener('click',()=>{
  openCustomerStatus();
 });
 document.querySelector('#closeCustomerStatus')?.addEventListener('click',()=>document.querySelector('#customerStatusModal')?.classList.remove('show'));
+
+// V10.68 — cadastro persistente do cliente, com OTP em modo de teste até conectar SMS/WhatsApp real.
+let customerProfile=null;
+const customerToken=()=>localStorage.getItem('chefeTellesCustomerToken')||'';
+function fillCheckoutFromCustomer(c){
+ if(!c)return;customerProfile=c;const f=document.querySelector('#orderForm');if(!f)return;
+ if(f.elements.name&&!f.elements.name.value)f.elements.name.value=c.name||'';
+ if(f.elements.phone&&!f.elements.phone.value)f.elements.phone.value=c.phone||'';
+ const a=c.address||{};[['neighborhood','neighborhood'],['street','street'],['number','number'],['complement','complement'],['reference','reference']].forEach(([field,key])=>{if(f.elements[field]&&!f.elements[field].value)f.elements[field].value=a[key]||''});
+ if(a.lat&&!document.querySelector('#customerLat').value)document.querySelector('#customerLat').value=a.lat;
+ if(a.lng&&!document.querySelector('#customerLng').value)document.querySelector('#customerLng').value=a.lng;
+ if(a.address)document.querySelector('#address').value=a.address;
+}
+async function loadCustomerProfile(){
+ const token=customerToken();if(!token){document.querySelector('#customerRegisterModal')?.classList.add('show');return;}
+ try{const r=await fetch('/api/customer/me',{headers:{'X-Customer-Token':token}});if(!r.ok)throw Error();const c=await r.json();fillCheckoutFromCustomer(c);document.querySelector('#customerRegisterModal')?.classList.remove('show');}
+ catch{localStorage.removeItem('chefeTellesCustomerToken');document.querySelector('#customerRegisterModal')?.classList.add('show');}
+}
+document.querySelector('#requestCustomerCode')?.addEventListener('click',async()=>{
+ const name=document.querySelector('#registerName').value.trim(),phone=document.querySelector('#registerPhone').value.trim(),st=document.querySelector('#registerStatus');
+ if(!name||phone.replace(/\D/g,'').length<10){st.textContent='Informe nome e celular.';return}
+ const r=await fetch('/api/customer/request-code',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({phone})}),j=await r.json();if(!r.ok){st.textContent=j.error||'Não foi possível gerar o código.';return}
+ sessionStorage.setItem('chefeTellesRegisterName',name);sessionStorage.setItem('chefeTellesRegisterPhone',phone);document.querySelector('#registerPhoneStep').style.display='none';document.querySelector('#registerCodeStep').style.display='block';
+ document.querySelector('#registerTestCode').textContent=j.testMode?`MODO TESTE — código: ${j.testCode}`:'Enviamos o código para seu celular.';st.textContent='';
+});
+document.querySelector('#verifyCustomerCode')?.addEventListener('click',async()=>{
+ const phone=sessionStorage.getItem('chefeTellesRegisterPhone')||'',code=document.querySelector('#registerCode').value.trim(),st=document.querySelector('#registerStatus');
+ const r=await fetch('/api/customer/verify-code',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({phone,code})}),j=await r.json();if(!r.ok){st.textContent=j.error||'Código inválido.';return}
+ localStorage.setItem('chefeTellesCustomerToken',j.token);customerProfile=j.customer;document.querySelector('#registerCodeStep').style.display='none';document.querySelector('#registerAddressStep').style.display='block';st.textContent='Celular confirmado.';
+});
+async function saveRegisterProfile(skip=false){
+ const token=customerToken(),name=sessionStorage.getItem('chefeTellesRegisterName')||'',address=skip?{}:{neighborhood:document.querySelector('#registerNeighborhood').value.trim(),street:document.querySelector('#registerStreet').value.trim(),number:document.querySelector('#registerNumber').value.trim(),complement:document.querySelector('#registerComplement').value.trim(),reference:document.querySelector('#registerReference').value.trim()};
+ const r=await fetch('/api/customer/profile',{method:'PUT',headers:{'Content-Type':'application/json','X-Customer-Token':token},body:JSON.stringify({name,address})}),j=await r.json();if(!r.ok){document.querySelector('#registerStatus').textContent=j.error||'Não foi possível salvar.';return}
+ fillCheckoutFromCustomer(j);document.querySelector('#customerRegisterModal').classList.remove('show');sessionStorage.removeItem('chefeTellesRegisterName');sessionStorage.removeItem('chefeTellesRegisterPhone');
+}
+document.querySelector('#saveCustomerProfile')?.addEventListener('click',()=>saveRegisterProfile(false));
+document.querySelector('#skipCustomerAddress')?.addEventListener('click',()=>saveRegisterProfile(true));
+document.querySelector('#checkoutBtn')?.addEventListener('click',()=>setTimeout(()=>fillCheckoutFromCustomer(customerProfile),0));
+loadCustomerProfile();
