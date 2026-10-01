@@ -40,7 +40,121 @@
     "São Luís",
     "Suíssa",
     "Tropical",
-    "Vila Rodoviária"
+    "Vila Rodoviária",
+    "Brasil Novo",
+    "Conjunto Habitacional Brasil Novo",
+    "Residencial Parque do Sol",
+    "Parque do Sol",
+    "Jardim Eldorado",
+    "Loteamento Jardim Tropical",
+    "Jardim Tropical",
+    "Loteamento Tropical",
+    "Vila Vitória",
+    "Inocoop",
+    "URBIS I",
+    "URBIS II",
+    "URBIS III",
+    "URBIS IV",
+    "Vida Nova I",
+    "Vida Nova II",
+    "Residencial Segredo",
+    "Segredo",
+    "Residencial Vida Jequié",
+    "Vida Jequié",
+    "Residencial Beira Rio",
+    "Residencial Mandacaru I",
+    "Residencial Mandacaru II",
+    "Cachoeirinha",
+    "Residencial Cachoeirinha I",
+    "Residencial Cachoeirinha II",
+    "Residencial Cachoeirinha III",
+    "Residencial Cachoeirinha IV",
+    "Feirinha do Jequiezinho",
+    "Alto da Bela Vista",
+    "Residencial Colina",
+    "Colina",
+    "Residencial Campo Belo",
+    "Campo Belo",
+    "Jardins da Cachoeirinha I",
+    "Jardins da Cachoeirinha II",
+    "Jardins da Cachoeirinha III",
+    "Jardins da Cachoeirinha IV",
+    "Feirinha do Joaquim Romão",
+    "Largo da Feirinha do Joaquim Romão",
+    "Sol Nascente",
+    "Loteamento Sol Nascente",
+    "Alto do Amor",
+    "Jardim Alvorada",
+    "Loteamento Jardim Alvorada",
+    "Bom Sossego",
+    "Vovó Camila",
+    "Brinco de Ouro",
+    "Casas Populares",
+    "Agarradinho",
+    "Parque das Algarobas",
+    "Pedras do Parque",
+    "Conjunto Takoma Park",
+    "Takoma Park",
+    "Zimbrune",
+    "Zibrune",
+    "Caranguejo",
+    "Prodecó",
+    "Prodecor",
+    "Mirassol",
+    "Loteamento Mirassol",
+    "Pau Ferro",
+    "Posto Manoel Antônio",
+    "Cururu",
+    "Gustavo Ribeiro",
+    "Osvaldo Costa Brito",
+    "Santo Antônio",
+    "Bateu do Boi",
+    "Vila Esperança",
+    "São Bento",
+    "Pedrinhas",
+    "Bateu do Sol",
+    "Corredor Água Branca",
+    "Mutirão do Curral Novo",
+    "Taquara Parque",
+    "Mutirão do Pau Ferro",
+    "Mutirão do São Judas Tadeu",
+    "Santo Ivo",
+    "Loteamento Água Branca",
+    "Mandacaru I",
+    "Mandacaru II",
+    "Cilion",
+    "Silion",
+    "Galeria Cilion",
+    "Praça da Bíblia",
+    "Baixa do Bomfim",
+    "Loteamento Belanápolis",
+    "Loteamento Boa Vista",
+    "Loteamento da Colina",
+    "Loteamento Espaço Nobre",
+    "Loteamento Ribeiro",
+    "Loteamento Vicente Grilo",
+    "Loteamento Vila Aeroporto",
+    "Urbis I",
+    "Loteamento Jardim Amaralina",
+    "Jardim Amaralina",
+    "Loteamento Pacaembu",
+    "Distrito Industrial",
+    "Loteamento Itaigara",
+    "Mutirão Curral Novo",
+    "Loteamento Ipanema",
+    "Loteamento Santa Luz",
+    "Condomínio Bela Vista",
+    "Loteamento Cleonice",
+    "Loteamento Pindorama",
+    "Loteamento Jardim Paquetá",
+    "Pacaembu",
+    "Loteamento Vila Aparecida",
+    "Vila Aparecida",
+    "Loteamento Cidade Nova",
+    "Conjunto Vida Jequié",
+    "Loteamento Parque Colina",
+    "Loteamento Boaventura",
+    "Loteamento Algarobas II"
   ],
   "entries": [
     {
@@ -1713,6 +1827,7612 @@
       "street": "Rua Leonilda Pires",
       "neighborhood": "Joaquim Romão",
       "complement": ""
+    },
+    {
+      "cep": "45208-199",
+      "street": "Rua Doutor João Braga",
+      "complement": "até 428/429",
+      "neighborhood": "Jequiezinho",
+      "lat": -13.86742,
+      "lng": -40.0684
+    },
+    {
+      "cep": "45208-201",
+      "street": "Rua Doutor João Braga",
+      "complement": "de 430/431 ao fim",
+      "neighborhood": "Jequiezinho",
+      "lat": -13.86729,
+      "lng": -40.06829
+    },
+    {
+      "cep": "45210-138",
+      "street": "1ª Travessa Afrânio Peixoto",
+      "complement": "",
+      "neighborhood": "Mandacaru"
+    },
+    {
+      "cep": "45210-106",
+      "street": "1ª Travessa Bruno Neto",
+      "complement": "",
+      "neighborhood": "Mandacaru"
+    },
+    {
+      "cep": "45210-100",
+      "street": "1ª Travessa Edvaldo Cardoso Guimarães",
+      "complement": "",
+      "neighborhood": "Mandacaru"
+    },
+    {
+      "cep": "45210-120",
+      "street": "1ª Travessa Miguel Gomes da Silva",
+      "complement": "",
+      "neighborhood": "Mandacaru"
+    },
+    {
+      "cep": "45210-148",
+      "street": "1ª Travessa Professor Damião Vieira",
+      "complement": "",
+      "neighborhood": "Mandacaru"
+    },
+    {
+      "cep": "45210-094",
+      "street": "2ª Travessa Bruno Neto",
+      "complement": "",
+      "neighborhood": "Mandacaru"
+    },
+    {
+      "cep": "45210-096",
+      "street": "2ª Travessa Edvaldo Cardoso Guimarães",
+      "complement": "",
+      "neighborhood": "Mandacaru"
+    },
+    {
+      "cep": "45210-122",
+      "street": "2ª Travessa Exupério Miranda",
+      "complement": "",
+      "neighborhood": "Mandacaru"
+    },
+    {
+      "cep": "45210-118",
+      "street": "2ª Travessa Miguel Gomes da Silva",
+      "complement": "",
+      "neighborhood": "Mandacaru"
+    },
+    {
+      "cep": "45210-128",
+      "street": "3ª Travessa Afrânio Peixoto",
+      "complement": "",
+      "neighborhood": "Mandacaru"
+    },
+    {
+      "cep": "45210-176",
+      "street": "3ª Travessa Chile",
+      "complement": "lado par",
+      "neighborhood": "Mandacaru"
+    },
+    {
+      "cep": "45210-006",
+      "street": "Avenida Beira Rio",
+      "complement": "",
+      "neighborhood": "Mandacaru"
+    },
+    {
+      "cep": "45210-008",
+      "street": "Travessa Beira Rio",
+      "complement": "",
+      "neighborhood": "Mandacaru"
+    },
+    {
+      "cep": "45210-011",
+      "street": "Avenida Botafogo",
+      "complement": "",
+      "neighborhood": "Mandacaru"
+    },
+    {
+      "cep": "45200-216",
+      "street": "1ª Travessa Manoel Vitorino",
+      "complement": "",
+      "neighborhood": "Centro"
+    },
+    {
+      "cep": "45200-153",
+      "street": "1ª Travessa São José",
+      "complement": "",
+      "neighborhood": "Centro"
+    },
+    {
+      "cep": "45200-053",
+      "street": "Avenida César Borges",
+      "complement": "",
+      "neighborhood": "Centro"
+    },
+    {
+      "cep": "45200-150",
+      "street": "Avenida Ministro Hélio de Almeida",
+      "complement": "",
+      "neighborhood": "Centro"
+    },
+    {
+      "cep": "45200-170",
+      "street": "Avenida Presidente Dutra",
+      "complement": "",
+      "neighborhood": "Centro"
+    },
+    {
+      "cep": "",
+      "street": "Rua Joventino Antônio Rocha",
+      "complement": "",
+      "neighborhood": "Cansanção"
+    },
+    {
+      "cep": "",
+      "street": "Rua da Paróquia",
+      "complement": "",
+      "neighborhood": "Cansanção"
+    },
+    {
+      "cep": "",
+      "street": "Rua Gustavo Santos Ribeiro",
+      "complement": "",
+      "neighborhood": "Cansanção"
+    },
+    {
+      "cep": "",
+      "street": "Rua G",
+      "complement": "Loteamento Jardim Tropical",
+      "neighborhood": "Jequiezinho"
+    },
+    {
+      "cep": "",
+      "street": "Avenida Radial",
+      "complement": "Loteamento Jardim Tropical",
+      "neighborhood": "Jequiezinho"
+    },
+    {
+      "cep": "",
+      "street": "Avenida Panorâmica",
+      "complement": "Loteamento Jardim Tropical",
+      "neighborhood": "Jequiezinho"
+    },
+    {
+      "cep": "",
+      "street": "Avenida E",
+      "complement": "Loteamento Jardim Tropical",
+      "neighborhood": "Jequiezinho"
+    },
+    {
+      "cep": "45200-670",
+      "street": "Rua Aiquara",
+      "complement": "",
+      "neighborhood": "Joaquim Romão"
+    },
+    {
+      "cep": "",
+      "street": "Rua João José Duarte",
+      "complement": "Largo da Feirinha",
+      "neighborhood": "Joaquim Romão"
+    },
+    {
+      "cep": "",
+      "street": "Rua Antônio Jacobina de Brito",
+      "complement": "Largo da Feirinha",
+      "neighborhood": "Joaquim Romão"
+    },
+    {
+      "cep": "45201-160",
+      "street": "Loteamento Sol Nascente",
+      "complement": "",
+      "neighborhood": "Joaquim Romão"
+    },
+    {
+      "cep": "",
+      "street": "Rua Antônio Miranda Pereira",
+      "complement": "Loteamento Sol Nascente",
+      "neighborhood": "Joaquim Romão"
+    },
+    {
+      "cep": "",
+      "street": "Rua 17",
+      "complement": "Loteamento Sol Nascente",
+      "neighborhood": "Joaquim Romão"
+    },
+    {
+      "cep": "",
+      "street": "Rua Gilberto de Araújo",
+      "complement": "Loteamento Sol Nascente",
+      "neighborhood": "Joaquim Romão"
+    },
+    {
+      "cep": "",
+      "street": "Rua Flávio Guedes",
+      "complement": "Loteamento Sol Nascente",
+      "neighborhood": "Joaquim Romão"
+    },
+    {
+      "cep": "",
+      "street": "Rua Rubens Souza Xavier",
+      "complement": "Loteamento Sol Nascente",
+      "neighborhood": "Joaquim Romão"
+    },
+    {
+      "cep": "",
+      "street": "Rua Urbano de Almeida Neto",
+      "complement": "Loteamento Sol Nascente",
+      "neighborhood": "Joaquim Romão"
+    },
+    {
+      "cep": "",
+      "street": "Travessa João José Duarte",
+      "complement": "Loteamento Sol Nascente",
+      "neighborhood": "Joaquim Romão"
+    },
+    {
+      "cep": "",
+      "street": "Rua Delson Andrade Machado",
+      "complement": "Loteamento Sol Nascente",
+      "neighborhood": "Joaquim Romão"
+    },
+    {
+      "cep": "",
+      "street": "Rua Félix Batista",
+      "complement": "Loteamento Sol Nascente",
+      "neighborhood": "Joaquim Romão"
+    },
+    {
+      "cep": "",
+      "street": "Rua Idailton Nascimentos Ribeiro",
+      "complement": "Loteamento Sol Nascente",
+      "neighborhood": "Joaquim Romão"
+    },
+    {
+      "cep": "",
+      "street": "Rua São Marcos",
+      "complement": "Loteamento Sol Nascente",
+      "neighborhood": "Joaquim Romão"
+    },
+    {
+      "cep": "",
+      "street": "Rua Laudelino Braga",
+      "complement": "Alto do Amor",
+      "neighborhood": "Joaquim Romão"
+    },
+    {
+      "cep": "",
+      "street": "Rua Osvaldo Inácio",
+      "complement": "Alto do Amor",
+      "neighborhood": "Joaquim Romão"
+    },
+    {
+      "cep": "",
+      "street": "Rua Alvino Bispo",
+      "complement": "Alto do Amor",
+      "neighborhood": "Joaquim Romão"
+    },
+    {
+      "cep": "",
+      "street": "Rua Otávio Bispo Santos",
+      "complement": "Alto do Amor",
+      "neighborhood": "Joaquim Romão"
+    },
+    {
+      "cep": "",
+      "street": "Rua Ivo Santos",
+      "complement": "Alto da Bela Vista",
+      "neighborhood": "Joaquim Romão"
+    },
+    {
+      "cep": "",
+      "street": "6ª Travessa São Lucas",
+      "complement": "Alto da Bela Vista",
+      "neighborhood": "Joaquim Romão"
+    },
+    {
+      "cep": "",
+      "street": "Travessa São Lucas",
+      "complement": "Alto da Bela Vista",
+      "neighborhood": "Joaquim Romão"
+    },
+    {
+      "cep": "",
+      "street": "Rua Flor do Campo",
+      "complement": "Alto da Bela Vista",
+      "neighborhood": "Joaquim Romão"
+    },
+    {
+      "cep": "45206-527",
+      "street": "Rua Cidade de Brasília",
+      "complement": "Brasil Novo",
+      "neighborhood": "Água Branca"
+    },
+    {
+      "cep": "45206-555",
+      "street": "Rua Cidade de Vitória da Conquista",
+      "complement": "Brasil Novo",
+      "neighborhood": "Água Branca"
+    },
+    {
+      "cep": "45205-260",
+      "street": "Rua Cidade de Porto Velho",
+      "complement": "Brasil Novo / Inocoop",
+      "neighborhood": "Jequiezinho"
+    },
+    {
+      "cep": "45205-280",
+      "street": "Rua Vovó Camila",
+      "complement": "",
+      "neighborhood": "Jequiezinho"
+    },
+    {
+      "cep": "",
+      "street": "Rua Valdir Leite",
+      "complement": "Inocoop",
+      "neighborhood": "Jequiezinho"
+    },
+    {
+      "cep": "",
+      "street": "Rua C",
+      "complement": "Inocoop",
+      "neighborhood": "Jequiezinho"
+    },
+    {
+      "cep": "",
+      "street": "Rua Professora Virgínia Ribeiro",
+      "complement": "",
+      "neighborhood": "Jequiezinho"
+    },
+    {
+      "cep": "",
+      "street": "Avenida José Moreira Sobrinho",
+      "complement": "",
+      "neighborhood": "Jequiezinho"
+    },
+    {
+      "cep": "",
+      "street": "Rua Francisco Mendes",
+      "complement": "",
+      "neighborhood": "Jequiezinho"
+    },
+    {
+      "cep": "",
+      "street": "Avenida Presidente Vargas",
+      "complement": "",
+      "neighborhood": "Jequiezinho"
+    },
+    {
+      "cep": "",
+      "street": "Travessa Ituaçu",
+      "complement": "",
+      "neighborhood": "Jequiezinho"
+    },
+    {
+      "cep": "",
+      "street": "Avenida Lions Clube",
+      "complement": "",
+      "neighborhood": "Jequiezinho"
+    },
+    {
+      "cep": "",
+      "street": "Rua Landulfo Caribé",
+      "complement": "",
+      "neighborhood": "Jequiezinho"
+    },
+    {
+      "cep": "45207-120",
+      "street": "Conjunto Takoma Park",
+      "complement": "",
+      "neighborhood": "Mandacaru"
+    },
+    {
+      "cep": "",
+      "street": "Rua Jabaquara",
+      "complement": "",
+      "neighborhood": "Mandacaru"
+    },
+    {
+      "cep": "",
+      "street": "Rua José Barros Meira",
+      "complement": "",
+      "neighborhood": "Mandacaru"
+    },
+    {
+      "cep": "",
+      "street": "Avenida Governador Otávio Mangabeira",
+      "complement": "",
+      "neighborhood": "Mandacaru"
+    },
+    {
+      "cep": "45210-426",
+      "street": "Via Local 1",
+      "complement": "Mandacaru I",
+      "neighborhood": "Itaigara"
+    },
+    {
+      "cep": "45210-430",
+      "street": "Via Local 2",
+      "complement": "Mandacaru I",
+      "neighborhood": "Itaigara"
+    },
+    {
+      "cep": "45210-440",
+      "street": "Via Local 3",
+      "complement": "Mandacaru I",
+      "neighborhood": "Itaigara"
+    },
+    {
+      "cep": "45210-444",
+      "street": "Via Local 1",
+      "complement": "Mandacaru II",
+      "neighborhood": "Itaigara"
+    },
+    {
+      "cep": "45210-454",
+      "street": "Via Local 2",
+      "complement": "Mandacaru II",
+      "neighborhood": "Itaigara"
+    },
+    {
+      "cep": "",
+      "street": "Rua Manoelito Rebouças",
+      "complement": "Zibrune",
+      "neighborhood": "Itaigara"
+    },
+    {
+      "cep": "",
+      "street": "Rua Ramiro Tourinho Neto",
+      "complement": "Zibrune",
+      "neighborhood": "Itaigara"
+    },
+    {
+      "cep": "",
+      "street": "Rua Aloisio Borges de Sousa",
+      "complement": "Zibrune",
+      "neighborhood": "Itaigara"
+    },
+    {
+      "cep": "",
+      "street": "Rua Paralela",
+      "complement": "Zibrune",
+      "neighborhood": "Itaigara"
+    },
+    {
+      "cep": "",
+      "street": "Rua Jamisom Souza",
+      "complement": "Zibrune",
+      "neighborhood": "Itaigara"
+    },
+    {
+      "cep": "",
+      "street": "Rua Dindinha",
+      "complement": "Zibrune",
+      "neighborhood": "Itaigara"
+    },
+    {
+      "cep": "",
+      "street": "Rua Josefa Fernandes",
+      "complement": "Zibrune",
+      "neighborhood": "Itaigara"
+    },
+    {
+      "cep": "",
+      "street": "Rua Almerinda Lomanto",
+      "complement": "Zibrune",
+      "neighborhood": "Itaigara"
+    },
+    {
+      "cep": "",
+      "street": "Rua Antônio Alves de Melo",
+      "complement": "Zibrune",
+      "neighborhood": "Itaigara"
+    },
+    {
+      "cep": "45202-141",
+      "street": "Rua A",
+      "complement": "Residencial Segredo",
+      "neighborhood": "Curral Novo"
+    },
+    {
+      "cep": "45201-701",
+      "street": "Via Local A",
+      "complement": "Residencial Beira Rio",
+      "neighborhood": "Kennedy"
+    },
+    {
+      "cep": "45201-703",
+      "street": "Via Local B",
+      "complement": "Residencial Beira Rio",
+      "neighborhood": "Kennedy"
+    },
+    {
+      "cep": "45201-705",
+      "street": "Via Local C",
+      "complement": "Residencial Beira Rio",
+      "neighborhood": "Kennedy"
+    },
+    {
+      "cep": "45201-707",
+      "street": "Via Local D",
+      "complement": "Residencial Beira Rio",
+      "neighborhood": "Kennedy"
+    },
+    {
+      "cep": "45201-709",
+      "street": "Via Local E",
+      "complement": "Residencial Beira Rio",
+      "neighborhood": "Kennedy"
+    },
+    {
+      "cep": "45201-711",
+      "street": "Via Local F",
+      "complement": "Residencial Beira Rio",
+      "neighborhood": "Kennedy"
+    },
+    {
+      "cep": "45201-713",
+      "street": "Via Local G",
+      "complement": "Residencial Beira Rio",
+      "neighborhood": "Kennedy"
+    },
+    {
+      "cep": "45201-715",
+      "street": "Via Local H",
+      "complement": "Residencial Beira Rio",
+      "neighborhood": "Kennedy"
+    },
+    {
+      "cep": "45209-162",
+      "street": "Avenida Cachoeirinha",
+      "complement": "",
+      "neighborhood": "Tropical"
+    },
+    {
+      "cep": "45209-164",
+      "street": "1ª Travessa Raimundo Xavier",
+      "complement": "",
+      "neighborhood": "Tropical"
+    },
+    {
+      "cep": "45209-166",
+      "street": "2ª Travessa Raimundo Xavier",
+      "complement": "",
+      "neighborhood": "Tropical"
+    },
+    {
+      "cep": "45209-168",
+      "street": "Rua Raimundo Xavier",
+      "complement": "",
+      "neighborhood": "Tropical"
+    },
+    {
+      "cep": "45209-170",
+      "street": "Rua da Torta",
+      "complement": "",
+      "neighborhood": "Tropical"
+    },
+    {
+      "cep": "45209-158",
+      "street": "Rua 6",
+      "complement": "Cachoeirinha III e IV",
+      "neighborhood": "Tropical"
+    },
+    {
+      "cep": "45209-156",
+      "street": "Rua 7",
+      "complement": "Cachoeirinha III e IV",
+      "neighborhood": "Tropical"
+    },
+    {
+      "cep": "45209-154",
+      "street": "Rua 8",
+      "complement": "Cachoeirinha III e IV",
+      "neighborhood": "Tropical"
+    },
+    {
+      "cep": "45209-152",
+      "street": "Rua 5",
+      "complement": "Cachoeirinha III e IV",
+      "neighborhood": "Tropical"
+    },
+    {
+      "cep": "45209-150",
+      "street": "Rua 4",
+      "complement": "Cachoeirinha III e IV",
+      "neighborhood": "Tropical"
+    },
+    {
+      "cep": "45209-148",
+      "street": "Rua 3",
+      "complement": "Cachoeirinha III e IV",
+      "neighborhood": "Tropical"
+    },
+    {
+      "cep": "45209-146",
+      "street": "Rua 2",
+      "complement": "Cachoeirinha III e IV",
+      "neighborhood": "Tropical"
+    },
+    {
+      "cep": "45202-141",
+      "street": "Rua A",
+      "complement": "Residencial Segredo • Quadra A",
+      "neighborhood": "Curral Novo"
+    },
+    {
+      "cep": "45202-141",
+      "street": "Rua A",
+      "complement": "Residencial Segredo • Quadra B",
+      "neighborhood": "Curral Novo"
+    },
+    {
+      "cep": "45202-141",
+      "street": "Rua A",
+      "complement": "Residencial Segredo • Quadra C",
+      "neighborhood": "Curral Novo"
+    },
+    {
+      "cep": "45202-141",
+      "street": "Rua A",
+      "complement": "Residencial Segredo • Quadra D",
+      "neighborhood": "Curral Novo"
+    },
+    {
+      "cep": "45202-141",
+      "street": "Rua A",
+      "complement": "Residencial Segredo • Quadra E",
+      "neighborhood": "Curral Novo"
+    },
+    {
+      "cep": "45202-141",
+      "street": "Rua A",
+      "complement": "Residencial Segredo • Quadra F",
+      "neighborhood": "Curral Novo"
+    },
+    {
+      "cep": "45202-141",
+      "street": "Rua A",
+      "complement": "Residencial Segredo • Quadra G",
+      "neighborhood": "Curral Novo"
+    },
+    {
+      "cep": "45202-141",
+      "street": "Rua A",
+      "complement": "Residencial Segredo • Quadra H",
+      "neighborhood": "Curral Novo"
+    },
+    {
+      "cep": "45202-141",
+      "street": "Rua A",
+      "complement": "Residencial Segredo • Quadra I",
+      "neighborhood": "Curral Novo"
+    },
+    {
+      "cep": "45202-141",
+      "street": "Rua A",
+      "complement": "Residencial Segredo • Quadra J",
+      "neighborhood": "Curral Novo"
+    },
+    {
+      "cep": "45202-141",
+      "street": "Rua A",
+      "complement": "Residencial Segredo • Quadra K",
+      "neighborhood": "Curral Novo"
+    },
+    {
+      "cep": "45202-141",
+      "street": "Rua A",
+      "complement": "Residencial Segredo • Quadra L",
+      "neighborhood": "Curral Novo"
+    },
+    {
+      "cep": "45202-141",
+      "street": "Rua A",
+      "complement": "Residencial Segredo • Quadra M",
+      "neighborhood": "Curral Novo"
+    },
+    {
+      "cep": "45202-141",
+      "street": "Rua A",
+      "complement": "Residencial Segredo • Quadra N",
+      "neighborhood": "Curral Novo"
+    },
+    {
+      "cep": "45202-141",
+      "street": "Rua A",
+      "complement": "Residencial Segredo • Quadra O",
+      "neighborhood": "Curral Novo"
+    },
+    {
+      "cep": "45202-141",
+      "street": "Rua A",
+      "complement": "Residencial Segredo • Quadra P",
+      "neighborhood": "Curral Novo"
+    },
+    {
+      "cep": "45202-141",
+      "street": "Rua A",
+      "complement": "Residencial Segredo • Quadra Q",
+      "neighborhood": "Curral Novo"
+    },
+    {
+      "cep": "45202-141",
+      "street": "Rua A",
+      "complement": "Residencial Segredo • Quadra R",
+      "neighborhood": "Curral Novo"
+    },
+    {
+      "cep": "45202-141",
+      "street": "Rua A",
+      "complement": "Residencial Segredo • Quadra S",
+      "neighborhood": "Curral Novo"
+    },
+    {
+      "cep": "45202-141",
+      "street": "Rua A",
+      "complement": "Residencial Segredo • Quadra T",
+      "neighborhood": "Curral Novo"
+    },
+    {
+      "cep": "45202-141",
+      "street": "Rua A",
+      "complement": "Residencial Segredo • Quadra U",
+      "neighborhood": "Curral Novo"
+    },
+    {
+      "cep": "45202-141",
+      "street": "Rua A",
+      "complement": "Residencial Segredo • Quadra V",
+      "neighborhood": "Curral Novo"
+    },
+    {
+      "cep": "45202-141",
+      "street": "Rua A",
+      "complement": "Residencial Segredo • Quadra W",
+      "neighborhood": "Curral Novo"
+    },
+    {
+      "cep": "45202-141",
+      "street": "Rua A",
+      "complement": "Residencial Segredo • Quadra X",
+      "neighborhood": "Curral Novo"
+    },
+    {
+      "cep": "45202-141",
+      "street": "Rua A",
+      "complement": "Residencial Segredo • Quadra Z",
+      "neighborhood": "Curral Novo"
+    },
+    {
+      "cep": "45202-141",
+      "street": "Rua A",
+      "complement": "Residencial Segredo • Quadra AA",
+      "neighborhood": "Curral Novo"
+    },
+    {
+      "cep": "45202-141",
+      "street": "Rua A",
+      "complement": "Residencial Segredo • Quadra BB",
+      "neighborhood": "Curral Novo"
+    },
+    {
+      "cep": "45202-141",
+      "street": "Rua A",
+      "complement": "Residencial Segredo • Quadra CC",
+      "neighborhood": "Curral Novo"
+    },
+    {
+      "cep": "45202-141",
+      "street": "Rua A",
+      "complement": "Residencial Segredo • Quadra DD",
+      "neighborhood": "Curral Novo"
+    },
+    {
+      "cep": "45202-141",
+      "street": "Rua A",
+      "complement": "Residencial Segredo • Quadra EE",
+      "neighborhood": "Curral Novo"
+    },
+    {
+      "cep": "45202-141",
+      "street": "Rua A",
+      "complement": "Residencial Segredo • Quadra FF",
+      "neighborhood": "Curral Novo"
+    },
+    {
+      "cep": "45202-141",
+      "street": "Rua A",
+      "complement": "Residencial Segredo • Quadra GG",
+      "neighborhood": "Curral Novo"
+    },
+    {
+      "cep": "45202-141",
+      "street": "Rua A",
+      "complement": "Residencial Segredo • Quadra HH",
+      "neighborhood": "Curral Novo"
+    },
+    {
+      "cep": "45202-141",
+      "street": "Rua A",
+      "complement": "Residencial Segredo • Quadra II",
+      "neighborhood": "Curral Novo"
+    },
+    {
+      "cep": "45202-141",
+      "street": "Rua A",
+      "complement": "Residencial Segredo • Quadra JJ",
+      "neighborhood": "Curral Novo"
+    },
+    {
+      "cep": "45208-395",
+      "street": "1ª Travessa Elieser Souza Santos",
+      "complement": "",
+      "neighborhood": "Jequiezinho"
+    },
+    {
+      "cep": "45208-427",
+      "street": "1ª Travessa Nossa Senhora do Perpétuo Socorro",
+      "complement": "",
+      "neighborhood": "Jequiezinho"
+    },
+    {
+      "cep": "45208-361",
+      "street": "1ª Travessa Professora Virgínia Ribeiro",
+      "complement": "",
+      "neighborhood": "Jequiezinho"
+    },
+    {
+      "cep": "45208-567",
+      "street": "1ª Travessa Teixeira de Freitas",
+      "complement": "",
+      "neighborhood": "Jequiezinho"
+    },
+    {
+      "cep": "45208-399",
+      "street": "2ª Travessa Agapito Fernandes",
+      "complement": "",
+      "neighborhood": "Jequiezinho"
+    },
+    {
+      "cep": "45208-333",
+      "street": "2ª Travessa Ary Barroso",
+      "complement": "",
+      "neighborhood": "Jequiezinho"
+    },
+    {
+      "cep": "45208-223",
+      "street": "2ª Travessa Francisco Mendes",
+      "complement": "",
+      "neighborhood": "Jequiezinho"
+    },
+    {
+      "cep": "45208-575",
+      "street": "2ª Travessa João Rosa",
+      "complement": "",
+      "neighborhood": "Jequiezinho"
+    },
+    {
+      "cep": "45208-103",
+      "street": "2ª Travessa Nossa Senhora do Perpétuo Socorro",
+      "complement": "",
+      "neighborhood": "Jequiezinho"
+    },
+    {
+      "cep": "45208-323",
+      "street": "2ª Travessa Professora Virgínia Ribeiro",
+      "complement": "",
+      "neighborhood": "Jequiezinho"
+    },
+    {
+      "cep": "45208-577",
+      "street": "3ª Travessa João Rosa",
+      "complement": "",
+      "neighborhood": "Jequiezinho"
+    },
+    {
+      "cep": "45208-579",
+      "street": "4ª Travessa João Rosa",
+      "complement": "",
+      "neighborhood": "Jequiezinho"
+    },
+    {
+      "cep": "45208-573",
+      "street": "5ª Travessa João Rosa",
+      "complement": "",
+      "neighborhood": "Jequiezinho"
+    },
+    {
+      "cep": "",
+      "street": "Avenida Antônio Carlos Magalhães",
+      "complement": "",
+      "neighborhood": "Jequiezinho"
+    },
+    {
+      "cep": "45208-553",
+      "street": "Avenida Antônio Tourinho",
+      "complement": "",
+      "neighborhood": "Jequiezinho"
+    },
+    {
+      "cep": "",
+      "street": "Avenida Artur Moraes",
+      "complement": "",
+      "neighborhood": "Jequiezinho"
+    },
+    {
+      "cep": "45208-065",
+      "street": "Avenida Castelo Branco",
+      "complement": "lado ímpar",
+      "neighborhood": "Jequiezinho"
+    },
+    {
+      "cep": "45208-001",
+      "street": "Avenida César Borges",
+      "complement": "",
+      "neighborhood": "Jequiezinho"
+    },
+    {
+      "cep": "45208-453",
+      "street": "Avenida Circular",
+      "complement": "",
+      "neighborhood": "Jequiezinho"
+    },
+    {
+      "cep": "",
+      "street": "Avenida do Parque de Exposição",
+      "complement": "",
+      "neighborhood": "Jequiezinho"
+    },
+    {
+      "cep": "",
+      "street": "Avenida dos Operários",
+      "complement": "",
+      "neighborhood": "Jequiezinho"
+    },
+    {
+      "cep": "",
+      "street": "Avenida Elizabeth Magalhães",
+      "complement": "",
+      "neighborhood": "Jequiezinho"
+    },
+    {
+      "cep": "",
+      "street": "Avenida Franz Gedeon",
+      "complement": "",
+      "neighborhood": "Jequiezinho"
+    },
+    {
+      "cep": "45206-210",
+      "street": "Avenida Iolanda Pires",
+      "complement": "",
+      "neighborhood": "Jequiezinho"
+    },
+    {
+      "cep": "45208-277",
+      "street": "Avenida Ipiaú",
+      "complement": "",
+      "neighborhood": "Jequiezinho"
+    },
+    {
+      "cep": "45206-070",
+      "street": "Avenida João Goulart",
+      "complement": "",
+      "neighborhood": "Jequiezinho"
+    },
+    {
+      "cep": "",
+      "street": "Avenida Landulfo Caribé",
+      "complement": "",
+      "neighborhood": "Jequiezinho"
+    },
+    {
+      "cep": "",
+      "street": "Avenida Lions Club",
+      "complement": "",
+      "neighborhood": "Jequiezinho"
+    },
+    {
+      "cep": "45208-081",
+      "street": "Avenida Presidente João Goulart",
+      "complement": "de 294/295 ao fim",
+      "neighborhood": "Jequiezinho"
+    },
+    {
+      "cep": "45208-421",
+      "street": "Avenida Radial 2",
+      "complement": "",
+      "neighborhood": "Jequiezinho"
+    },
+    {
+      "cep": "",
+      "street": "Avenida Senhor do Bonfim",
+      "complement": "",
+      "neighborhood": "Jequiezinho"
+    },
+    {
+      "cep": "45208-539",
+      "street": "Avenida Vavá Lomanto",
+      "complement": "",
+      "neighborhood": "Jequiezinho"
+    },
+    {
+      "cep": "45208-403",
+      "street": "Beco Agapito Fernandes",
+      "complement": "",
+      "neighborhood": "Jequiezinho"
+    },
+    {
+      "cep": "45208-149",
+      "street": "Beco do Sal",
+      "complement": "",
+      "neighborhood": "Jequiezinho"
+    },
+    {
+      "cep": "45208-007",
+      "street": "Beco Espinhaço I",
+      "complement": "",
+      "neighborhood": "Jequiezinho"
+    },
+    {
+      "cep": "45208-009",
+      "street": "Beco Estrada de Ferro",
+      "complement": "",
+      "neighborhood": "Jequiezinho"
+    },
+    {
+      "cep": "45208-187",
+      "street": "Beco Professora Ferreirinha",
+      "complement": "",
+      "neighborhood": "Jequiezinho"
+    },
+    {
+      "cep": "45208-561",
+      "street": "Beco Teixeira de Freitas",
+      "complement": "",
+      "neighborhood": "Jequiezinho"
+    },
+    {
+      "cep": "45205-260",
+      "street": "Conjunto Inocoop",
+      "complement": "",
+      "neighborhood": "Jequiezinho"
+    },
+    {
+      "cep": "45206-510",
+      "street": "Conjunto Urbis I",
+      "complement": "",
+      "neighborhood": "Jequiezinho"
+    },
+    {
+      "cep": "45208-237",
+      "street": "Corredor da Água Branca",
+      "complement": "",
+      "neighborhood": "Jequiezinho"
+    },
+    {
+      "cep": "45205-270",
+      "street": "Loteamento Água Branca",
+      "complement": "",
+      "neighborhood": "Jequiezinho"
+    },
+    {
+      "cep": "45204-630",
+      "street": "Loteamento Belanápolis",
+      "complement": "",
+      "neighborhood": "Jequiezinho"
+    },
+    {
+      "cep": "45204-180",
+      "street": "Loteamento Boa Vista",
+      "complement": "",
+      "neighborhood": "Jequiezinho"
+    },
+    {
+      "cep": "45204-160",
+      "street": "Loteamento da Colina",
+      "complement": "",
+      "neighborhood": "Jequiezinho"
+    },
+    {
+      "cep": "45206-480",
+      "street": "Loteamento Espaço Nobre",
+      "complement": "",
+      "neighborhood": "Jequiezinho"
+    },
+    {
+      "cep": "45206-590",
+      "street": "Loteamento Mirassol",
+      "complement": "",
+      "neighborhood": "Jequiezinho"
+    },
+    {
+      "cep": "45204-450",
+      "street": "Loteamento Ribeiro",
+      "complement": "",
+      "neighborhood": "Jequiezinho"
+    },
+    {
+      "cep": "45206-490",
+      "street": "Loteamento Vicente Grilo",
+      "complement": "",
+      "neighborhood": "Jequiezinho"
+    },
+    {
+      "cep": "45206-340",
+      "street": "Loteamento Vila Aeroporto",
+      "complement": "",
+      "neighborhood": "Jequiezinho"
+    },
+    {
+      "cep": "45206-140",
+      "street": "Praça Ademar Vieira",
+      "complement": "",
+      "neighborhood": "Jequiezinho"
+    },
+    {
+      "cep": "45208-085",
+      "street": "Praça do Centenário",
+      "complement": "",
+      "neighborhood": "Jequiezinho"
+    },
+    {
+      "cep": "",
+      "street": "Praça Duque de Caxias",
+      "complement": "",
+      "neighborhood": "Jequiezinho"
+    },
+    {
+      "cep": "45208-109",
+      "street": "Praça Governador Juracy Magalhães",
+      "complement": "Cilion",
+      "neighborhood": "Jequiezinho"
+    },
+    {
+      "cep": "45208-379",
+      "street": "Praça Governador Waldir Pires",
+      "complement": "",
+      "neighborhood": "Jequiezinho"
+    },
+    {
+      "cep": "45208-439",
+      "street": "Praça Jornalista Jorge Calmon",
+      "complement": "",
+      "neighborhood": "Jequiezinho"
+    },
+    {
+      "cep": "45206-280",
+      "street": "Praça Juracy Magalhães",
+      "complement": "",
+      "neighborhood": "Jequiezinho"
+    },
+    {
+      "cep": "",
+      "street": "Praça Otaviano Saback",
+      "complement": "",
+      "neighborhood": "Jequiezinho"
+    },
+    {
+      "cep": "45208-083",
+      "street": "Praça Prefeito Ademar Nunes Vieira",
+      "complement": "",
+      "neighborhood": "Jequiezinho"
+    },
+    {
+      "cep": "45208-219",
+      "street": "Rua Anésia Barreto de Palma",
+      "complement": "",
+      "neighborhood": "Jequiezinho"
+    },
+    {
+      "cep": "45205-240",
+      "street": "Rua Antônio Rebouças",
+      "complement": "",
+      "neighborhood": "Jequiezinho"
+    },
+    {
+      "cep": "45208-413",
+      "street": "Rua Antônio Soares Pereira",
+      "complement": "",
+      "neighborhood": "Jequiezinho"
+    },
+    {
+      "cep": "45206-550",
+      "street": "Rua Ari Barroso",
+      "complement": "",
+      "neighborhood": "Jequiezinho"
+    },
+    {
+      "cep": "45208-315",
+      "street": "Rua Arlindo José da Cruz",
+      "complement": "",
+      "neighborhood": "Jequiezinho"
+    },
+    {
+      "cep": "45208-467",
+      "street": "Rua Arnóbio",
+      "complement": "",
+      "neighborhood": "Jequiezinho"
+    },
+    {
+      "cep": "45208-353",
+      "street": "Rua Aroeira",
+      "complement": "",
+      "neighborhood": "Jequiezinho"
+    },
+    {
+      "cep": "45208-331",
+      "street": "Rua Ary Barroso",
+      "complement": "",
+      "neighborhood": "Jequiezinho"
+    },
+    {
+      "cep": "",
+      "street": "Rua Augusto Marques",
+      "complement": "",
+      "neighborhood": "Jequiezinho"
+    },
+    {
+      "cep": "45204-680",
+      "street": "Rua Bloco",
+      "complement": "",
+      "neighborhood": "Jequiezinho"
+    },
+    {
+      "cep": "45206-120",
+      "street": "Rua Brigadeiro Sá",
+      "complement": "",
+      "neighborhood": "Jequiezinho"
+    },
+    {
+      "cep": "45208-087",
+      "street": "Rua Brigadeiro Sá Bittencourt",
+      "complement": "",
+      "neighborhood": "Jequiezinho"
+    },
+    {
+      "cep": "",
+      "street": "Rua Candinha Barreto",
+      "complement": "",
+      "neighborhood": "Jequiezinho"
+    },
+    {
+      "cep": "",
+      "street": "Rua Carlos Andrade",
+      "complement": "",
+      "neighborhood": "Jequiezinho"
+    },
+    {
+      "cep": "45206-290",
+      "street": "Rua Carlota Sá",
+      "complement": "",
+      "neighborhood": "Jequiezinho"
+    },
+    {
+      "cep": "45204-500",
+      "street": "Rua Castelo Branco",
+      "complement": "",
+      "neighborhood": "Jequiezinho"
+    },
+    {
+      "cep": "45208-269",
+      "street": "Rua Catarina C de Jesus",
+      "complement": "",
+      "neighborhood": "Jequiezinho"
+    },
+    {
+      "cep": "",
+      "street": "Rua Catulo da Paixão Cearense",
+      "complement": "",
+      "neighborhood": "Jequiezinho"
+    },
+    {
+      "cep": "45208-473",
+      "street": "Rua Clériston Andrade",
+      "complement": "",
+      "neighborhood": "Jequiezinho"
+    },
+    {
+      "cep": "45208-067",
+      "street": "Rua Clodoaldo Chaves",
+      "complement": "",
+      "neighborhood": "Jequiezinho"
+    },
+    {
+      "cep": "45208-023",
+      "street": "Rua Corredor Costa Brito",
+      "complement": "",
+      "neighborhood": "Jequiezinho"
+    },
+    {
+      "cep": "45204-650",
+      "street": "Rua Corredor da Costa Brito",
+      "complement": "",
+      "neighborhood": "Jequiezinho"
+    },
+    {
+      "cep": "",
+      "street": "Rua da Banca",
+      "complement": "",
+      "neighborhood": "Jequiezinho"
+    },
+    {
+      "cep": "45208-161",
+      "street": "Rua da Igreja São José",
+      "complement": "",
+      "neighborhood": "Jequiezinho"
+    },
+    {
+      "cep": "45208-359",
+      "street": "Rua das Braúnas",
+      "complement": "",
+      "neighborhood": "Jequiezinho"
+    },
+    {
+      "cep": "45208-351",
+      "street": "Rua das Sapucaias",
+      "complement": "",
+      "neighborhood": "Jequiezinho"
+    },
+    {
+      "cep": "45208-217",
+      "street": "Rua Diácono Waldomiro Souza de Melo",
+      "complement": "",
+      "neighborhood": "Jequiezinho"
+    },
+    {
+      "cep": "45208-057",
+      "street": "Rua do Bloco",
+      "complement": "",
+      "neighborhood": "Jequiezinho"
+    },
+    {
+      "cep": "",
+      "street": "Rua do Contorno",
+      "complement": "",
+      "neighborhood": "Jequiezinho"
+    },
+    {
+      "cep": "",
+      "street": "Rua do Sal",
+      "complement": "",
+      "neighborhood": "Jequiezinho"
+    },
+    {
+      "cep": "45208-107",
+      "street": "Rua Dona Carlota Sá",
+      "complement": "",
+      "neighborhood": "Jequiezinho"
+    },
+    {
+      "cep": "45208-425",
+      "street": "Rua dos Advogados",
+      "complement": "",
+      "neighborhood": "Jequiezinho"
+    },
+    {
+      "cep": "45208-347",
+      "street": "Rua dos Flamboyants",
+      "complement": "",
+      "neighborhood": "Jequiezinho"
+    },
+    {
+      "cep": "45208-357",
+      "street": "Rua dos Ipês",
+      "complement": "",
+      "neighborhood": "Jequiezinho"
+    },
+    {
+      "cep": "45208-349",
+      "street": "Rua dos Mognos",
+      "complement": "",
+      "neighborhood": "Jequiezinho"
+    },
+    {
+      "cep": "45208-259",
+      "street": "Rua Doutor Carlos Aguiar",
+      "complement": "",
+      "neighborhood": "Jequiezinho"
+    },
+    {
+      "cep": "45208-119",
+      "street": "Rua Doutor João Caricchio Filho",
+      "complement": "",
+      "neighborhood": "Jequiezinho"
+    },
+    {
+      "cep": "45208-417",
+      "street": "Rua Doutor Joel Sá",
+      "complement": "",
+      "neighborhood": "Jequiezinho"
+    },
+    {
+      "cep": "45208-433",
+      "street": "Rua Doutor Odilon T Santos",
+      "complement": "",
+      "neighborhood": "Jequiezinho"
+    },
+    {
+      "cep": "45208-275",
+      "street": "Rua Doutor Waldeck Pinto Araújo",
+      "complement": "",
+      "neighborhood": "Jequiezinho"
+    },
+    {
+      "cep": "45208-437",
+      "street": "Rua Doutora Rita Maria S Rodrigues",
+      "complement": "",
+      "neighborhood": "Jequiezinho"
+    },
+    {
+      "cep": "45208-251",
+      "street": "Rua Eliel Cerqueira Mendes",
+      "complement": "",
+      "neighborhood": "Jequiezinho"
+    },
+    {
+      "cep": "45208-397",
+      "street": "Rua Elieser Souza Santos",
+      "complement": "",
+      "neighborhood": "Jequiezinho"
+    },
+    {
+      "cep": "45206-240",
+      "street": "Rua Eliezer Souza Santos",
+      "complement": "",
+      "neighborhood": "Jequiezinho"
+    },
+    {
+      "cep": "45208-049",
+      "street": "Rua Elza Galvão Vaz",
+      "complement": "",
+      "neighborhood": "Jequiezinho"
+    },
+    {
+      "cep": "45208-235",
+      "street": "Rua Emanuel C Almeida",
+      "complement": "",
+      "neighborhood": "Jequiezinho"
+    },
+    {
+      "cep": "45208-447",
+      "street": "Rua Ermelina Caribé",
+      "complement": "",
+      "neighborhood": "Jequiezinho"
+    },
+    {
+      "cep": "45208-317",
+      "street": "Rua Estela Câmara Dubois",
+      "complement": "",
+      "neighborhood": "Jequiezinho"
+    },
+    {
+      "cep": "45208-449",
+      "street": "Rua Eubulides Gianbastiane",
+      "complement": "",
+      "neighborhood": "Jequiezinho"
+    },
+    {
+      "cep": "45204-540",
+      "street": "Rua Euflosino Almeida",
+      "complement": "",
+      "neighborhood": "Jequiezinho"
+    },
+    {
+      "cep": "45208-143",
+      "street": "Rua Eufrosino Almeida",
+      "complement": "",
+      "neighborhood": "Jequiezinho"
+    },
+    {
+      "cep": "45208-457",
+      "street": "Rua Eurípedes Brandão",
+      "complement": "",
+      "neighborhood": "Jequiezinho"
+    },
+    {
+      "cep": "45208-041",
+      "street": "Rua Evaldo Gonçalves",
+      "complement": "",
+      "neighborhood": "Jequiezinho"
+    },
+    {
+      "cep": "45204-190",
+      "street": "Rua Everaldo Santos",
+      "complement": "",
+      "neighborhood": "Jequiezinho"
+    },
+    {
+      "cep": "45208-193",
+      "street": "Rua Expedicionário",
+      "complement": "",
+      "neighborhood": "Jequiezinho"
+    },
+    {
+      "cep": "45205-120",
+      "street": "Rua Expedicionários",
+      "complement": "",
+      "neighborhood": "Jequiezinho"
+    },
+    {
+      "cep": "45208-063",
+      "street": "Rua Fenelon Freire Lima",
+      "complement": "",
+      "neighborhood": "Jequiezinho"
+    },
+    {
+      "cep": "",
+      "street": "Rua Filo Galrão",
+      "complement": "",
+      "neighborhood": "Jequiezinho"
+    },
+    {
+      "cep": "",
+      "street": "Rua Francisco Carneiro",
+      "complement": "",
+      "neighborhood": "Jequiezinho"
+    },
+    {
+      "cep": "",
+      "street": "Rua Francisco Veloso Leal",
+      "complement": "",
+      "neighborhood": "Jequiezinho"
+    },
+    {
+      "cep": "45208-035",
+      "street": "Rua Garibalde Ribeiro",
+      "complement": "",
+      "neighborhood": "Jequiezinho"
+    },
+    {
+      "cep": "45204-660",
+      "street": "Rua Garibaldi Ribeiro",
+      "complement": "",
+      "neighborhood": "Jequiezinho"
+    },
+    {
+      "cep": "45208-327",
+      "street": "Rua Geminiano Saback",
+      "complement": "",
+      "neighborhood": "Jequiezinho"
+    },
+    {
+      "cep": "45208-415",
+      "street": "Rua Gildélito Ferraz",
+      "complement": "",
+      "neighborhood": "Jequiezinho"
+    },
+    {
+      "cep": "",
+      "street": "Rua Gonçalves da Costa",
+      "complement": "",
+      "neighborhood": "Jequiezinho"
+    },
+    {
+      "cep": "",
+      "street": "Rua Guilherme Fernandes",
+      "complement": "",
+      "neighborhood": "Jequiezinho"
+    },
+    {
+      "cep": "",
+      "street": "Rua Gustavo dos Santos",
+      "complement": "",
+      "neighborhood": "Jequiezinho"
+    },
+    {
+      "cep": "45208-072",
+      "street": "Rua H",
+      "complement": "Loteamento Alvorada",
+      "neighborhood": "Jequiezinho"
+    },
+    {
+      "cep": "",
+      "street": "Rua Higino Barros",
+      "complement": "",
+      "neighborhood": "Jequiezinho"
+    },
+    {
+      "cep": "45208-373",
+      "street": "Rua Humberto Ferreira",
+      "complement": "",
+      "neighborhood": "Jequiezinho"
+    },
+    {
+      "cep": "",
+      "street": "Rua Ituaçu",
+      "complement": "",
+      "neighborhood": "Jequiezinho"
+    },
+    {
+      "cep": "45208-435",
+      "street": "Rua Ivan Andrade",
+      "complement": "",
+      "neighborhood": "Jequiezinho"
+    },
+    {
+      "cep": "45208-355",
+      "street": "Rua Jacarandá",
+      "complement": "",
+      "neighborhood": "Jequiezinho"
+    },
+    {
+      "cep": "45208-485",
+      "street": "Rua Januário Cafezeiro",
+      "complement": "",
+      "neighborhood": "Jequiezinho"
+    },
+    {
+      "cep": "45208-345",
+      "street": "Rua Jequitibá",
+      "complement": "",
+      "neighborhood": "Jequiezinho"
+    },
+    {
+      "cep": "",
+      "street": "Rua Jesuíno Cerqueira",
+      "complement": "",
+      "neighborhood": "Jequiezinho"
+    },
+    {
+      "cep": "45208-095",
+      "street": "Rua Joana Veloso",
+      "complement": "",
+      "neighborhood": "Jequiezinho"
+    },
+    {
+      "cep": "",
+      "street": "Rua João Braga",
+      "complement": "",
+      "neighborhood": "Jequiezinho"
+    },
+    {
+      "cep": "45204-480",
+      "street": "Rua João Caricchio Filho",
+      "complement": "",
+      "neighborhood": "Jequiezinho"
+    },
+    {
+      "cep": "",
+      "street": "Rua João Emílio",
+      "complement": "",
+      "neighborhood": "Jequiezinho"
+    },
+    {
+      "cep": "",
+      "street": "Rua João Rosa",
+      "complement": "",
+      "neighborhood": "Jequiezinho"
+    },
+    {
+      "cep": "",
+      "street": "Rua João Santana",
+      "complement": "",
+      "neighborhood": "Jequiezinho"
+    },
+    {
+      "cep": "",
+      "street": "Rua José Leto",
+      "complement": "",
+      "neighborhood": "Jequiezinho"
+    },
+    {
+      "cep": "",
+      "street": "Rua José Limongi",
+      "complement": "",
+      "neighborhood": "Jequiezinho"
+    },
+    {
+      "cep": "45208-045",
+      "street": "Rua José Meira",
+      "complement": "",
+      "neighborhood": "Jequiezinho"
+    },
+    {
+      "cep": "",
+      "street": "Rua José Moreira Sobrinho",
+      "complement": "",
+      "neighborhood": "Jequiezinho"
+    },
+    {
+      "cep": "",
+      "street": "Rua José Rotandano",
+      "complement": "",
+      "neighborhood": "Jequiezinho"
+    },
+    {
+      "cep": "45208-465",
+      "street": "Rua José Vicente Souza",
+      "complement": "",
+      "neighborhood": "Jequiezinho"
+    },
+    {
+      "cep": "",
+      "street": "Rua Juca Rebouças",
+      "complement": "",
+      "neighborhood": "Jequiezinho"
+    },
+    {
+      "cep": "45205-200",
+      "street": "Rua K",
+      "complement": "",
+      "neighborhood": "Jequiezinho"
+    },
+    {
+      "cep": "45208-537",
+      "street": "Caminho A",
+      "complement": "Urbis I",
+      "neighborhood": "Jequiezinho"
+    },
+    {
+      "cep": "45208-535",
+      "street": "Caminho B",
+      "complement": "Urbis I",
+      "neighborhood": "Jequiezinho"
+    },
+    {
+      "cep": "45208-533",
+      "street": "Caminho C",
+      "complement": "Urbis I",
+      "neighborhood": "Jequiezinho"
+    },
+    {
+      "cep": "45208-527",
+      "street": "Caminho D",
+      "complement": "Urbis I",
+      "neighborhood": "Jequiezinho"
+    },
+    {
+      "cep": "45208-525",
+      "street": "Caminho E",
+      "complement": "Urbis I",
+      "neighborhood": "Jequiezinho"
+    },
+    {
+      "cep": "45208-523",
+      "street": "Caminho F",
+      "complement": "Urbis I",
+      "neighborhood": "Jequiezinho"
+    },
+    {
+      "cep": "45208-519",
+      "street": "Caminho G",
+      "complement": "Urbis I",
+      "neighborhood": "Jequiezinho"
+    },
+    {
+      "cep": "45208-521",
+      "street": "Caminho H",
+      "complement": "Urbis I",
+      "neighborhood": "Jequiezinho"
+    },
+    {
+      "cep": "45208-517",
+      "street": "Caminho I",
+      "complement": "Urbis I",
+      "neighborhood": "Jequiezinho"
+    },
+    {
+      "cep": "45208-513",
+      "street": "Caminho J",
+      "complement": "Urbis I",
+      "neighborhood": "Jequiezinho"
+    },
+    {
+      "cep": "45208-511",
+      "street": "Caminho K",
+      "complement": "Urbis I",
+      "neighborhood": "Jequiezinho"
+    },
+    {
+      "cep": "45208-509",
+      "street": "Caminho L",
+      "complement": "Urbis I",
+      "neighborhood": "Jequiezinho"
+    },
+    {
+      "cep": "45208-507",
+      "street": "Caminho M",
+      "complement": "Urbis I",
+      "neighborhood": "Jequiezinho"
+    },
+    {
+      "cep": "45208-505",
+      "street": "Caminho N",
+      "complement": "Urbis I",
+      "neighborhood": "Jequiezinho"
+    },
+    {
+      "cep": "45208-499",
+      "street": "Caminho O",
+      "complement": "Urbis I",
+      "neighborhood": "Jequiezinho"
+    },
+    {
+      "cep": "45208-493",
+      "street": "Caminho P",
+      "complement": "Urbis I",
+      "neighborhood": "Jequiezinho"
+    },
+    {
+      "cep": "45208-497",
+      "street": "Caminho Q",
+      "complement": "Urbis I",
+      "neighborhood": "Jequiezinho"
+    },
+    {
+      "cep": "45208-531",
+      "street": "Caminho R",
+      "complement": "Urbis I",
+      "neighborhood": "Jequiezinho"
+    },
+    {
+      "cep": "45208-529",
+      "street": "Caminho S",
+      "complement": "Urbis I",
+      "neighborhood": "Jequiezinho"
+    },
+    {
+      "cep": "45208-501",
+      "street": "Caminho T",
+      "complement": "Urbis I",
+      "neighborhood": "Jequiezinho"
+    },
+    {
+      "cep": "45208-503",
+      "street": "Caminho U",
+      "complement": "Urbis I",
+      "neighborhood": "Jequiezinho"
+    },
+    {
+      "cep": "45206-070",
+      "street": "Praça da Bíblia",
+      "complement": "Avenida João Goulart",
+      "neighborhood": "Jequiezinho"
+    },
+    {
+      "cep": "45206-540",
+      "street": "Praça Governador Juracy Magalhães",
+      "complement": "Cilion",
+      "neighborhood": "Jequiezinho"
+    },
+    {
+      "cep": "45200-070",
+      "street": "Avenida Presidente João Goulart",
+      "complement": "até 292/293",
+      "neighborhood": "Centro"
+    },
+    {
+      "cep": "",
+      "street": "Avenida Rio Branco",
+      "complement": "",
+      "neighborhood": "Centro"
+    },
+    {
+      "cep": "45203-736",
+      "street": "Avenida Nazaré",
+      "complement": "",
+      "neighborhood": "Caixa D'Água"
+    },
+    {
+      "cep": "",
+      "street": "Avenida Tote Lomanto",
+      "complement": "",
+      "neighborhood": "Caixa D'Água"
+    },
+    {
+      "cep": "45203-581",
+      "street": "Avenida Vicente Leone",
+      "complement": "",
+      "neighborhood": "Caixa D'Água"
+    },
+    {
+      "cep": "45203-460",
+      "street": "Praça Elza Leone",
+      "complement": "",
+      "neighborhood": "Caixa D'Água"
+    },
+    {
+      "cep": "45204-068",
+      "street": "Avenida Adolfo Ribeiro",
+      "complement": "",
+      "neighborhood": "São Judas Tadeu"
+    },
+    {
+      "cep": "45203-858",
+      "street": "Avenida Águas Claras",
+      "complement": "",
+      "neighborhood": "São Judas Tadeu"
+    },
+    {
+      "cep": "45204-046",
+      "street": "Avenida Almirante Tamandaré",
+      "complement": "",
+      "neighborhood": "São Judas Tadeu"
+    },
+    {
+      "cep": "45204-091",
+      "street": "Avenida Antônia Garcia",
+      "complement": "",
+      "neighborhood": "São Judas Tadeu"
+    },
+    {
+      "cep": "45204-113",
+      "street": "Avenida Antônia Garcia Ribeiro",
+      "complement": "",
+      "neighborhood": "São Judas Tadeu"
+    },
+    {
+      "cep": "45203-830",
+      "street": "Avenida César Borges",
+      "complement": "",
+      "neighborhood": "São Judas Tadeu"
+    },
+    {
+      "cep": "45204-021",
+      "street": "Avenida das Estrelas",
+      "complement": "",
+      "neighborhood": "São Judas Tadeu"
+    },
+    {
+      "cep": "45204-125",
+      "street": "Avenida Deputado Luís Eduardo Magalhães",
+      "complement": "",
+      "neighborhood": "São Judas Tadeu"
+    },
+    {
+      "cep": "45203-892",
+      "street": "Avenida do Sol",
+      "complement": "",
+      "neighborhood": "São Judas Tadeu"
+    },
+    {
+      "cep": "45203-856",
+      "street": "Avenida dos Cometas",
+      "complement": "",
+      "neighborhood": "São Judas Tadeu"
+    },
+    {
+      "cep": "45204-071",
+      "street": "Avenida Doutor Carlos Aguiar Ribeiro",
+      "complement": "",
+      "neighborhood": "São Judas Tadeu"
+    },
+    {
+      "cep": "45204-147",
+      "street": "Avenida Epaminondas Custódio Ribeiro",
+      "complement": "",
+      "neighborhood": "São Judas Tadeu"
+    },
+    {
+      "cep": "45203-842",
+      "street": "Avenida Jequiezinho",
+      "complement": "",
+      "neighborhood": "São Judas Tadeu"
+    },
+    {
+      "cep": "45204-139",
+      "street": "Avenida Maria Francisca Ribeiro Marques",
+      "complement": "",
+      "neighborhood": "São Judas Tadeu"
+    },
+    {
+      "cep": "45204-082",
+      "street": "Avenida Nair Ribeiro",
+      "complement": "",
+      "neighborhood": "São Judas Tadeu"
+    },
+    {
+      "cep": "45203-882",
+      "street": "Avenida Plutão",
+      "complement": "",
+      "neighborhood": "São Judas Tadeu"
+    },
+    {
+      "cep": "45203-854",
+      "street": "Avenida Rio Jequiezinho",
+      "complement": "",
+      "neighborhood": "São Judas Tadeu"
+    },
+    {
+      "cep": "45210-016",
+      "street": "Avenida Fluminense",
+      "complement": "",
+      "neighborhood": "Mandacaru"
+    },
+    {
+      "cep": "45210-036",
+      "street": "Avenida Galícia",
+      "complement": "",
+      "neighborhood": "Mandacaru"
+    },
+    {
+      "cep": "",
+      "street": "Avenida Exupério Miranda",
+      "complement": "",
+      "neighborhood": "Mandacaru"
+    },
+    {
+      "cep": "45207-270",
+      "street": "Conjunto Prodecor",
+      "complement": "",
+      "neighborhood": "Mandacaru"
+    },
+    {
+      "cep": "45207-310",
+      "street": "Loteamento Itaigara",
+      "complement": "",
+      "neighborhood": "Mandacaru"
+    },
+    {
+      "cep": "45207-400",
+      "street": "Loteamento Pacaembu",
+      "complement": "",
+      "neighborhood": "Mandacaru"
+    },
+    {
+      "cep": "45208-020",
+      "street": "Loteamento Industrial Distrito",
+      "complement": "",
+      "neighborhood": "Mandacaru"
+    },
+    {
+      "cep": "45206-245",
+      "street": "Avenida das Abelhas",
+      "complement": "",
+      "neighborhood": "Pompílio Sampaio"
+    },
+    {
+      "cep": "45206-229",
+      "street": "Avenida das Esperanças",
+      "complement": "",
+      "neighborhood": "Pompílio Sampaio"
+    },
+    {
+      "cep": "45206-231",
+      "street": "Avenida das Formigas",
+      "complement": "",
+      "neighborhood": "Pompílio Sampaio"
+    },
+    {
+      "cep": "45206-249",
+      "street": "Avenida das Joaninhas",
+      "complement": "",
+      "neighborhood": "Pompílio Sampaio"
+    },
+    {
+      "cep": "45206-247",
+      "street": "Avenida das Mutucas",
+      "complement": "",
+      "neighborhood": "Pompílio Sampaio"
+    },
+    {
+      "cep": "45206-115",
+      "street": "Avenida de Acesso",
+      "complement": "",
+      "neighborhood": "Pompílio Sampaio"
+    },
+    {
+      "cep": "45206-285",
+      "street": "Avenida Deputado Luís Eduardo Magalhães",
+      "complement": "",
+      "neighborhood": "Pompílio Sampaio"
+    },
+    {
+      "cep": "45206-283",
+      "street": "Avenida Principal B",
+      "complement": "",
+      "neighborhood": "Pompílio Sampaio"
+    },
+    {
+      "cep": "45201-820",
+      "street": "Avenida Barragem de Pedras",
+      "complement": "",
+      "neighborhood": "Kennedy"
+    },
+    {
+      "cep": "45201-475",
+      "street": "Avenida Governador Aurélio Rodrigues Viana",
+      "complement": "",
+      "neighborhood": "Kennedy"
+    },
+    {
+      "cep": "",
+      "street": "Avenida Governador Lomanto Júnior",
+      "complement": "",
+      "neighborhood": "Kennedy"
+    },
+    {
+      "cep": "45201-641",
+      "street": "Avenida Gustavo dos Santos Ribeiro",
+      "complement": "de 1241/1242 ao fim",
+      "neighborhood": "Kennedy"
+    },
+    {
+      "cep": "45201-769",
+      "street": "Avenida Landerson S Souza",
+      "complement": "",
+      "neighborhood": "Kennedy"
+    },
+    {
+      "cep": "45201-813",
+      "street": "Avenida Manoel Alves Andrade",
+      "complement": "",
+      "neighborhood": "Kennedy"
+    },
+    {
+      "cep": "45206-117",
+      "street": "Caminho 1",
+      "complement": "Parque das Algarobas",
+      "neighborhood": "Pompílio Sampaio"
+    },
+    {
+      "cep": "",
+      "street": "Caminho 2",
+      "complement": "Parque das Algarobas",
+      "neighborhood": "Pompílio Sampaio"
+    },
+    {
+      "cep": "",
+      "street": "Caminho 3",
+      "complement": "Parque das Algarobas",
+      "neighborhood": "Pompílio Sampaio"
+    },
+    {
+      "cep": "",
+      "street": "Caminho 4",
+      "complement": "Parque das Algarobas",
+      "neighborhood": "Pompílio Sampaio"
+    },
+    {
+      "cep": "",
+      "street": "Caminho 5",
+      "complement": "Parque das Algarobas",
+      "neighborhood": "Pompílio Sampaio"
+    },
+    {
+      "cep": "",
+      "street": "Caminho 6",
+      "complement": "Parque das Algarobas",
+      "neighborhood": "Pompílio Sampaio"
+    },
+    {
+      "cep": "",
+      "street": "Caminho 7",
+      "complement": "Parque das Algarobas",
+      "neighborhood": "Pompílio Sampaio"
+    },
+    {
+      "cep": "",
+      "street": "Caminho 8",
+      "complement": "Parque das Algarobas",
+      "neighborhood": "Pompílio Sampaio"
+    },
+    {
+      "cep": "",
+      "street": "Caminho 9",
+      "complement": "Parque das Algarobas",
+      "neighborhood": "Pompílio Sampaio"
+    },
+    {
+      "cep": "45206-141",
+      "street": "Caminho 10",
+      "complement": "Parque das Algarobas",
+      "neighborhood": "Pompílio Sampaio"
+    },
+    {
+      "cep": "45206-143",
+      "street": "Caminho 11",
+      "complement": "Parque das Algarobas",
+      "neighborhood": "Pompílio Sampaio"
+    },
+    {
+      "cep": "",
+      "street": "Caminho 12",
+      "complement": "Parque das Algarobas",
+      "neighborhood": "Pompílio Sampaio"
+    },
+    {
+      "cep": "",
+      "street": "Caminho 13",
+      "complement": "Parque das Algarobas",
+      "neighborhood": "Pompílio Sampaio"
+    },
+    {
+      "cep": "",
+      "street": "Caminho 14",
+      "complement": "Parque das Algarobas",
+      "neighborhood": "Pompílio Sampaio"
+    },
+    {
+      "cep": "",
+      "street": "Caminho 15",
+      "complement": "Parque das Algarobas",
+      "neighborhood": "Pompílio Sampaio"
+    },
+    {
+      "cep": "",
+      "street": "Caminho 16",
+      "complement": "Parque das Algarobas",
+      "neighborhood": "Pompílio Sampaio"
+    },
+    {
+      "cep": "",
+      "street": "Caminho 17",
+      "complement": "Parque das Algarobas",
+      "neighborhood": "Pompílio Sampaio"
+    },
+    {
+      "cep": "",
+      "street": "Caminho 18",
+      "complement": "Parque das Algarobas",
+      "neighborhood": "Pompílio Sampaio"
+    },
+    {
+      "cep": "",
+      "street": "Caminho 19",
+      "complement": "Parque das Algarobas",
+      "neighborhood": "Pompílio Sampaio"
+    },
+    {
+      "cep": "",
+      "street": "Caminho 20",
+      "complement": "Parque das Algarobas",
+      "neighborhood": "Pompílio Sampaio"
+    },
+    {
+      "cep": "",
+      "street": "Caminho 21",
+      "complement": "Parque das Algarobas",
+      "neighborhood": "Pompílio Sampaio"
+    },
+    {
+      "cep": "",
+      "street": "Caminho 22",
+      "complement": "Parque das Algarobas",
+      "neighborhood": "Pompílio Sampaio"
+    },
+    {
+      "cep": "",
+      "street": "Caminho 23",
+      "complement": "Parque das Algarobas",
+      "neighborhood": "Pompílio Sampaio"
+    },
+    {
+      "cep": "",
+      "street": "Caminho 24",
+      "complement": "Parque das Algarobas",
+      "neighborhood": "Pompílio Sampaio"
+    },
+    {
+      "cep": "",
+      "street": "Caminho 25",
+      "complement": "Parque das Algarobas",
+      "neighborhood": "Pompílio Sampaio"
+    },
+    {
+      "cep": "",
+      "street": "Caminho 26",
+      "complement": "Parque das Algarobas",
+      "neighborhood": "Pompílio Sampaio"
+    },
+    {
+      "cep": "",
+      "street": "Caminho 27",
+      "complement": "Parque das Algarobas",
+      "neighborhood": "Pompílio Sampaio"
+    },
+    {
+      "cep": "",
+      "street": "Caminho 28",
+      "complement": "Parque das Algarobas",
+      "neighborhood": "Pompílio Sampaio"
+    },
+    {
+      "cep": "",
+      "street": "Caminho 29",
+      "complement": "Parque das Algarobas",
+      "neighborhood": "Pompílio Sampaio"
+    },
+    {
+      "cep": "45200-553",
+      "street": "Avenida Tote Lomanto",
+      "complement": "até 297 lado ímpar",
+      "neighborhood": "Joaquim Romão"
+    },
+    {
+      "cep": "45201-037",
+      "street": "Avenida Tote Lomanto",
+      "complement": "299 a 833 lado ímpar",
+      "neighborhood": "Joaquim Romão"
+    },
+    {
+      "cep": "45201-195",
+      "street": "Avenida Tote Lomanto",
+      "complement": "835 a 1999 lado ímpar",
+      "neighborhood": "Joaquim Romão"
+    },
+    {
+      "cep": "45203-484",
+      "street": "Avenida Tote Lomanto",
+      "complement": "até 120 lado par",
+      "neighborhood": "Caixa D'Água"
+    },
+    {
+      "cep": "45203-641",
+      "street": "Avenida Tote Lomanto",
+      "complement": "122 a 700 lado par",
+      "neighborhood": "Caixa D'Água"
+    },
+    {
+      "cep": "45203-720",
+      "street": "Avenida Tote Lomanto",
+      "complement": "702 a 2000 lado par",
+      "neighborhood": "Caixa D'Água"
+    },
+    {
+      "cep": "45205-301",
+      "street": "Avenida Tote Lomanto",
+      "complement": "2002 ao fim lado par",
+      "neighborhood": "Suíssa"
+    },
+    {
+      "cep": "45205-311",
+      "street": "Avenida Tote Lomanto",
+      "complement": "2001 ao fim lado ímpar",
+      "neighborhood": "Suíssa"
+    },
+    {
+      "cep": "45209-006",
+      "street": "1ª Travessa Senhor do Bonfim",
+      "complement": "lado par",
+      "neighborhood": "Tropical"
+    },
+    {
+      "cep": "45209-140",
+      "street": "1ª Travessa Tropical",
+      "complement": "",
+      "neighborhood": "Tropical"
+    },
+    {
+      "cep": "45209-002",
+      "street": "2ª Travessa Senhor do Bonfim",
+      "complement": "",
+      "neighborhood": "Tropical"
+    },
+    {
+      "cep": "45209-001",
+      "street": "3ª Travessa Senhor do Bonfim",
+      "complement": "lado par",
+      "neighborhood": "Tropical"
+    },
+    {
+      "cep": "45209-008",
+      "street": "4ª Travessa Senhor do Bonfim",
+      "complement": "",
+      "neighborhood": "Tropical"
+    },
+    {
+      "cep": "45209-012",
+      "street": "5ª Travessa Senhor do Bonfim",
+      "complement": "",
+      "neighborhood": "Tropical"
+    },
+    {
+      "cep": "45209-080",
+      "street": "6ª Travessa Senhor do Bonfim",
+      "complement": "",
+      "neighborhood": "Tropical"
+    },
+    {
+      "cep": "45209-090",
+      "street": "Avenida A",
+      "complement": "Loteamento Jardim Tropical",
+      "neighborhood": "Tropical"
+    },
+    {
+      "cep": "45209-092",
+      "street": "Avenida B",
+      "complement": "Loteamento Jardim Tropical",
+      "neighborhood": "Tropical"
+    },
+    {
+      "cep": "45209-104",
+      "street": "Avenida Bela Vista",
+      "complement": "",
+      "neighborhood": "Tropical"
+    },
+    {
+      "cep": "45209-102",
+      "street": "Avenida C",
+      "complement": "Loteamento Jardim Tropical",
+      "neighborhood": "Tropical"
+    },
+    {
+      "cep": "45209-088",
+      "street": "Avenida D",
+      "complement": "Loteamento Jardim Tropical",
+      "neighborhood": "Tropical"
+    },
+    {
+      "cep": "45209-082",
+      "street": "Avenida do Parque de Exposição",
+      "complement": "",
+      "neighborhood": "Tropical"
+    },
+    {
+      "cep": "45209-106",
+      "street": "Avenida E",
+      "complement": "Loteamento Jardim Tropical",
+      "neighborhood": "Tropical"
+    },
+    {
+      "cep": "45209-108",
+      "street": "Avenida F",
+      "complement": "Loteamento Jardim Tropical",
+      "neighborhood": "Tropical"
+    },
+    {
+      "cep": "45209-112",
+      "street": "Avenida G",
+      "complement": "Loteamento Jardim Tropical",
+      "neighborhood": "Tropical"
+    },
+    {
+      "cep": "45209-114",
+      "street": "Avenida H",
+      "complement": "Loteamento Jardim Tropical",
+      "neighborhood": "Tropical"
+    },
+    {
+      "cep": "45209-094",
+      "street": "Avenida Ipiaú",
+      "complement": "",
+      "neighborhood": "Tropical"
+    },
+    {
+      "cep": "45209-116",
+      "street": "Avenida J",
+      "complement": "Loteamento Jardim Tropical",
+      "neighborhood": "Tropical"
+    },
+    {
+      "cep": "45209-118",
+      "street": "Avenida L",
+      "complement": "Loteamento Jardim Tropical",
+      "neighborhood": "Tropical"
+    },
+    {
+      "cep": "45209-120",
+      "street": "Avenida M",
+      "complement": "Loteamento Jardim Tropical",
+      "neighborhood": "Tropical"
+    },
+    {
+      "cep": "45209-122",
+      "street": "Avenida N",
+      "complement": "Loteamento Jardim Tropical",
+      "neighborhood": "Tropical"
+    },
+    {
+      "cep": "45209-086",
+      "street": "Avenida O",
+      "complement": "Loteamento Jardim Tropical",
+      "neighborhood": "Tropical"
+    },
+    {
+      "cep": "45209-126",
+      "street": "Avenida P",
+      "complement": "Loteamento Jardim Tropical",
+      "neighborhood": "Tropical"
+    },
+    {
+      "cep": "45209-100",
+      "street": "Avenida Panorâmica",
+      "complement": "",
+      "neighborhood": "Tropical"
+    },
+    {
+      "cep": "45209-132",
+      "street": "Avenida Q",
+      "complement": "Loteamento Jardim Tropical",
+      "neighborhood": "Tropical"
+    },
+    {
+      "cep": "45209-134",
+      "street": "Avenida R",
+      "complement": "Loteamento Jardim Tropical",
+      "neighborhood": "Tropical"
+    },
+    {
+      "cep": "45209-098",
+      "street": "Avenida Radial",
+      "complement": "",
+      "neighborhood": "Tropical"
+    },
+    {
+      "cep": "45209-136",
+      "street": "Avenida S",
+      "complement": "Loteamento Jardim Tropical",
+      "neighborhood": "Tropical"
+    },
+    {
+      "cep": "45209-010",
+      "street": "Avenida Senhor do Bonfim",
+      "complement": "",
+      "neighborhood": "Tropical"
+    },
+    {
+      "cep": "45209-130",
+      "street": "Avenida T",
+      "complement": "Loteamento Jardim Tropical",
+      "neighborhood": "Tropical"
+    },
+    {
+      "cep": "45209-084",
+      "street": "Avenida Tropical",
+      "complement": "",
+      "neighborhood": "Tropical"
+    },
+    {
+      "cep": "45209-160",
+      "street": "Estrada de Ferro Nazaré Sá",
+      "complement": "",
+      "neighborhood": "Tropical"
+    },
+    {
+      "cep": "45209-142",
+      "street": "Estrada Salvador Paulo Garcia",
+      "complement": "",
+      "neighborhood": "Tropical"
+    },
+    {
+      "cep": "45209-144",
+      "street": "Rua 1",
+      "complement": "Cachoeirinha III e IV",
+      "neighborhood": "Tropical"
+    },
+    {
+      "cep": "45206-501",
+      "street": "1ª Travessa da Igreja São José",
+      "complement": "lado par",
+      "neighborhood": "Água Branca"
+    },
+    {
+      "cep": "45206-719",
+      "street": "1ª Travessa P",
+      "complement": "Loteamento Água Branca",
+      "neighborhood": "Água Branca"
+    },
+    {
+      "cep": "45206-717",
+      "street": "2ª Travessa P",
+      "complement": "Loteamento Água Branca",
+      "neighborhood": "Água Branca"
+    },
+    {
+      "cep": "45206-715",
+      "street": "3ª Travessa P",
+      "complement": "Loteamento Água Branca",
+      "neighborhood": "Água Branca"
+    },
+    {
+      "cep": "45206-805",
+      "street": "Avenida Deputado Luís Eduardo Magalhães",
+      "complement": "",
+      "neighborhood": "Água Branca"
+    },
+    {
+      "cep": "45206-625",
+      "street": "Praça do INOCOOP",
+      "complement": "",
+      "neighborhood": "Água Branca"
+    },
+    {
+      "cep": "45206-801",
+      "street": "Rua 1",
+      "complement": "Chácara Borda da Mata",
+      "neighborhood": "Água Branca"
+    },
+    {
+      "cep": "45206-803",
+      "street": "Rua 2",
+      "complement": "Chácara Borda da Mata",
+      "neighborhood": "Água Branca"
+    },
+    {
+      "cep": "45206-519",
+      "street": "Rua 26",
+      "complement": "",
+      "neighborhood": "Água Branca"
+    },
+    {
+      "cep": "45206-807",
+      "street": "Rua 3",
+      "complement": "Chácara Borda da Mata",
+      "neighborhood": "Água Branca"
+    },
+    {
+      "cep": "45206-809",
+      "street": "Rua 4",
+      "complement": "Chácara Borda da Mata",
+      "neighborhood": "Água Branca"
+    },
+    {
+      "cep": "45206-813",
+      "street": "Rua 6",
+      "complement": "Chácara Borda da Mata",
+      "neighborhood": "Água Branca"
+    },
+    {
+      "cep": "45206-815",
+      "street": "Rua 7",
+      "complement": "Chácara Borda da Mata",
+      "neighborhood": "Água Branca"
+    },
+    {
+      "cep": "45206-633",
+      "street": "Rua Acre",
+      "complement": "",
+      "neighborhood": "Água Branca"
+    },
+    {
+      "cep": "45206-669",
+      "street": "Rua Alagoas",
+      "complement": "",
+      "neighborhood": "Água Branca"
+    },
+    {
+      "cep": "45206-667",
+      "street": "Rua Amapá",
+      "complement": "",
+      "neighborhood": "Água Branca"
+    },
+    {
+      "cep": "45206-643",
+      "street": "Rua Amazonas",
+      "complement": "",
+      "neighborhood": "Água Branca"
+    },
+    {
+      "cep": "45206-783",
+      "street": "Rua Américo Vespúcio",
+      "complement": "",
+      "neighborhood": "Água Branca"
+    },
+    {
+      "cep": "45206-685",
+      "street": "Rua Bahia",
+      "complement": "",
+      "neighborhood": "Água Branca"
+    },
+    {
+      "cep": "45206-767",
+      "street": "Rua Campos Sales",
+      "complement": "",
+      "neighborhood": "Água Branca"
+    },
+    {
+      "cep": "45206-775",
+      "street": "Rua Castelo Branco",
+      "complement": "",
+      "neighborhood": "Água Branca"
+    },
+    {
+      "cep": "45206-765",
+      "street": "Rua Castro Alves",
+      "complement": "",
+      "neighborhood": "Água Branca"
+    },
+    {
+      "cep": "45206-663",
+      "street": "Rua Ceará",
+      "complement": "",
+      "neighborhood": "Água Branca"
+    },
+    {
+      "cep": "45206-577",
+      "street": "Rua Cidade de Anápolis",
+      "complement": "",
+      "neighborhood": "Água Branca"
+    },
+    {
+      "cep": "45206-581",
+      "street": "Rua Cidade de Angra dos Reis",
+      "complement": "",
+      "neighborhood": "Água Branca"
+    },
+    {
+      "cep": "45206-587",
+      "street": "Rua Cidade de Aracaju",
+      "complement": "",
+      "neighborhood": "Água Branca"
+    },
+    {
+      "cep": "45206-569",
+      "street": "Rua Cidade de Belém",
+      "complement": "",
+      "neighborhood": "Água Branca"
+    },
+    {
+      "cep": "45206-571",
+      "street": "Rua Cidade de Belo Horizonte",
+      "complement": "",
+      "neighborhood": "Água Branca"
+    },
+    {
+      "cep": "45206-575",
+      "street": "Rua Cidade de Blumenau",
+      "complement": "",
+      "neighborhood": "Água Branca"
+    },
+    {
+      "cep": "45206-527",
+      "street": "Rua Cidade de Brasília",
+      "complement": "",
+      "neighborhood": "Água Branca"
+    },
+    {
+      "cep": "45206-579",
+      "street": "Rua Cidade de Cabo Frio",
+      "complement": "",
+      "neighborhood": "Água Branca"
+    },
+    {
+      "cep": "45206-583",
+      "street": "Rua Cidade de Campina Grande",
+      "complement": "",
+      "neighborhood": "Água Branca"
+    },
+    {
+      "cep": "45206-585",
+      "street": "Rua Cidade de Caruaru",
+      "complement": "",
+      "neighborhood": "Água Branca"
+    },
+    {
+      "cep": "45206-609",
+      "street": "Rua Cidade de Cuiabá",
+      "complement": "",
+      "neighborhood": "Água Branca"
+    },
+    {
+      "cep": "45206-611",
+      "street": "Rua Cidade de Curitiba",
+      "complement": "",
+      "neighborhood": "Água Branca"
+    },
+    {
+      "cep": "45206-607",
+      "street": "Rua Cidade de Feira de Santana",
+      "complement": "",
+      "neighborhood": "Água Branca"
+    },
+    {
+      "cep": "45206-603",
+      "street": "Rua Cidade de Florianópolis",
+      "complement": "",
+      "neighborhood": "Água Branca"
+    },
+    {
+      "cep": "45206-601",
+      "street": "Rua Cidade de Fortaleza",
+      "complement": "",
+      "neighborhood": "Água Branca"
+    },
+    {
+      "cep": "45206-599",
+      "street": "Rua Cidade de Goiânia",
+      "complement": "",
+      "neighborhood": "Água Branca"
+    },
+    {
+      "cep": "45206-597",
+      "street": "Rua Cidade de Governador Valadares",
+      "complement": "",
+      "neighborhood": "Água Branca"
+    },
+    {
+      "cep": "45206-595",
+      "street": "Rua Cidade de Ilhéus",
+      "complement": "",
+      "neighborhood": "Água Branca"
+    },
+    {
+      "cep": "45206-605",
+      "street": "Rua Cidade de Itabuna",
+      "complement": "",
+      "neighborhood": "Água Branca"
+    },
+    {
+      "cep": "45206-593",
+      "street": "Rua Cidade de Jequié",
+      "complement": "",
+      "neighborhood": "Água Branca"
+    },
+    {
+      "cep": "45206-565",
+      "street": "Rua Cidade de João Pessoa",
+      "complement": "",
+      "neighborhood": "Água Branca"
+    },
+    {
+      "cep": "45206-551",
+      "street": "Rua Cidade de Juiz de Fora",
+      "complement": "",
+      "neighborhood": "Água Branca"
+    },
+    {
+      "cep": "45206-547",
+      "street": "Rua Cidade de Jundiaí",
+      "complement": "",
+      "neighborhood": "Água Branca"
+    },
+    {
+      "cep": "45206-541",
+      "street": "Rua Cidade de Macapá",
+      "complement": "",
+      "neighborhood": "Água Branca"
+    },
+    {
+      "cep": "45206-537",
+      "street": "Rua Cidade de Maceió",
+      "complement": "",
+      "neighborhood": "Água Branca"
+    },
+    {
+      "cep": "45206-525",
+      "street": "Rua Cidade de Manaus",
+      "complement": "",
+      "neighborhood": "Água Branca"
+    },
+    {
+      "cep": "45206-563",
+      "street": "Rua Cidade de Olinda",
+      "complement": "",
+      "neighborhood": "Água Branca"
+    },
+    {
+      "cep": "45206-561",
+      "street": "Rua Cidade de Ouro Preto",
+      "complement": "",
+      "neighborhood": "Água Branca"
+    },
+    {
+      "cep": "45206-567",
+      "street": "Rua Cidade de Palmas",
+      "complement": "",
+      "neighborhood": "Água Branca"
+    },
+    {
+      "cep": "45206-557",
+      "street": "Rua Cidade de Penedo",
+      "complement": "",
+      "neighborhood": "Água Branca"
+    },
+    {
+      "cep": "45206-553",
+      "street": "Rua Cidade de Petrolina",
+      "complement": "",
+      "neighborhood": "Água Branca"
+    },
+    {
+      "cep": "45206-549",
+      "street": "Rua Cidade de Poços de Caldas",
+      "complement": "",
+      "neighborhood": "Água Branca"
+    },
+    {
+      "cep": "45206-545",
+      "street": "Rua Cidade de Ponta Porã",
+      "complement": "",
+      "neighborhood": "Água Branca"
+    },
+    {
+      "cep": "45206-539",
+      "street": "Rua Cidade de Porto Alegre",
+      "complement": "",
+      "neighborhood": "Água Branca"
+    },
+    {
+      "cep": "45206-533",
+      "street": "Rua Cidade de Porto Velho",
+      "complement": "",
+      "neighborhood": "Água Branca"
+    },
+    {
+      "cep": "45206-531",
+      "street": "Rua Cidade de Propriá",
+      "complement": "",
+      "neighborhood": "Água Branca"
+    },
+    {
+      "cep": "45206-529",
+      "street": "Rua Cidade de Recife",
+      "complement": "",
+      "neighborhood": "Água Branca"
+    },
+    {
+      "cep": "45206-535",
+      "street": "Rua Cidade de Rio Branco",
+      "complement": "",
+      "neighborhood": "Água Branca"
+    },
+    {
+      "cep": "45206-523",
+      "street": "Rua Cidade de Rio de Contas",
+      "complement": "",
+      "neighborhood": "Água Branca"
+    },
+    {
+      "cep": "45206-591",
+      "street": "Rua Cidade de Salvador",
+      "complement": "",
+      "neighborhood": "Água Branca"
+    },
+    {
+      "cep": "45206-559",
+      "street": "Rua Cidade de São Paulo",
+      "complement": "",
+      "neighborhood": "Água Branca"
+    },
+    {
+      "cep": "45206-589",
+      "street": "Rua Cidade de Teresina",
+      "complement": "",
+      "neighborhood": "Água Branca"
+    },
+    {
+      "cep": "45206-555",
+      "street": "Rua Cidade de Vitória da Conquista",
+      "complement": "",
+      "neighborhood": "Água Branca"
+    },
+    {
+      "cep": "45206-573",
+      "street": "Rua Cidade do Amapá",
+      "complement": "",
+      "neighborhood": "Água Branca"
+    },
+    {
+      "cep": "45206-543",
+      "street": "Rua Cidade do Rio de Janeiro",
+      "complement": "",
+      "neighborhood": "Água Branca"
+    },
+    {
+      "cep": "45206-797",
+      "street": "Rua Costa e Silva",
+      "complement": "",
+      "neighborhood": "Água Branca"
+    },
+    {
+      "cep": "45206-503",
+      "street": "Rua da Igreja São José",
+      "complement": "",
+      "neighborhood": "Água Branca"
+    },
+    {
+      "cep": "45206-795",
+      "street": "Rua da Paz",
+      "complement": "",
+      "neighborhood": "Água Branca"
+    },
+    {
+      "cep": "45206-755",
+      "street": "Rua Dom Pedro I",
+      "complement": "",
+      "neighborhood": "Água Branca"
+    },
+    {
+      "cep": "45206-761",
+      "street": "Rua Doutor Simão Souza",
+      "complement": "",
+      "neighborhood": "Água Branca"
+    },
+    {
+      "cep": "45206-681",
+      "street": "Rua Espírito Santo",
+      "complement": "",
+      "neighborhood": "Água Branca"
+    },
+    {
+      "cep": "45206-769",
+      "street": "Rua Floriano Peixoto",
+      "complement": "",
+      "neighborhood": "Água Branca"
+    },
+    {
+      "cep": "45206-789",
+      "street": "Rua Getúlio Vargas",
+      "complement": "",
+      "neighborhood": "Água Branca"
+    },
+    {
+      "cep": "45206-635",
+      "street": "Rua Goiás",
+      "complement": "",
+      "neighborhood": "Água Branca"
+    },
+    {
+      "cep": "45206-785",
+      "street": "Rua Jânio Quadros",
+      "complement": "",
+      "neighborhood": "Água Branca"
+    },
+    {
+      "cep": "45206-763",
+      "street": "Rua Joana Angélica",
+      "complement": "",
+      "neighborhood": "Água Branca"
+    },
+    {
+      "cep": "45206-707",
+      "street": "Rua L",
+      "complement": "Loteamento Água Branca",
+      "neighborhood": "Água Branca"
+    },
+    {
+      "cep": "45206-705",
+      "street": "Rua M",
+      "complement": "Loteamento Água Branca",
+      "neighborhood": "Água Branca"
+    },
+    {
+      "cep": "45206-679",
+      "street": "Rua Maranhão",
+      "complement": "",
+      "neighborhood": "Água Branca"
+    },
+    {
+      "cep": "45206-757",
+      "street": "Rua Maria da Penha",
+      "complement": "",
+      "neighborhood": "Água Branca"
+    },
+    {
+      "cep": "45206-641",
+      "street": "Rua Mato Grosso",
+      "complement": "",
+      "neighborhood": "Água Branca"
+    },
+    {
+      "cep": "45206-637",
+      "street": "Rua Mato Grosso do Sul",
+      "complement": "",
+      "neighborhood": "Água Branca"
+    },
+    {
+      "cep": "45206-631",
+      "street": "Rua Mestre Domingos da Silva Santos",
+      "complement": "",
+      "neighborhood": "Água Branca"
+    },
+    {
+      "cep": "45206-673",
+      "street": "Rua Minas Gerais",
+      "complement": "",
+      "neighborhood": "Água Branca"
+    },
+    {
+      "cep": "45206-703",
+      "street": "Rua N",
+      "complement": "Loteamento Água Branca",
+      "neighborhood": "Água Branca"
+    },
+    {
+      "cep": "45206-701",
+      "street": "Rua O",
+      "complement": "Loteamento Água Branca",
+      "neighborhood": "Água Branca"
+    },
+    {
+      "cep": "45206-777",
+      "street": "Rua Olavo Bilac",
+      "complement": "",
+      "neighborhood": "Água Branca"
+    },
+    {
+      "cep": "45206-699",
+      "street": "Rua P",
+      "complement": "Loteamento Água Branca",
+      "neighborhood": "Água Branca"
+    },
+    {
+      "cep": "45206-649",
+      "street": "Rua Pará",
+      "complement": "",
+      "neighborhood": "Água Branca"
+    },
+    {
+      "cep": "45206-665",
+      "street": "Rua Paraíba",
+      "complement": "",
+      "neighborhood": "Água Branca"
+    },
+    {
+      "cep": "45206-745",
+      "street": "Rua Paraíso",
+      "complement": "",
+      "neighborhood": "Água Branca"
+    },
+    {
+      "cep": "45206-655",
+      "street": "Rua Paraná",
+      "complement": "",
+      "neighborhood": "Água Branca"
+    },
+    {
+      "cep": "45206-657",
+      "street": "Rua Pernambuco",
+      "complement": "",
+      "neighborhood": "Água Branca"
+    },
+    {
+      "cep": "45206-661",
+      "street": "Rua Piauí",
+      "complement": "",
+      "neighborhood": "Água Branca"
+    },
+    {
+      "cep": "45206-773",
+      "street": "Rua Professor Reinaldo de Moura Pinheiro",
+      "complement": "",
+      "neighborhood": "Água Branca"
+    },
+    {
+      "cep": "45206-695",
+      "street": "Rua R",
+      "complement": "Loteamento Água Branca",
+      "neighborhood": "Água Branca"
+    },
+    {
+      "cep": "45206-677",
+      "street": "Rua Rio Grande do Norte",
+      "complement": "",
+      "neighborhood": "Água Branca"
+    },
+    {
+      "cep": "45206-647",
+      "street": "Rua Rio Grande do Sul",
+      "complement": "",
+      "neighborhood": "Água Branca"
+    },
+    {
+      "cep": "45206-683",
+      "street": "Rua Rondônia",
+      "complement": "",
+      "neighborhood": "Água Branca"
+    },
+    {
+      "cep": "45206-651",
+      "street": "Rua Roraima",
+      "complement": "",
+      "neighborhood": "Água Branca"
+    },
+    {
+      "cep": "45206-693",
+      "street": "Rua S",
+      "complement": "Loteamento Água Branca",
+      "neighborhood": "Água Branca"
+    },
+    {
+      "cep": "45206-653",
+      "street": "Rua Santa Catarina",
+      "complement": "",
+      "neighborhood": "Água Branca"
+    },
+    {
+      "cep": "45206-781",
+      "street": "Rua Santos Dumont",
+      "complement": "",
+      "neighborhood": "Água Branca"
+    },
+    {
+      "cep": "45206-675",
+      "street": "Rua São Paulo",
+      "complement": "",
+      "neighborhood": "Água Branca"
+    },
+    {
+      "cep": "45206-671",
+      "street": "Rua Sergipe",
+      "complement": "",
+      "neighborhood": "Água Branca"
+    },
+    {
+      "cep": "45206-751",
+      "street": "Rua Sol Nascente",
+      "complement": "",
+      "neighborhood": "Água Branca"
+    },
+    {
+      "cep": "45206-645",
+      "street": "Rua Solimões",
+      "complement": "",
+      "neighborhood": "Água Branca"
+    },
+    {
+      "cep": "45206-691",
+      "street": "Rua T",
+      "complement": "Loteamento Água Branca",
+      "neighborhood": "Água Branca"
+    },
+    {
+      "cep": "45206-799",
+      "street": "Rua Tancredo Neves",
+      "complement": "",
+      "neighborhood": "Água Branca"
+    },
+    {
+      "cep": "45206-779",
+      "street": "Rua Tiradentes",
+      "complement": "",
+      "neighborhood": "Água Branca"
+    },
+    {
+      "cep": "45206-639",
+      "street": "Rua Tocantins",
+      "complement": "",
+      "neighborhood": "Água Branca"
+    },
+    {
+      "cep": "45206-787",
+      "street": "Rua Tomé de Souza",
+      "complement": "",
+      "neighborhood": "Água Branca"
+    },
+    {
+      "cep": "45206-689",
+      "street": "Rua U",
+      "complement": "Loteamento Água Branca",
+      "neighborhood": "Água Branca"
+    },
+    {
+      "cep": "45206-791",
+      "street": "Rua Ulisses Guimarães",
+      "complement": "",
+      "neighborhood": "Água Branca"
+    },
+    {
+      "cep": "45206-827",
+      "street": "Rua Vovó Camila",
+      "complement": "",
+      "neighborhood": "Água Branca"
+    },
+    {
+      "cep": "45206-621",
+      "street": "Rua Waldir Leite",
+      "complement": "",
+      "neighborhood": "Água Branca"
+    },
+    {
+      "cep": "45206-793",
+      "street": "Rua Zenaide Rocha",
+      "complement": "",
+      "neighborhood": "Água Branca"
+    },
+    {
+      "cep": "45206-659",
+      "street": "Travessa Ceará",
+      "complement": "",
+      "neighborhood": "Água Branca"
+    },
+    {
+      "cep": "45206-771",
+      "street": "Travessa Floriano Peixoto",
+      "complement": "",
+      "neighborhood": "Água Branca"
+    },
+    {
+      "cep": "45203-688",
+      "street": "1ª Travessa Americano da Costa",
+      "complement": "",
+      "neighborhood": "Caixa D'Água"
+    },
+    {
+      "cep": "45203-684",
+      "street": "1ª Travessa Caramuru",
+      "complement": "",
+      "neighborhood": "Caixa D'Água"
+    },
+    {
+      "cep": "45203-440",
+      "street": "1ª Travessa D'Abruzzi",
+      "complement": "",
+      "neighborhood": "Caixa D'Água"
+    },
+    {
+      "cep": "45203-608",
+      "street": "1ª Travessa Dom Climério",
+      "complement": "",
+      "neighborhood": "Caixa D'Água"
+    },
+    {
+      "cep": "45203-476",
+      "street": "1ª Travessa Doutor Duarte Muniz de Aragão",
+      "complement": "",
+      "neighborhood": "Caixa D'Água"
+    },
+    {
+      "cep": "45203-692",
+      "street": "1ª Travessa Duque de Caxias",
+      "complement": "",
+      "neighborhood": "Caixa D'Água"
+    },
+    {
+      "cep": "45203-604",
+      "street": "1ª Travessa José Borges da Silva",
+      "complement": "",
+      "neighborhood": "Caixa D'Água"
+    },
+    {
+      "cep": "45203-589",
+      "street": "1ª Travessa São Bento",
+      "complement": "",
+      "neighborhood": "Caixa D'Água"
+    },
+    {
+      "cep": "45203-492",
+      "street": "1ª Travessa São Bernardo",
+      "complement": "",
+      "neighborhood": "Caixa D'Água"
+    },
+    {
+      "cep": "45203-648",
+      "street": "1ª Travessa Vicente Leone",
+      "complement": "",
+      "neighborhood": "Caixa D'Água"
+    },
+    {
+      "cep": "45203-432",
+      "street": "2ª Travessa D'Abruzzi",
+      "complement": "",
+      "neighborhood": "Caixa D'Água"
+    },
+    {
+      "cep": "45203-612",
+      "street": "2ª Travessa Dom Climério",
+      "complement": "",
+      "neighborhood": "Caixa D'Água"
+    },
+    {
+      "cep": "45203-701",
+      "street": "2ª Travessa Duque de Caxias",
+      "complement": "",
+      "neighborhood": "Caixa D'Água"
+    },
+    {
+      "cep": "45203-601",
+      "street": "2ª Travessa José Borges da Silva",
+      "complement": "",
+      "neighborhood": "Caixa D'Água"
+    },
+    {
+      "cep": "45203-656",
+      "street": "2ª Travessa Vicente Leone",
+      "complement": "",
+      "neighborhood": "Caixa D'Água"
+    },
+    {
+      "cep": "45203-616",
+      "street": "3ª Travessa José Borges da Silva",
+      "complement": "",
+      "neighborhood": "Caixa D'Água"
+    },
+    {
+      "cep": "45203-664",
+      "street": "3ª Travessa Vicente Leone",
+      "complement": "",
+      "neighborhood": "Caixa D'Água"
+    },
+    {
+      "cep": "45203-724",
+      "street": "4ª Travessa Duque de Caxias",
+      "complement": "",
+      "neighborhood": "Caixa D'Água"
+    },
+    {
+      "cep": "45203-668",
+      "street": "4ª Travessa Vicente Leone",
+      "complement": "",
+      "neighborhood": "Caixa D'Água"
+    },
+    {
+      "cep": "45203-676",
+      "street": "5ª Travessa Vicente Leone",
+      "complement": "",
+      "neighborhood": "Caixa D'Água"
+    },
+    {
+      "cep": "45203-661",
+      "street": "6ª Travessa Vicente Leone",
+      "complement": "",
+      "neighborhood": "Caixa D'Água"
+    },
+    {
+      "cep": "45203-672",
+      "street": "7ª Travessa Vicente Leone",
+      "complement": "",
+      "neighborhood": "Caixa D'Água"
+    },
+    {
+      "cep": "45203-516",
+      "street": "Rua Abrão Rodrigues",
+      "complement": "",
+      "neighborhood": "Caixa D'Água"
+    },
+    {
+      "cep": "45203-412",
+      "street": "Rua Alcides Vieira",
+      "complement": "",
+      "neighborhood": "Caixa D'Água"
+    },
+    {
+      "cep": "45203-621",
+      "street": "Rua Alvino Ramos",
+      "complement": "",
+      "neighborhood": "Caixa D'Água"
+    },
+    {
+      "cep": "45203-464",
+      "street": "Rua Basílio Elói",
+      "complement": "",
+      "neighborhood": "Caixa D'Água"
+    },
+    {
+      "cep": "45202-470",
+      "street": "Rua Basílio Eloy",
+      "complement": "",
+      "neighborhood": "Caixa D'Água"
+    },
+    {
+      "cep": "45203-504",
+      "street": "Rua Boaçu",
+      "complement": "",
+      "neighborhood": "Caixa D'Água"
+    },
+    {
+      "cep": "45203-680",
+      "street": "Rua Caramuru",
+      "complement": "",
+      "neighborhood": "Caixa D'Água"
+    },
+    {
+      "cep": "45203-524",
+      "street": "Rua Celina Sales da Silva",
+      "complement": "",
+      "neighborhood": "Caixa D'Água"
+    },
+    {
+      "cep": "45203-568",
+      "street": "Rua das Macambiras",
+      "complement": "",
+      "neighborhood": "Caixa D'Água"
+    },
+    {
+      "cep": "45204-213",
+      "street": "2ª Travessa Leur Lomanto",
+      "complement": "",
+      "neighborhood": "São Judas Tadeu"
+    },
+    {
+      "cep": "45204-221",
+      "street": "3ª Travessa Leur Lomanto",
+      "complement": "",
+      "neighborhood": "São Judas Tadeu"
+    },
+    {
+      "cep": "45204-365",
+      "street": "Rua 66",
+      "complement": "Loteamento Jardim Amaralina",
+      "neighborhood": "São Judas Tadeu"
+    },
+    {
+      "cep": "45204-337",
+      "street": "Rua 67",
+      "complement": "Loteamento Jardim Amaralina",
+      "neighborhood": "São Judas Tadeu"
+    },
+    {
+      "cep": "45204-319",
+      "street": "Rua 68",
+      "complement": "Loteamento Jardim Amaralina",
+      "neighborhood": "São Judas Tadeu"
+    },
+    {
+      "cep": "45210-110",
+      "street": "3ª Travessa Miguel Gomes da Silva",
+      "complement": "",
+      "neighborhood": "Mandacaru"
+    },
+    {
+      "cep": "45210-152",
+      "street": "3ª Travessa Professor Damião Vieira",
+      "complement": "",
+      "neighborhood": "Mandacaru"
+    },
+    {
+      "cep": "45210-112",
+      "street": "4ª Travessa Miguel Gomes da Silva",
+      "complement": "",
+      "neighborhood": "Mandacaru"
+    },
+    {
+      "cep": "45208-000",
+      "street": "Avenida Otávio Mangabeira",
+      "complement": "",
+      "neighborhood": "Mandacaru"
+    },
+    {
+      "cep": "45210-074",
+      "street": "Rua 17",
+      "complement": "Zimbrune lado par",
+      "neighborhood": "Mandacaru"
+    },
+    {
+      "cep": "45210-160",
+      "street": "Rua A",
+      "complement": "Distrito Industrial",
+      "neighborhood": "Mandacaru"
+    },
+    {
+      "cep": "45210-076",
+      "street": "Rua Alagoas",
+      "complement": "",
+      "neighborhood": "Mandacaru"
+    },
+    {
+      "cep": "45210-062",
+      "street": "Rua Antero Cícero",
+      "complement": "",
+      "neighborhood": "Mandacaru"
+    },
+    {
+      "cep": "45207-290",
+      "street": "Rua Antero Cícero dos Santos",
+      "complement": "",
+      "neighborhood": "Mandacaru"
+    },
+    {
+      "cep": "45210-068",
+      "street": "Rua Antônio Alves de Melo",
+      "complement": "lado par",
+      "neighborhood": "Mandacaru"
+    },
+    {
+      "cep": "45210-064",
+      "street": "Rua Arthur Sanches",
+      "complement": "",
+      "neighborhood": "Mandacaru"
+    },
+    {
+      "cep": "45207-280",
+      "street": "Rua Artur Sanches",
+      "complement": "",
+      "neighborhood": "Mandacaru"
+    },
+    {
+      "cep": "45210-192",
+      "street": "Rua B",
+      "complement": "Distrito Industrial",
+      "neighborhood": "Mandacaru"
+    },
+    {
+      "cep": "45210-102",
+      "street": "Rua Bahia",
+      "complement": "",
+      "neighborhood": "Mandacaru"
+    },
+    {
+      "cep": "45207-050",
+      "street": "Rua Beira Rio",
+      "complement": "",
+      "neighborhood": "Mandacaru"
+    },
+    {
+      "cep": "45210-188",
+      "street": "Rua Bolívar Reis",
+      "complement": "",
+      "neighborhood": "Mandacaru"
+    },
+    {
+      "cep": "45202-001",
+      "street": "1ª Travessa Elísio Lapa",
+      "complement": "lado par",
+      "neighborhood": "Curral Novo"
+    },
+    {
+      "cep": "45202-118",
+      "street": "1ª Travessa Manoel Tibúrcio da Silva",
+      "complement": "",
+      "neighborhood": "Curral Novo"
+    },
+    {
+      "cep": "45202-122",
+      "street": "1ª Travessa Santa Rita de Cássia",
+      "complement": "",
+      "neighborhood": "Curral Novo"
+    },
+    {
+      "cep": "45202-028",
+      "street": "1ª Travessa São Geraldo",
+      "complement": "",
+      "neighborhood": "Curral Novo"
+    },
+    {
+      "cep": "45202-071",
+      "street": "1ª Travessa São Sebastião",
+      "complement": "",
+      "neighborhood": "Curral Novo"
+    },
+    {
+      "cep": "45202-004",
+      "street": "2ª Travessa Elísio Lapa",
+      "complement": "",
+      "neighborhood": "Curral Novo"
+    },
+    {
+      "cep": "45202-121",
+      "street": "2ª Travessa Manoel Tibúrcio da Silva",
+      "complement": "",
+      "neighborhood": "Curral Novo"
+    },
+    {
+      "cep": "45202-126",
+      "street": "2ª Travessa Santa Rita de Cássia",
+      "complement": "",
+      "neighborhood": "Curral Novo"
+    },
+    {
+      "cep": "45202-006",
+      "street": "3ª Travessa Elísio Lapa",
+      "complement": "",
+      "neighborhood": "Curral Novo"
+    },
+    {
+      "cep": "45202-132",
+      "street": "3ª Travessa Santa Rita de Cássia",
+      "complement": "",
+      "neighborhood": "Curral Novo"
+    },
+    {
+      "cep": "45202-008",
+      "street": "4ª Travessa Elísio Lapa",
+      "complement": "",
+      "neighborhood": "Curral Novo"
+    },
+    {
+      "cep": "45202-022",
+      "street": "Avenida Barragem de Pedras",
+      "complement": "",
+      "neighborhood": "Curral Novo"
+    },
+    {
+      "cep": "45202-025",
+      "street": "Avenida Tote Lomanto",
+      "complement": "",
+      "neighborhood": "Curral Novo"
+    },
+    {
+      "cep": "45202-124",
+      "street": "Corredor Santa Rita de Cássia",
+      "complement": "",
+      "neighborhood": "Curral Novo"
+    },
+    {
+      "cep": "45202-170",
+      "street": "Loteamento Jardim Primavera",
+      "complement": "",
+      "neighborhood": "Curral Novo"
+    },
+    {
+      "cep": "45201-760",
+      "street": "Loteamento Ipanema",
+      "complement": "",
+      "neighborhood": "Curral Novo"
+    },
+    {
+      "cep": "45201-740",
+      "street": "Loteamento Plano de Habitação",
+      "complement": "",
+      "neighborhood": "Curral Novo"
+    },
+    {
+      "cep": "45202-112",
+      "street": "Praça Capitão Silvino",
+      "complement": "",
+      "neighborhood": "Curral Novo"
+    },
+    {
+      "cep": "45202-054",
+      "street": "Rua 3",
+      "complement": "Mutirão Curral Novo",
+      "neighborhood": "Curral Novo"
+    },
+    {
+      "cep": "45202-042",
+      "street": "Rua 4",
+      "complement": "",
+      "neighborhood": "Curral Novo"
+    },
+    {
+      "cep": "45202-056",
+      "street": "Rua 4",
+      "complement": "Mutirão Curral Novo",
+      "neighborhood": "Curral Novo"
+    },
+    {
+      "cep": "45202-058",
+      "street": "Rua 5",
+      "complement": "Mutirão Curral Novo",
+      "neighborhood": "Curral Novo"
+    },
+    {
+      "cep": "45202-061",
+      "street": "Rua 6",
+      "complement": "Mutirão Curral Novo",
+      "neighborhood": "Curral Novo"
+    },
+    {
+      "cep": "45202-062",
+      "street": "Rua 7",
+      "complement": "Mutirão Curral Novo",
+      "neighborhood": "Curral Novo"
+    },
+    {
+      "cep": "45202-064",
+      "street": "Rua 8",
+      "complement": "Mutirão Curral Novo",
+      "neighborhood": "Curral Novo"
+    },
+    {
+      "cep": "45202-072",
+      "street": "Rua A",
+      "complement": "Loteamento Ipanema",
+      "neighborhood": "Curral Novo"
+    },
+    {
+      "cep": "45202-191",
+      "street": "Rua A2",
+      "complement": "Residencial Segredo",
+      "neighborhood": "Curral Novo"
+    },
+    {
+      "cep": "45202-030",
+      "street": "Rua Abílio Procópio",
+      "complement": "",
+      "neighborhood": "Curral Novo"
+    },
+    {
+      "cep": "45202-036",
+      "street": "Rua Aderbal Moreira Ferreira",
+      "complement": "",
+      "neighborhood": "Curral Novo"
+    },
+    {
+      "cep": "45202-020",
+      "street": "Rua Alfredo Ribeiro",
+      "complement": "",
+      "neighborhood": "Curral Novo"
+    },
+    {
+      "cep": "45202-040",
+      "street": "Rua Aliria Argolo",
+      "complement": "",
+      "neighborhood": "Curral Novo"
+    },
+    {
+      "cep": "45202-038",
+      "street": "Rua Alves Cardoso",
+      "complement": "",
+      "neighborhood": "Curral Novo"
+    },
+    {
+      "cep": "45202-051",
+      "street": "Rua Ana Delmira",
+      "complement": "",
+      "neighborhood": "Curral Novo"
+    },
+    {
+      "cep": "45202-150",
+      "street": "Rua Antônio J. de Brito",
+      "complement": "",
+      "neighborhood": "Curral Novo"
+    },
+    {
+      "cep": "45202-138",
+      "street": "Rua Augusto Cruz",
+      "complement": "",
+      "neighborhood": "Curral Novo"
+    },
+    {
+      "cep": "45202-142",
+      "street": "Rua B",
+      "complement": "Residencial Segredo",
+      "neighborhood": "Curral Novo"
+    },
+    {
+      "cep": "45202-074",
+      "street": "Rua B",
+      "complement": "Loteamento Ipanema",
+      "neighborhood": "Curral Novo"
+    },
+    {
+      "cep": "45202-192",
+      "street": "Rua B2",
+      "complement": "Residencial Segredo",
+      "neighborhood": "Curral Novo"
+    },
+    {
+      "cep": "45202-010",
+      "street": "Rua Barro Vermelho",
+      "complement": "",
+      "neighborhood": "Curral Novo"
+    },
+    {
+      "cep": "45202-076",
+      "street": "Rua C",
+      "complement": "Loteamento Ipanema",
+      "neighborhood": "Curral Novo"
+    },
+    {
+      "cep": "45202-144",
+      "street": "Rua C",
+      "complement": "Residencial Segredo",
+      "neighborhood": "Curral Novo"
+    },
+    {
+      "cep": "45202-194",
+      "street": "Rua C2",
+      "complement": "Residencial Segredo",
+      "neighborhood": "Curral Novo"
+    },
+    {
+      "cep": "45202-180",
+      "street": "Rua Capitão Oscar Sá",
+      "complement": "",
+      "neighborhood": "Curral Novo"
+    },
+    {
+      "cep": "45202-146",
+      "street": "Rua D",
+      "complement": "Residencial Segredo",
+      "neighborhood": "Curral Novo"
+    },
+    {
+      "cep": "45202-016",
+      "street": "Rua da Alegria",
+      "complement": "",
+      "neighborhood": "Curral Novo"
+    },
+    {
+      "cep": "45202-134",
+      "street": "Rua da Mangabeira",
+      "complement": "",
+      "neighborhood": "Curral Novo"
+    },
+    {
+      "cep": "45202-012",
+      "street": "Rua das Águas",
+      "complement": "",
+      "neighborhood": "Curral Novo"
+    },
+    {
+      "cep": "45202-050",
+      "street": "Rua Desembargador Andrade Teixeira",
+      "complement": "",
+      "neighborhood": "Curral Novo"
+    },
+    {
+      "cep": "45202-066",
+      "street": "Rua do Cemitério",
+      "complement": "",
+      "neighborhood": "Curral Novo"
+    },
+    {
+      "cep": "45202-136",
+      "street": "Rua do Come Quente",
+      "complement": "",
+      "neighborhood": "Curral Novo"
+    },
+    {
+      "cep": "45202-128",
+      "street": "Rua Dourado",
+      "complement": "",
+      "neighborhood": "Curral Novo"
+    },
+    {
+      "cep": "45202-148",
+      "street": "Rua E",
+      "complement": "Residencial Segredo",
+      "neighborhood": "Curral Novo"
+    },
+    {
+      "cep": "45202-041",
+      "street": "Rua Edevaldo Neto",
+      "complement": "",
+      "neighborhood": "Curral Novo"
+    },
+    {
+      "cep": "45202-002",
+      "street": "Rua Elísio Lapa",
+      "complement": "",
+      "neighborhood": "Curral Novo"
+    },
+    {
+      "cep": "45202-084",
+      "street": "Rua F",
+      "complement": "Loteamento Ipanema",
+      "neighborhood": "Curral Novo"
+    },
+    {
+      "cep": "45202-151",
+      "street": "Rua F",
+      "complement": "Residencial Segredo",
+      "neighborhood": "Curral Novo"
+    },
+    {
+      "cep": "45202-088",
+      "street": "Rua G",
+      "complement": "Loteamento Ipanema",
+      "neighborhood": "Curral Novo"
+    },
+    {
+      "cep": "45202-152",
+      "street": "Rua G",
+      "complement": "Residencial Segredo",
+      "neighborhood": "Curral Novo"
+    },
+    {
+      "cep": "45202-091",
+      "street": "Rua H",
+      "complement": "Loteamento Ipanema",
+      "neighborhood": "Curral Novo"
+    },
+    {
+      "cep": "45202-154",
+      "street": "Rua H",
+      "complement": "Residencial Segredo",
+      "neighborhood": "Curral Novo"
+    },
+    {
+      "cep": "45202-086",
+      "street": "Rua I",
+      "complement": "Loteamento Ipanema",
+      "neighborhood": "Curral Novo"
+    },
+    {
+      "cep": "45202-156",
+      "street": "Rua I",
+      "complement": "Residencial Segredo",
+      "neighborhood": "Curral Novo"
+    },
+    {
+      "cep": "45202-090",
+      "street": "Rua Ipiranga",
+      "complement": "",
+      "neighborhood": "Curral Novo"
+    },
+    {
+      "cep": "45202-045",
+      "street": "Rua Itagi",
+      "complement": "",
+      "neighborhood": "Curral Novo"
+    },
+    {
+      "cep": "45202-130",
+      "street": "Rua Itaibó",
+      "complement": "",
+      "neighborhood": "Curral Novo"
+    },
+    {
+      "cep": "45202-160",
+      "street": "Rua Itajuru",
+      "complement": "",
+      "neighborhood": "Curral Novo"
+    },
+    {
+      "cep": "45202-098",
+      "street": "Rua J",
+      "complement": "Loteamento Ipanema",
+      "neighborhood": "Curral Novo"
+    },
+    {
+      "cep": "45202-158",
+      "street": "Rua J",
+      "complement": "Residencial Segredo",
+      "neighborhood": "Curral Novo"
+    },
+    {
+      "cep": "45202-044",
+      "street": "Rua Jean Marcos S de Jesus",
+      "complement": "",
+      "neighborhood": "Curral Novo"
+    },
+    {
+      "cep": "45202-131",
+      "street": "Rua Jequié",
+      "complement": "",
+      "neighborhood": "Curral Novo"
+    },
+    {
+      "cep": "45202-110",
+      "street": "Rua João José Duarte",
+      "complement": "",
+      "neighborhood": "Curral Novo"
+    },
+    {
+      "cep": "45202-190",
+      "street": "Rua Joaquim Fernandes",
+      "complement": "",
+      "neighborhood": "Curral Novo"
+    },
+    {
+      "cep": "45202-026",
+      "street": "Rua José de Oliveira",
+      "complement": "",
+      "neighborhood": "Curral Novo"
+    },
+    {
+      "cep": "45202-111",
+      "street": "Rua Jovino Brito",
+      "complement": "",
+      "neighborhood": "Curral Novo"
+    },
+    {
+      "cep": "45202-106",
+      "street": "Rua K",
+      "complement": "Loteamento Ipanema",
+      "neighborhood": "Curral Novo"
+    },
+    {
+      "cep": "45202-161",
+      "street": "Rua K",
+      "complement": "Residencial Segredo",
+      "neighborhood": "Curral Novo"
+    },
+    {
+      "cep": "45202-108",
+      "street": "Rua L",
+      "complement": "Loteamento Ipanema",
+      "neighborhood": "Curral Novo"
+    },
+    {
+      "cep": "45202-162",
+      "street": "Rua L",
+      "complement": "Residencial Segredo",
+      "neighborhood": "Curral Novo"
+    },
+    {
+      "cep": "45202-100",
+      "street": "Rua Leur Brito",
+      "complement": "",
+      "neighborhood": "Curral Novo"
+    },
+    {
+      "cep": "45202-104",
+      "street": "Rua M",
+      "complement": "Loteamento Ipanema",
+      "neighborhood": "Curral Novo"
+    },
+    {
+      "cep": "45202-164",
+      "street": "Rua M",
+      "complement": "Residencial Segredo",
+      "neighborhood": "Curral Novo"
+    },
+    {
+      "cep": "45202-081",
+      "street": "Rua Manoel Francisco Rosa",
+      "complement": "",
+      "neighborhood": "Curral Novo"
+    },
+    {
+      "cep": "45202-080",
+      "street": "Rua Manoel P. de Araújo",
+      "complement": "",
+      "neighborhood": "Curral Novo"
+    },
+    {
+      "cep": "45202-014",
+      "street": "Rua Manoel Tibúrcio da Silva",
+      "complement": "",
+      "neighborhood": "Curral Novo"
+    },
+    {
+      "cep": "45202-046",
+      "street": "Rua Maura Santana",
+      "complement": "",
+      "neighborhood": "Curral Novo"
+    },
+    {
+      "cep": "45202-166",
+      "street": "Rua N",
+      "complement": "Residencial Segredo",
+      "neighborhood": "Curral Novo"
+    },
+    {
+      "cep": "45202-102",
+      "street": "Rua O",
+      "complement": "Loteamento Ipanema",
+      "neighborhood": "Curral Novo"
+    },
+    {
+      "cep": "45202-168",
+      "street": "Rua O",
+      "complement": "Residencial Segredo",
+      "neighborhood": "Curral Novo"
+    },
+    {
+      "cep": "45202-172",
+      "street": "Rua P",
+      "complement": "Residencial Segredo",
+      "neighborhood": "Curral Novo"
+    },
+    {
+      "cep": "45202-140",
+      "street": "Rua Permínio Amorim",
+      "complement": "",
+      "neighborhood": "Curral Novo"
+    },
+    {
+      "cep": "45202-070",
+      "street": "Rua Primeiro de Maio",
+      "complement": "",
+      "neighborhood": "Curral Novo"
+    },
+    {
+      "cep": "45202-171",
+      "street": "Rua Principal",
+      "complement": "",
+      "neighborhood": "Curral Novo"
+    },
+    {
+      "cep": "45202-114",
+      "street": "Rua Professora Maria Amélia",
+      "complement": "",
+      "neighborhood": "Curral Novo"
+    },
+    {
+      "cep": "45202-092",
+      "street": "Rua Q",
+      "complement": "Loteamento Ipanema",
+      "neighborhood": "Curral Novo"
+    },
+    {
+      "cep": "45202-174",
+      "street": "Rua Q",
+      "complement": "Residencial Segredo",
+      "neighborhood": "Curral Novo"
+    },
+    {
+      "cep": "45202-101",
+      "street": "Rua R",
+      "complement": "Loteamento Ipanema",
+      "neighborhood": "Curral Novo"
+    },
+    {
+      "cep": "45202-176",
+      "street": "Rua R",
+      "complement": "Residencial Segredo",
+      "neighborhood": "Curral Novo"
+    },
+    {
+      "cep": "45202-094",
+      "street": "Rua S",
+      "complement": "Loteamento Ipanema",
+      "neighborhood": "Curral Novo"
+    },
+    {
+      "cep": "45202-178",
+      "street": "Rua S",
+      "complement": "Residencial Segredo",
+      "neighborhood": "Curral Novo"
+    },
+    {
+      "cep": "45202-060",
+      "street": "Rua Santa Maria",
+      "complement": "",
+      "neighborhood": "Curral Novo"
+    },
+    {
+      "cep": "45202-116",
+      "street": "Rua Santa Rita de Cássia",
+      "complement": "",
+      "neighborhood": "Curral Novo"
+    },
+    {
+      "cep": "45210-362",
+      "street": "Avenida Beira Rio",
+      "complement": "",
+      "neighborhood": "Itaigara"
+    },
+    {
+      "cep": "45210-384",
+      "street": "Avenida Exupério Miranda",
+      "complement": "851 a 1619 lado ímpar",
+      "neighborhood": "Itaigara"
+    },
+    {
+      "cep": "45210-478",
+      "street": "Avenida Exupério Miranda",
+      "complement": "1621/1622 ao fim",
+      "neighborhood": "Itaigara"
+    },
+    {
+      "cep": "45210-366",
+      "street": "Avenida Ildefonso Guedes de Araújo",
+      "complement": "",
+      "neighborhood": "Itaigara"
+    },
+    {
+      "cep": "45210-374",
+      "street": "Avenida Joana Augusta de Oliveira e Souza",
+      "complement": "",
+      "neighborhood": "Itaigara"
+    },
+    {
+      "cep": "45210-402",
+      "street": "Avenida João Araújo Garcia",
+      "complement": "",
+      "neighborhood": "Itaigara"
+    },
+    {
+      "cep": "45210-476",
+      "street": "Rua 10",
+      "complement": "Zimbrune",
+      "neighborhood": "Itaigara"
+    },
+    {
+      "cep": "45210-466",
+      "street": "Rua 11",
+      "complement": "Zimbrune",
+      "neighborhood": "Itaigara"
+    },
+    {
+      "cep": "45210-456",
+      "street": "Rua 12",
+      "complement": "Zimbrune",
+      "neighborhood": "Itaigara"
+    },
+    {
+      "cep": "45210-464",
+      "street": "Rua 13",
+      "complement": "Zimbrune",
+      "neighborhood": "Itaigara"
+    },
+    {
+      "cep": "45210-462",
+      "street": "Rua 14",
+      "complement": "Zimbrune",
+      "neighborhood": "Itaigara"
+    },
+    {
+      "cep": "45210-460",
+      "street": "Rua 15",
+      "complement": "Zimbrune",
+      "neighborhood": "Itaigara"
+    },
+    {
+      "cep": "45210-458",
+      "street": "Rua 16",
+      "complement": "Zimbrune",
+      "neighborhood": "Itaigara"
+    },
+    {
+      "cep": "45210-480",
+      "street": "Rua 17",
+      "complement": "Zimbrune lado ímpar",
+      "neighborhood": "Itaigara"
+    },
+    {
+      "cep": "45210-486",
+      "street": "Rua 18",
+      "complement": "Zimbrune",
+      "neighborhood": "Itaigara"
+    },
+    {
+      "cep": "45210-490",
+      "street": "Rua 19",
+      "complement": "Zimbrune",
+      "neighborhood": "Itaigara"
+    },
+    {
+      "cep": "45210-470",
+      "street": "Rua 2",
+      "complement": "Zimbrune",
+      "neighborhood": "Itaigara"
+    },
+    {
+      "cep": "45210-494",
+      "street": "Rua 20",
+      "complement": "Zimbrune",
+      "neighborhood": "Itaigara"
+    },
+    {
+      "cep": "45210-482",
+      "street": "Rua 21",
+      "complement": "Zimbrune",
+      "neighborhood": "Itaigara"
+    },
+    {
+      "cep": "45210-424",
+      "street": "Rua 22",
+      "complement": "Zimbrune",
+      "neighborhood": "Itaigara"
+    },
+    {
+      "cep": "45210-468",
+      "street": "Rua 3",
+      "complement": "Zimbrune",
+      "neighborhood": "Itaigara"
+    },
+    {
+      "cep": "45210-472",
+      "street": "Rua 4",
+      "complement": "Zimbrune",
+      "neighborhood": "Itaigara"
+    },
+    {
+      "cep": "45210-484",
+      "street": "Rua 5",
+      "complement": "Zimbrune",
+      "neighborhood": "Itaigara"
+    },
+    {
+      "cep": "45210-488",
+      "street": "Rua 6",
+      "complement": "Zimbrune",
+      "neighborhood": "Itaigara"
+    },
+    {
+      "cep": "45210-492",
+      "street": "Rua 7",
+      "complement": "Zimbrune",
+      "neighborhood": "Itaigara"
+    },
+    {
+      "cep": "45210-498",
+      "street": "Rua 8",
+      "complement": "Zimbrune",
+      "neighborhood": "Itaigara"
+    },
+    {
+      "cep": "45210-496",
+      "street": "Rua 9",
+      "complement": "Zimbrune",
+      "neighborhood": "Itaigara"
+    },
+    {
+      "cep": "45210-418",
+      "street": "Rua A",
+      "complement": "Zimbrune",
+      "neighborhood": "Itaigara"
+    },
+    {
+      "cep": "45210-390",
+      "street": "Rua Almerinda Lomanto",
+      "complement": "",
+      "neighborhood": "Itaigara"
+    },
+    {
+      "cep": "45210-416",
+      "street": "Rua Aloysio Borges de Souza",
+      "complement": "",
+      "neighborhood": "Itaigara"
+    },
+    {
+      "cep": "45210-394",
+      "street": "Rua Aníbal dos Anjos e Silva",
+      "complement": "",
+      "neighborhood": "Itaigara"
+    },
+    {
+      "cep": "45210-404",
+      "street": "Rua Anísia América da Silva Tourinho",
+      "complement": "",
+      "neighborhood": "Itaigara"
+    },
+    {
+      "cep": "45210-378",
+      "street": "Rua Antônio Alves de Melo",
+      "complement": "lado ímpar",
+      "neighborhood": "Itaigara"
+    },
+    {
+      "cep": "45210-388",
+      "street": "Rua Antônio Carlos de Almeida Michelli Filho",
+      "complement": "",
+      "neighborhood": "Itaigara"
+    },
+    {
+      "cep": "45210-422",
+      "street": "Rua B",
+      "complement": "Zimbrune",
+      "neighborhood": "Itaigara"
+    },
+    {
+      "cep": "45210-420",
+      "street": "Rua C",
+      "complement": "Zimbrune",
+      "neighborhood": "Itaigara"
+    },
+    {
+      "cep": "45210-386",
+      "street": "Rua Dindinha Josefa Fernandes",
+      "complement": "",
+      "neighborhood": "Itaigara"
+    },
+    {
+      "cep": "45210-360",
+      "street": "Rua do Boiadeiro",
+      "complement": "",
+      "neighborhood": "Itaigara"
+    },
+    {
+      "cep": "45210-368",
+      "street": "Rua Doutor Ivan José da Silva",
+      "complement": "",
+      "neighborhood": "Itaigara"
+    },
+    {
+      "cep": "45210-410",
+      "street": "Rua Eliana Maria Teixeira de Almeida",
+      "complement": "",
+      "neighborhood": "Itaigara"
+    },
+    {
+      "cep": "45210-408",
+      "street": "Rua Francisco Paulo Gomes",
+      "complement": "",
+      "neighborhood": "Itaigara"
+    },
+    {
+      "cep": "45210-412",
+      "street": "Rua João Ferreira dos Santos",
+      "complement": "",
+      "neighborhood": "Itaigara"
+    },
+    {
+      "cep": "45210-372",
+      "street": "Rua Leonel Ribeiro de Oliveira",
+      "complement": "",
+      "neighborhood": "Itaigara"
+    },
+    {
+      "cep": "45210-406",
+      "street": "Rua Manoelito Rebouças",
+      "complement": "",
+      "neighborhood": "Itaigara"
+    },
+    {
+      "cep": "45210-414",
+      "street": "Rua Maria Celeste Gomes",
+      "complement": "",
+      "neighborhood": "Itaigara"
+    },
+    {
+      "cep": "45210-370",
+      "street": "Rua Marineide Macedo Gomes",
+      "complement": "",
+      "neighborhood": "Itaigara"
+    },
+    {
+      "cep": "45210-382",
+      "street": "Rua Professor Etelvino Torres",
+      "complement": "",
+      "neighborhood": "Itaigara"
+    },
+    {
+      "cep": "45210-376",
+      "street": "Rua Professor Raimundo Fernandes da Costa",
+      "complement": "",
+      "neighborhood": "Itaigara"
+    },
+    {
+      "cep": "45210-396",
+      "street": "Rua Radmesse Antônio de Brito",
+      "complement": "",
+      "neighborhood": "Itaigara"
+    },
+    {
+      "cep": "45210-392",
+      "street": "Rua Ramiro de Paula Tourinho Neto",
+      "complement": "",
+      "neighborhood": "Itaigara"
+    },
+    {
+      "cep": "45210-398",
+      "street": "Rua W",
+      "complement": "Loteamento Itaigara",
+      "neighborhood": "Itaigara"
+    },
+    {
+      "cep": "45210-380",
+      "street": "Rua Washington Navarro Pinto",
+      "complement": "",
+      "neighborhood": "Itaigara"
+    },
+    {
+      "cep": "45210-400",
+      "street": "Rua Z",
+      "complement": "Loteamento Itaigara",
+      "neighborhood": "Itaigara"
+    },
+    {
+      "cep": "45210-364",
+      "street": "Travessa Ildefonso Guedes de Araújo",
+      "complement": "",
+      "neighborhood": "Itaigara"
+    },
+    {
+      "cep": "45210-448",
+      "street": "Via Local 3",
+      "complement": "Mandacaru II",
+      "neighborhood": "Itaigara"
+    },
+    {
+      "cep": "45210-442",
+      "street": "Via Local 4",
+      "complement": "Mandacaru I",
+      "neighborhood": "Itaigara"
+    },
+    {
+      "cep": "45210-450",
+      "street": "Via Local 4",
+      "complement": "Mandacaru II",
+      "neighborhood": "Itaigara"
+    },
+    {
+      "cep": "45210-446",
+      "street": "Via Local 5",
+      "complement": "Mandacaru II",
+      "neighborhood": "Itaigara"
+    },
+    {
+      "cep": "45210-438",
+      "street": "Via Local 5",
+      "complement": "Mandacaru I",
+      "neighborhood": "Itaigara"
+    },
+    {
+      "cep": "45210-436",
+      "street": "Via Local 6",
+      "complement": "Mandacaru I",
+      "neighborhood": "Itaigara"
+    },
+    {
+      "cep": "45210-452",
+      "street": "Via Local 6",
+      "complement": "Mandacaru II",
+      "neighborhood": "Itaigara"
+    },
+    {
+      "cep": "45210-434",
+      "street": "Via Local 7",
+      "complement": "Mandacaru I",
+      "neighborhood": "Itaigara"
+    },
+    {
+      "cep": "45210-432",
+      "street": "Via Local 8",
+      "complement": "Mandacaru I",
+      "neighborhood": "Itaigara"
+    },
+    {
+      "cep": "45210-428",
+      "street": "Via Local 9",
+      "complement": "Mandacaru I",
+      "neighborhood": "Itaigara"
+    },
+    {
+      "cep": "45201-406",
+      "street": "1ª Travessa Amélia Ribeiro",
+      "complement": "",
+      "neighborhood": "Cansanção"
+    },
+    {
+      "cep": "45201-420",
+      "street": "1ª Travessa da Paróquia",
+      "complement": "",
+      "neighborhood": "Cansanção"
+    },
+    {
+      "cep": "45201-340",
+      "street": "1ª Travessa Gustavo dos Santos Ribeiro",
+      "complement": "",
+      "neighborhood": "Cansanção"
+    },
+    {
+      "cep": "45201-337",
+      "street": "1ª Travessa Joventino Antônio Rocha",
+      "complement": "",
+      "neighborhood": "Cansanção"
+    },
+    {
+      "cep": "45201-424",
+      "street": "2ª Travessa Amélia Ribeiro Oliveira",
+      "complement": "",
+      "neighborhood": "Cansanção"
+    },
+    {
+      "cep": "45201-440",
+      "street": "2ª Travessa da Paróquia",
+      "complement": "",
+      "neighborhood": "Cansanção"
+    },
+    {
+      "cep": "45201-335",
+      "street": "2ª Travessa Gustavo dos Santos Ribeiro",
+      "complement": "",
+      "neighborhood": "Cansanção"
+    },
+    {
+      "cep": "45201-351",
+      "street": "2ª Travessa Joventino Antônio Rocha",
+      "complement": "lado ímpar",
+      "neighborhood": "Cansanção"
+    },
+    {
+      "cep": "45201-456",
+      "street": "2ª Travessa N",
+      "complement": "Loteamento Santa Luz",
+      "neighborhood": "Cansanção"
+    },
+    {
+      "cep": "45201-408",
+      "street": "Avenida Antonio Ralph Ribeiro Oliveira",
+      "complement": "",
+      "neighborhood": "Cansanção"
+    },
+    {
+      "cep": "45201-330",
+      "street": "Avenida Governador Lomanto Júnior",
+      "complement": "2325 a 2855 lado ímpar",
+      "neighborhood": "Cansanção"
+    },
+    {
+      "cep": "45201-331",
+      "street": "Avenida Governador Lomanto Júnior",
+      "complement": "2326 a 2854 lado par",
+      "neighborhood": "Cansanção"
+    },
+    {
+      "cep": "45201-360",
+      "street": "Avenida Gustavo dos Santos Ribeiro",
+      "complement": "203/204 a 1239/1240",
+      "neighborhood": "Cansanção"
+    },
+    {
+      "cep": "45201-350",
+      "street": "Loteamento Vila Nova Ciretran",
+      "complement": "",
+      "neighborhood": "Cansanção"
+    },
+    {
+      "cep": "45201-414",
+      "street": "Rua 5",
+      "complement": "Loteamento Santa Luz",
+      "neighborhood": "Cansanção"
+    },
+    {
+      "cep": "45201-452",
+      "street": "Rua 7",
+      "complement": "Loteamento Santa Luz",
+      "neighborhood": "Cansanção"
+    },
+    {
+      "cep": "45201-364",
+      "street": "Rua A",
+      "complement": "Residencial Campo Belo",
+      "neighborhood": "Cansanção"
+    },
+    {
+      "cep": "45201-461",
+      "street": "Rua A",
+      "complement": "Residencial Colina",
+      "neighborhood": "Cansanção"
+    },
+    {
+      "cep": "45201-349",
+      "street": "Rua Ageu dos Santos Coelho",
+      "complement": "",
+      "neighborhood": "Cansanção"
+    },
+    {
+      "cep": "45201-430",
+      "street": "Rua Alves Cardoso",
+      "complement": "",
+      "neighborhood": "Cansanção"
+    },
+    {
+      "cep": "45201-404",
+      "street": "Rua Amélia Ribeiro Oliveira",
+      "complement": "",
+      "neighborhood": "Cansanção"
+    },
+    {
+      "cep": "45201-366",
+      "street": "Rua B",
+      "complement": "Residencial Campo Belo",
+      "neighborhood": "Cansanção"
+    },
+    {
+      "cep": "45201-462",
+      "street": "Rua B",
+      "complement": "Residencial Colina",
+      "neighborhood": "Cansanção"
+    },
+    {
+      "cep": "45201-442",
+      "street": "Rua Beatriz Fernandes Bahiense",
+      "complement": "",
+      "neighborhood": "Cansanção"
+    },
+    {
+      "cep": "45201-362",
+      "street": "Rua Belém",
+      "complement": "",
+      "neighborhood": "Cansanção"
+    },
+    {
+      "cep": "45201-368",
+      "street": "Rua C",
+      "complement": "Residencial Campo Belo",
+      "neighborhood": "Cansanção"
+    },
+    {
+      "cep": "45201-372",
+      "street": "Rua D",
+      "complement": "Residencial Campo Belo",
+      "neighborhood": "Cansanção"
+    },
+    {
+      "cep": "45201-410",
+      "street": "Rua da Paróquia",
+      "complement": "lado ímpar",
+      "neighborhood": "Cansanção"
+    },
+    {
+      "cep": "45201-380",
+      "street": "Rua do Chafariz",
+      "complement": "",
+      "neighborhood": "Cansanção"
+    },
+    {
+      "cep": "45201-422",
+      "street": "Rua Doutor Ildefonso Guedes",
+      "complement": "lado par",
+      "neighborhood": "Cansanção"
+    },
+    {
+      "cep": "45201-460",
+      "street": "Rua Elísio Lapa",
+      "complement": "",
+      "neighborhood": "Cansanção"
+    },
+    {
+      "cep": "45201-392",
+      "street": "Rua Ernani Ribeiro Oliveira",
+      "complement": "",
+      "neighborhood": "Cansanção"
+    },
+    {
+      "cep": "45201-402",
+      "street": "Rua Eva Brito",
+      "complement": "lado ímpar",
+      "neighborhood": "Cansanção"
+    },
+    {
+      "cep": "45201-353",
+      "street": "Rua João Batista dos Santos",
+      "complement": "",
+      "neighborhood": "Cansanção"
+    },
+    {
+      "cep": "45201-386",
+      "street": "Rua José Fernandes Oliveira",
+      "complement": "",
+      "neighborhood": "Cansanção"
+    },
+    {
+      "cep": "45201-347",
+      "street": "Rua José Gonçalves Pereira",
+      "complement": "",
+      "neighborhood": "Cansanção"
+    },
+    {
+      "cep": "45201-418",
+      "street": "Rua José Mário Benevídes",
+      "complement": "",
+      "neighborhood": "Cansanção"
+    },
+    {
+      "cep": "45201-020",
+      "street": "Rua Joventino Antonio Rocha",
+      "complement": "",
+      "neighborhood": "Cansanção"
+    },
+    {
+      "cep": "45201-345",
+      "street": "Rua Joventino Antônio Rocha",
+      "complement": "",
+      "neighborhood": "Cansanção"
+    },
+    {
+      "cep": "45201-374",
+      "street": "Rua Leonel Ribeiro Oliveira",
+      "complement": "",
+      "neighborhood": "Cansanção"
+    },
+    {
+      "cep": "45201-343",
+      "street": "Rua Lucivaldo Lima Silva",
+      "complement": "",
+      "neighborhood": "Cansanção"
+    },
+    {
+      "cep": "45201-378",
+      "street": "Rua Major Ralph Fernandes Oliveira",
+      "complement": "",
+      "neighborhood": "Cansanção"
+    },
+    {
+      "cep": "45201-040",
+      "street": "Rua Manoel Pereira Da Silva",
+      "complement": "",
+      "neighborhood": "Cansanção"
+    },
+    {
+      "cep": "45201-355",
+      "street": "Rua Manoel Pereira da Silva",
+      "complement": "",
+      "neighborhood": "Cansanção"
+    },
+    {
+      "cep": "45201-396",
+      "street": "Rua Maria Angélica Oliveira Luna",
+      "complement": "",
+      "neighborhood": "Cansanção"
+    },
+    {
+      "cep": "45201-398",
+      "street": "Rua Morena Bahiense",
+      "complement": "",
+      "neighborhood": "Cansanção"
+    },
+    {
+      "cep": "45201-432",
+      "street": "Rua N",
+      "complement": "Loteamento Santa Luz",
+      "neighborhood": "Cansanção"
+    },
+    {
+      "cep": "45201-426",
+      "street": "Rua O",
+      "complement": "Loteamento Santa Luz",
+      "neighborhood": "Cansanção"
+    },
+    {
+      "cep": "45201-382",
+      "street": "Rua Olga Ribeiro Oliveira",
+      "complement": "",
+      "neighborhood": "Cansanção"
+    },
+    {
+      "cep": "45201-390",
+      "street": "Rua Otacílio Guimarães",
+      "complement": "",
+      "neighborhood": "Cansanção"
+    },
+    {
+      "cep": "45201-400",
+      "street": "Rua Otaviano Martins",
+      "complement": "",
+      "neighborhood": "Cansanção"
+    },
+    {
+      "cep": "45201-428",
+      "street": "Rua P",
+      "complement": "Loteamento Santa Luz",
+      "neighborhood": "Cansanção"
+    },
+    {
+      "cep": "45201-464",
+      "street": "Rua Raul Balício Chaves",
+      "complement": "",
+      "neighborhood": "Cansanção"
+    },
+    {
+      "cep": "45201-451",
+      "street": "Rua Saturnino Nunes Bahiense",
+      "complement": "",
+      "neighborhood": "Cansanção"
+    },
+    {
+      "cep": "45201-458",
+      "street": "Rua Urbano de Almeida Neto",
+      "complement": "",
+      "neighborhood": "Cansanção"
+    },
+    {
+      "cep": "45201-454",
+      "street": "Rua Vereador Valdeci de Jesus Silva",
+      "complement": "",
+      "neighborhood": "Cansanção"
+    },
+    {
+      "cep": "45201-376",
+      "street": "Travessa A",
+      "complement": "Loteamento Santa Luz",
+      "neighborhood": "Cansanção"
+    },
+    {
+      "cep": "45201-394",
+      "street": "Travessa Ernani Ribeiro Oliveira",
+      "complement": "",
+      "neighborhood": "Cansanção"
+    },
+    {
+      "cep": "45201-444",
+      "street": "Travessa G",
+      "complement": "Loteamento Santa Luz",
+      "neighborhood": "Cansanção"
+    },
+    {
+      "cep": "45201-010",
+      "street": "Travessa Gustavo Santos Ribeiro",
+      "complement": "",
+      "neighborhood": "Cansanção"
+    },
+    {
+      "cep": "45201-436",
+      "street": "Travessa I",
+      "complement": "Loteamento Santa Luz",
+      "neighborhood": "Cansanção"
+    },
+    {
+      "cep": "45201-438",
+      "street": "Travessa J",
+      "complement": "Loteamento Santa Luz",
+      "neighborhood": "Cansanção"
+    },
+    {
+      "cep": "45201-450",
+      "street": "Travessa João Batista Silva",
+      "complement": "",
+      "neighborhood": "Cansanção"
+    },
+    {
+      "cep": "45201-388",
+      "street": "Travessa José Fernandes Oliveira",
+      "complement": "",
+      "neighborhood": "Cansanção"
+    },
+    {
+      "cep": "45201-434",
+      "street": "Travessa K",
+      "complement": "Loteamento Santa Luz",
+      "neighborhood": "Cansanção"
+    },
+    {
+      "cep": "45201-416",
+      "street": "Travessa L",
+      "complement": "Loteamento Santa Luz",
+      "neighborhood": "Cansanção"
+    },
+    {
+      "cep": "45201-448",
+      "street": "Travessa M",
+      "complement": "Loteamento Santa Luz",
+      "neighborhood": "Cansanção"
+    },
+    {
+      "cep": "45201-370",
+      "street": "Travessa Manoel Pereira da Silva",
+      "complement": "",
+      "neighborhood": "Cansanção"
+    },
+    {
+      "cep": "45201-446",
+      "street": "Travessa N",
+      "complement": "Loteamento Santa Luz",
+      "neighborhood": "Cansanção"
+    },
+    {
+      "cep": "45201-412",
+      "street": "Travessa O",
+      "complement": "Loteamento Santa Luz",
+      "neighborhood": "Cansanção"
+    },
+    {
+      "cep": "45201-384",
+      "street": "Travessa Olga Ribeiro Oliveira",
+      "complement": "",
+      "neighborhood": "Cansanção"
+    },
+    {
+      "cep": "45201-357",
+      "street": "Travessa Otaviano Martins",
+      "complement": "",
+      "neighborhood": "Cansanção"
+    },
+    {
+      "cep": "45206-690",
+      "street": "Avenida Bela Vista",
+      "complement": "",
+      "neighborhood": "Baixa do Bonfim"
+    },
+    {
+      "cep": "45206-650",
+      "street": "Avenida Cachoerinha",
+      "complement": "",
+      "neighborhood": "Baixa do Bonfim"
+    },
+    {
+      "cep": "45206-700",
+      "street": "Avenida Panorâmica",
+      "complement": "",
+      "neighborhood": "Baixa do Bonfim"
+    },
+    {
+      "cep": "45206-710",
+      "street": "Avenida Radial",
+      "complement": "",
+      "neighborhood": "Baixa do Bonfim"
+    },
+    {
+      "cep": "45206-720",
+      "street": "Estrada Salvador Paulo",
+      "complement": "",
+      "neighborhood": "Baixa do Bonfim"
+    },
+    {
+      "cep": "45206-680",
+      "street": "Loteamento Bairro Tropical",
+      "complement": "",
+      "neighborhood": "Baixa do Bonfim"
+    },
+    {
+      "cep": "45206-670",
+      "street": "Rua da Torta",
+      "complement": "",
+      "neighborhood": "Baixa do Bonfim"
+    },
+    {
+      "cep": "45206-640",
+      "street": "Rua Licinho Barros",
+      "complement": "",
+      "neighborhood": "Baixa do Bonfim"
+    },
+    {
+      "cep": "45206-660",
+      "street": "Rua Raimundo Xavier",
+      "complement": "",
+      "neighborhood": "Baixa do Bonfim"
+    },
+    {
+      "cep": "45204-120",
+      "street": "Loteamento Alto do Viveiro",
+      "complement": "",
+      "neighborhood": "São José"
+    },
+    {
+      "cep": "45204-110",
+      "street": "Loteamento Jardim Paquetá",
+      "complement": "",
+      "neighborhood": "São José"
+    },
+    {
+      "cep": "45204-040",
+      "street": "Loteamento São Judas Tadeu",
+      "complement": "",
+      "neighborhood": "São José"
+    },
+    {
+      "cep": "45204-100",
+      "street": "Praça Firmo Nunes de Moraes",
+      "complement": "",
+      "neighborhood": "São José"
+    },
+    {
+      "cep": "45204-020",
+      "street": "Praça Trinta e Um de Março",
+      "complement": "",
+      "neighborhood": "São José"
+    },
+    {
+      "cep": "45204-030",
+      "street": "Rua Adelaide Rodrigues Lima",
+      "complement": "",
+      "neighborhood": "São José"
+    },
+    {
+      "cep": "45204-010",
+      "street": "Rua Antônio Orrico",
+      "complement": "",
+      "neighborhood": "São José"
+    },
+    {
+      "cep": "45204-050",
+      "street": "Rua Coronel Erotildes Soares",
+      "complement": "",
+      "neighborhood": "São José"
+    },
+    {
+      "cep": "45204-130",
+      "street": "Rua Mutirão São Judas Tadeu",
+      "complement": "",
+      "neighborhood": "São José"
+    },
+    {
+      "cep": "45204-090",
+      "street": "Rua Possidônio Gomes",
+      "complement": "",
+      "neighborhood": "São José"
+    },
+    {
+      "cep": "45204-080",
+      "street": "Rua Professora Faraildes Santos",
+      "complement": "",
+      "neighborhood": "São José"
+    },
+    {
+      "cep": "45204-070",
+      "street": "Travessa Rúbens Almeida",
+      "complement": "",
+      "neighborhood": "São José"
+    },
+    {
+      "cep": "45204-060",
+      "street": "Travessa Sinhá Soares",
+      "complement": "",
+      "neighborhood": "São José"
+    },
+    {
+      "cep": "45204-305",
+      "street": "Rua 69",
+      "complement": "Loteamento Jardim Amaralina",
+      "neighborhood": "São Judas Tadeu"
+    },
+    {
+      "cep": "45204-288",
+      "street": "Rua 70",
+      "complement": "Loteamento Jardim Amaralina",
+      "neighborhood": "São Judas Tadeu"
+    },
+    {
+      "cep": "45204-327",
+      "street": "Rua 71",
+      "complement": "Loteamento Jardim Amaralina",
+      "neighborhood": "São Judas Tadeu"
+    },
+    {
+      "cep": "45204-355",
+      "street": "Rua 73",
+      "complement": "Loteamento Jardim Amaralina",
+      "neighborhood": "São Judas Tadeu"
+    },
+    {
+      "cep": "45204-273",
+      "street": "Rua 74",
+      "complement": "Loteamento Jardim Amaralina",
+      "neighborhood": "São Judas Tadeu"
+    },
+    {
+      "cep": "45204-245",
+      "street": "Rua 75",
+      "complement": "Loteamento Jardim Amaralina",
+      "neighborhood": "São Judas Tadeu"
+    },
+    {
+      "cep": "45204-121",
+      "street": "Rua A",
+      "complement": "Condomínio Bela Vista",
+      "neighborhood": "São Judas Tadeu"
+    },
+    {
+      "cep": "45204-127",
+      "street": "Rua A",
+      "complement": "Loteamento Cleonice",
+      "neighborhood": "São Judas Tadeu"
+    },
+    {
+      "cep": "45204-199",
+      "street": "Rua A",
+      "complement": "Loteamento Pindorama",
+      "neighborhood": "São Judas Tadeu"
+    },
+    {
+      "cep": "45204-191",
+      "street": "Rua Acácia",
+      "complement": "",
+      "neighborhood": "São Judas Tadeu"
+    },
+    {
+      "cep": "45204-150",
+      "street": "Rua Albertino Pereira",
+      "complement": "",
+      "neighborhood": "São Judas Tadeu"
+    },
+    {
+      "cep": "45204-199",
+      "street": "Rua Amarílis",
+      "complement": "",
+      "neighborhood": "São Judas Tadeu"
+    },
+    {
+      "cep": "45204-261",
+      "street": "Rua Angico",
+      "complement": "",
+      "neighborhood": "São Judas Tadeu"
+    },
+    {
+      "cep": "45204-010",
+      "street": "Rua Antônio Orrico",
+      "complement": "",
+      "neighborhood": "São Judas Tadeu"
+    },
+    {
+      "cep": "45204-195",
+      "street": "Rua B",
+      "complement": "Loteamento Pindorama",
+      "neighborhood": "São Judas Tadeu"
+    },
+    {
+      "cep": "45204-119",
+      "street": "Rua B",
+      "complement": "Condomínio Bela Vista",
+      "neighborhood": "São Judas Tadeu"
+    },
+    {
+      "cep": "45204-129",
+      "street": "Rua B",
+      "complement": "Loteamento Cleonice",
+      "neighborhood": "São Judas Tadeu"
+    },
+    {
+      "cep": "45204-117",
+      "street": "Rua C",
+      "complement": "Condomínio Bela Vista",
+      "neighborhood": "São Judas Tadeu"
+    },
+    {
+      "cep": "45204-135",
+      "street": "Rua C",
+      "complement": "Loteamento Cleonice",
+      "neighborhood": "São Judas Tadeu"
+    },
+    {
+      "cep": "45204-189",
+      "street": "Rua C",
+      "complement": "Loteamento Pindorama",
+      "neighborhood": "São Judas Tadeu"
+    },
+    {
+      "cep": "45203-838",
+      "street": "Rua C",
+      "complement": "Loteamento Jardim Paquetá",
+      "neighborhood": "São Judas Tadeu"
+    },
+    {
+      "cep": "45204-115",
+      "street": "Rua D",
+      "complement": "Condomínio Bela Vista",
+      "neighborhood": "São Judas Tadeu"
+    },
+    {
+      "cep": "45204-133",
+      "street": "Rua D",
+      "complement": "Loteamento Cleonice",
+      "neighborhood": "São Judas Tadeu"
+    },
+    {
+      "cep": "45204-187",
+      "street": "Rua D",
+      "complement": "Loteamento Pindorama",
+      "neighborhood": "São Judas Tadeu"
+    },
+    {
+      "cep": "45204-131",
+      "street": "Rua E",
+      "complement": "Loteamento Cleonice",
+      "neighborhood": "São Judas Tadeu"
+    },
+    {
+      "cep": "45204-191",
+      "street": "Rua E",
+      "complement": "Loteamento Pindorama",
+      "neighborhood": "São Judas Tadeu"
+    },
+    {
+      "cep": "45203-844",
+      "street": "Rua E",
+      "complement": "",
+      "neighborhood": "São Judas Tadeu"
+    },
+    {
+      "cep": "45204-137",
+      "street": "Rua F",
+      "complement": "Loteamento Cleonice",
+      "neighborhood": "São Judas Tadeu"
+    },
+    {
+      "cep": "45204-185",
+      "street": "Rua F",
+      "complement": "Loteamento Pindorama",
+      "neighborhood": "São Judas Tadeu"
+    },
+    {
+      "cep": "45204-183",
+      "street": "Rua G",
+      "complement": "Loteamento Pindorama",
+      "neighborhood": "São Judas Tadeu"
+    },
+    {
+      "cep": "45204-141",
+      "street": "Rua G",
+      "complement": "Loteamento Cleonice",
+      "neighborhood": "São Judas Tadeu"
+    },
+    {
+      "cep": "45204-171",
+      "street": "Rua H",
+      "complement": "Loteamento Pindorama",
+      "neighborhood": "São Judas Tadeu"
+    },
+    {
+      "cep": "45204-167",
+      "street": "Rua I",
+      "complement": "Loteamento Pindorama",
+      "neighborhood": "São Judas Tadeu"
+    },
+    {
+      "cep": "45204-165",
+      "street": "Rua J",
+      "complement": "Loteamento Pindorama",
+      "neighborhood": "São Judas Tadeu"
+    },
+    {
+      "cep": "45204-193",
+      "street": "Rua L",
+      "complement": "Loteamento Pindorama",
+      "neighborhood": "São Judas Tadeu"
+    },
+    {
+      "cep": "45204-169",
+      "street": "Rua M",
+      "complement": "Loteamento Pindorama",
+      "neighborhood": "São Judas Tadeu"
+    },
+    {
+      "cep": "45204-175",
+      "street": "Rua O",
+      "complement": "Loteamento Pindorama",
+      "neighborhood": "São Judas Tadeu"
+    },
+    {
+      "cep": "45204-177",
+      "street": "Rua P",
+      "complement": "Loteamento Pindorama",
+      "neighborhood": "São Judas Tadeu"
+    },
+    {
+      "cep": "45204-163",
+      "street": "Rua S",
+      "complement": "Loteamento Pindorama",
+      "neighborhood": "São Judas Tadeu"
+    },
+    {
+      "cep": "45204-243",
+      "street": "Rua Babilônia",
+      "complement": "",
+      "neighborhood": "São Judas Tadeu"
+    },
+    {
+      "cep": "45204-281",
+      "street": "Rua Baraúna",
+      "complement": "",
+      "neighborhood": "São Judas Tadeu"
+    },
+    {
+      "cep": "45204-285",
+      "street": "Rua Barbatimão",
+      "complement": "",
+      "neighborhood": "São Judas Tadeu"
+    },
+    {
+      "cep": "45204-225",
+      "street": "Rua Belém",
+      "complement": "",
+      "neighborhood": "São Judas Tadeu"
+    },
+    {
+      "cep": "45204-287",
+      "street": "Rua Buriti",
+      "complement": "",
+      "neighborhood": "São Judas Tadeu"
+    },
+    {
+      "cep": "45204-343",
+      "street": "Rua Cabreúvas",
+      "complement": "",
+      "neighborhood": "São Judas Tadeu"
+    },
+    {
+      "cep": "45204-377",
+      "street": "Rua Cajazeiro",
+      "complement": "",
+      "neighborhood": "São Judas Tadeu"
+    },
+    {
+      "cep": "45204-011",
+      "street": "Rua Calancuer",
+      "complement": "",
+      "neighborhood": "São Judas Tadeu"
+    },
+    {
+      "cep": "45204-329",
+      "street": "Rua Cambuci",
+      "complement": "",
+      "neighborhood": "São Judas Tadeu"
+    },
+    {
+      "cep": "45204-237",
+      "street": "Rua Canaã",
+      "complement": "",
+      "neighborhood": "São Judas Tadeu"
+    },
+    {
+      "cep": "45204-339",
+      "street": "Rua Canelinha",
+      "complement": "",
+      "neighborhood": "São Judas Tadeu"
+    },
+    {
+      "cep": "45204-353",
+      "street": "Rua Caraíba",
+      "complement": "",
+      "neighborhood": "São Judas Tadeu"
+    },
+    {
+      "cep": "45204-207",
+      "street": "Rua Carlos Aguiar",
+      "complement": "",
+      "neighborhood": "São Judas Tadeu"
+    },
+    {
+      "cep": "45204-375",
+      "street": "Rua Carnaúba",
+      "complement": "",
+      "neighborhood": "São Judas Tadeu"
+    },
+    {
+      "cep": "45204-379",
+      "street": "Rua Casca d'Anta",
+      "complement": "",
+      "neighborhood": "São Judas Tadeu"
+    },
+    {
+      "cep": "45204-357",
+      "street": "Rua Castanheira",
+      "complement": "",
+      "neighborhood": "São Judas Tadeu"
+    },
+    {
+      "cep": "45204-351",
+      "street": "Rua Catuaba",
+      "complement": "",
+      "neighborhood": "São Judas Tadeu"
+    },
+    {
+      "cep": "45204-313",
+      "street": "Rua Cedro",
+      "complement": "",
+      "neighborhood": "São Judas Tadeu"
+    },
+    {
+      "cep": "45204-299",
+      "street": "Rua Cerejeira",
+      "complement": "",
+      "neighborhood": "São Judas Tadeu"
+    },
+    {
+      "cep": "45203-848",
+      "street": "Rua Contorno",
+      "complement": "",
+      "neighborhood": "São Judas Tadeu"
+    },
+    {
+      "cep": "45204-275",
+      "street": "Rua Copaíba",
+      "complement": "",
+      "neighborhood": "São Judas Tadeu"
+    },
+    {
+      "cep": "45204-297",
+      "street": "Rua Coração de Negro",
+      "complement": "",
+      "neighborhood": "São Judas Tadeu"
+    },
+    {
+      "cep": "45204-229",
+      "street": "Rua Damasco",
+      "complement": "",
+      "neighborhood": "São Judas Tadeu"
+    },
+    {
+      "cep": "45203-860",
+      "street": "Rua das Acácias",
+      "complement": "",
+      "neighborhood": "São Judas Tadeu"
+    },
+    {
+      "cep": "45204-006",
+      "street": "Rua das Açucenas",
+      "complement": "",
+      "neighborhood": "São Judas Tadeu"
+    },
+    {
+      "cep": "45204-014",
+      "street": "Rua das Alfazemas",
+      "complement": "",
+      "neighborhood": "São Judas Tadeu"
+    },
+    {
+      "cep": "45204-026",
+      "street": "Rua das Angélicas",
+      "complement": "",
+      "neighborhood": "São Judas Tadeu"
+    },
+    {
+      "cep": "45203-872",
+      "street": "Rua das Azaléias",
+      "complement": "",
+      "neighborhood": "São Judas Tadeu"
+    },
+    {
+      "cep": "45203-898",
+      "street": "Rua das Begônias",
+      "complement": "",
+      "neighborhood": "São Judas Tadeu"
+    },
+    {
+      "cep": "45203-874",
+      "street": "Rua das Bromélias",
+      "complement": "",
+      "neighborhood": "São Judas Tadeu"
+    },
+    {
+      "cep": "45204-004",
+      "street": "Rua das Camponelas",
+      "complement": "",
+      "neighborhood": "São Judas Tadeu"
+    },
+    {
+      "cep": "45203-888",
+      "street": "Rua das Celosias",
+      "complement": "",
+      "neighborhood": "São Judas Tadeu"
+    },
+    {
+      "cep": "45204-032",
+      "street": "Rua das Centurias",
+      "complement": "",
+      "neighborhood": "São Judas Tadeu"
+    },
+    {
+      "cep": "45203-890",
+      "street": "Rua das Cravinas",
+      "complement": "",
+      "neighborhood": "São Judas Tadeu"
+    },
+    {
+      "cep": "45203-864",
+      "street": "Rua das Dálias",
+      "complement": "",
+      "neighborhood": "São Judas Tadeu"
+    },
+    {
+      "cep": "45203-886",
+      "street": "Rua das Dracenas",
+      "complement": "",
+      "neighborhood": "São Judas Tadeu"
+    },
+    {
+      "cep": "45204-028",
+      "street": "Rua das Gerberas",
+      "complement": "",
+      "neighborhood": "São Judas Tadeu"
+    },
+    {
+      "cep": "45204-042",
+      "street": "Rua das Hortênsias",
+      "complement": "",
+      "neighborhood": "São Judas Tadeu"
+    },
+    {
+      "cep": "45203-896",
+      "street": "Rua das Lunárias",
+      "complement": "",
+      "neighborhood": "São Judas Tadeu"
+    },
+    {
+      "cep": "45204-031",
+      "street": "Rua das Margaridas",
+      "complement": "",
+      "neighborhood": "São Judas Tadeu"
+    },
+    {
+      "cep": "45204-038",
+      "street": "Rua das Orquídeas",
+      "complement": "",
+      "neighborhood": "São Judas Tadeu"
+    },
+    {
+      "cep": "45204-008",
+      "street": "Rua das Papoulas",
+      "complement": "",
+      "neighborhood": "São Judas Tadeu"
+    },
+    {
+      "cep": "45203-894",
+      "street": "Rua das Rosas",
+      "complement": "",
+      "neighborhood": "São Judas Tadeu"
+    },
+    {
+      "cep": "45204-034",
+      "street": "Rua das Tulipas",
+      "complement": "",
+      "neighborhood": "São Judas Tadeu"
+    },
+    {
+      "cep": "45204-016",
+      "street": "Rua das Verbenias",
+      "complement": "",
+      "neighborhood": "São Judas Tadeu"
+    },
+    {
+      "cep": "45204-064",
+      "street": "Rua Dolfo Valverde",
+      "complement": "",
+      "neighborhood": "São Judas Tadeu"
+    },
+    {
+      "cep": "45204-000",
+      "street": "Rua dos Anturios",
+      "complement": "",
+      "neighborhood": "São Judas Tadeu"
+    },
+    {
+      "cep": "45204-036",
+      "street": "Rua dos Cravos",
+      "complement": "",
+      "neighborhood": "São Judas Tadeu"
+    },
+    {
+      "cep": "45203-868",
+      "street": "Rua dos Crisântemos",
+      "complement": "",
+      "neighborhood": "São Judas Tadeu"
+    },
+    {
+      "cep": "45203-862",
+      "street": "Rua dos Girassóis",
+      "complement": "",
+      "neighborhood": "São Judas Tadeu"
+    },
+    {
+      "cep": "45204-022",
+      "street": "Rua dos Jasmins",
+      "complement": "",
+      "neighborhood": "São Judas Tadeu"
+    },
+    {
+      "cep": "45204-041",
+      "street": "Rua dos Lírios",
+      "complement": "",
+      "neighborhood": "São Judas Tadeu"
+    },
+    {
+      "cep": "45204-012",
+      "street": "Rua dos Lisianthus",
+      "complement": "",
+      "neighborhood": "São Judas Tadeu"
+    },
+    {
+      "cep": "45204-002",
+      "street": "Rua dos Tangos",
+      "complement": "",
+      "neighborhood": "São Judas Tadeu"
+    },
+    {
+      "cep": "45204-209",
+      "street": "Rua Doutor João Aguiar Ribeiro",
+      "complement": "",
+      "neighborhood": "São Judas Tadeu"
+    },
+    {
+      "cep": "45204-111",
+      "street": "Rua Doutor Nelson Aguiar Ribeiro",
+      "complement": "",
+      "neighborhood": "São Judas Tadeu"
+    },
+    {
+      "cep": "45204-211",
+      "street": "Rua Edgar Araújo",
+      "complement": "",
+      "neighborhood": "São Judas Tadeu"
+    },
+    {
+      "cep": "45204-105",
+      "street": "Rua Edgar Garcia Ribeiro Filho",
+      "complement": "",
+      "neighborhood": "São Judas Tadeu"
+    },
+    {
+      "cep": "45204-051",
+      "street": "Rua Eliete Andrade",
+      "complement": "",
+      "neighborhood": "São Judas Tadeu"
+    },
+    {
+      "cep": "45204-271",
+      "street": "Rua Embira",
+      "complement": "",
+      "neighborhood": "São Judas Tadeu"
+    },
+    {
+      "cep": "45204-094",
+      "street": "Rua Escritora Maria Vitória Lopes Oliveira",
+      "complement": "",
+      "neighborhood": "São Judas Tadeu"
+    },
+    {
+      "cep": "45204-084",
+      "street": "Rua Ester Ribeiro Cajaíba",
+      "complement": "",
+      "neighborhood": "São Judas Tadeu"
+    },
+    {
+      "cep": "45204-259",
+      "street": "Rua Eucalipto",
+      "complement": "",
+      "neighborhood": "São Judas Tadeu"
+    },
+    {
+      "cep": "45204-054",
+      "street": "Rua Felipe Aragão Silva",
+      "complement": "",
+      "neighborhood": "São Judas Tadeu"
+    },
+    {
+      "cep": "45204-231",
+      "street": "Rua Filadelfia",
+      "complement": "",
+      "neighborhood": "São Judas Tadeu"
+    },
+    {
+      "cep": "45204-088",
+      "street": "Rua Flordinice",
+      "complement": "",
+      "neighborhood": "São Judas Tadeu"
+    },
+    {
+      "cep": "45204-062",
+      "street": "Rua Germino Alexandrino Correia",
+      "complement": "",
+      "neighborhood": "São Judas Tadeu"
+    },
+    {
+      "cep": "45204-052",
+      "street": "Rua Graciliano Gonçalves da Silva",
+      "complement": "",
+      "neighborhood": "São Judas Tadeu"
+    },
+    {
+      "cep": "45204-255",
+      "street": "Rua Guaiçara",
+      "complement": "",
+      "neighborhood": "São Judas Tadeu"
+    },
+    {
+      "cep": "45204-249",
+      "street": "Rua Imbirema",
+      "complement": "",
+      "neighborhood": "São Judas Tadeu"
+    },
+    {
+      "cep": "45204-247",
+      "street": "Rua Imbuí",
+      "complement": "",
+      "neighborhood": "São Judas Tadeu"
+    },
+    {
+      "cep": "45204-253",
+      "street": "Rua Imburana",
+      "complement": "",
+      "neighborhood": "São Judas Tadeu"
+    },
+    {
+      "cep": "45204-373",
+      "street": "Rua Indaiá",
+      "complement": "",
+      "neighborhood": "São Judas Tadeu"
+    },
+    {
+      "cep": "45204-349",
+      "street": "Rua Ingazeiro",
+      "complement": "",
+      "neighborhood": "São Judas Tadeu"
+    },
+    {
+      "cep": "45204-325",
+      "street": "Rua Ipê",
+      "complement": "",
+      "neighborhood": "São Judas Tadeu"
+    },
+    {
+      "cep": "45204-223",
+      "street": "Rua Israel",
+      "complement": "",
+      "neighborhood": "São Judas Tadeu"
+    },
+    {
+      "cep": "45204-301",
+      "street": "Rua Jaborandi",
+      "complement": "",
+      "neighborhood": "São Judas Tadeu"
+    },
+    {
+      "cep": "45204-311",
+      "street": "Rua Jabuticabeira",
+      "complement": "",
+      "neighborhood": "São Judas Tadeu"
+    },
+    {
+      "cep": "45204-295",
+      "street": "Rua Jacarandá",
+      "complement": "",
+      "neighborhood": "São Judas Tadeu"
+    },
+    {
+      "cep": "45204-359",
+      "street": "Rua Jaqueira",
+      "complement": "",
+      "neighborhood": "São Judas Tadeu"
+    },
+    {
+      "cep": "45204-269",
+      "street": "Rua Jataí",
+      "complement": "",
+      "neighborhood": "São Judas Tadeu"
+    },
+    {
+      "cep": "45204-381",
+      "street": "Rua Jatobá",
+      "complement": "",
+      "neighborhood": "São Judas Tadeu"
+    },
+    {
+      "cep": "45204-331",
+      "street": "Rua Jenipapo",
+      "complement": "",
+      "neighborhood": "São Judas Tadeu"
+    },
+    {
+      "cep": "45204-315",
+      "street": "Rua Jequitibá",
+      "complement": "",
+      "neighborhood": "São Judas Tadeu"
+    },
+    {
+      "cep": "45204-233",
+      "street": "Rua Jericó",
+      "complement": "",
+      "neighborhood": "São Judas Tadeu"
+    },
+    {
+      "cep": "45204-103",
+      "street": "Rua Joaquim Aguiar Ribeiro",
+      "complement": "",
+      "neighborhood": "São Judas Tadeu"
+    },
+    {
+      "cep": "45204-044",
+      "street": "Rua José Augusto Barreto",
+      "complement": "",
+      "neighborhood": "São Judas Tadeu"
+    },
+    {
+      "cep": "45204-277",
+      "street": "Rua Juazeiro",
+      "complement": "",
+      "neighborhood": "São Judas Tadeu"
+    },
+    {
+      "cep": "45203-884",
+      "street": "Rua Júpiter",
+      "complement": "",
+      "neighborhood": "São Judas Tadeu"
+    },
+    {
+      "cep": "45204-066",
+      "street": "Rua Luiz Teles",
+      "complement": "",
+      "neighborhood": "São Judas Tadeu"
+    },
+    {
+      "cep": "45204-371",
+      "street": "Rua Macambira",
+      "complement": "",
+      "neighborhood": "São Judas Tadeu"
+    },
+    {
+      "cep": "45204-347",
+      "street": "Rua Maçaranduba",
+      "complement": "",
+      "neighborhood": "São Judas Tadeu"
+    },
+    {
+      "cep": "45204-323",
+      "street": "Rua Macaúva",
+      "complement": "",
+      "neighborhood": "São Judas Tadeu"
+    },
+    {
+      "cep": "45203-850",
+      "street": "Rua Machado de Assis",
+      "complement": "",
+      "neighborhood": "São Judas Tadeu"
+    },
+    {
+      "cep": "45204-101",
+      "street": "Rua Maestro Opetaciano Custódio Ribeiro",
+      "complement": "",
+      "neighborhood": "São Judas Tadeu"
+    },
+    {
+      "cep": "45204-092",
+      "street": "Rua Major Deocleciano",
+      "complement": "",
+      "neighborhood": "São Judas Tadeu"
+    },
+    {
+      "cep": "45204-293",
+      "street": "Rua Mangueira",
+      "complement": "",
+      "neighborhood": "São Judas Tadeu"
+    },
+    {
+      "cep": "45204-267",
+      "street": "Rua Marfim",
+      "complement": "",
+      "neighborhood": "São Judas Tadeu"
+    },
+    {
+      "cep": "45203-878",
+      "street": "Rua Marte",
+      "complement": "",
+      "neighborhood": "São Judas Tadeu"
+    },
+    {
+      "cep": "45203-866",
+      "street": "Rua Mercúrio",
+      "complement": "",
+      "neighborhood": "São Judas Tadeu"
+    },
+    {
+      "cep": "45204-309",
+      "street": "Rua Mirindiva",
+      "complement": "",
+      "neighborhood": "São Judas Tadeu"
+    },
+    {
+      "cep": "45204-383",
+      "street": "Rua Mogno",
+      "complement": "",
+      "neighborhood": "São Judas Tadeu"
+    },
+    {
+      "cep": "45204-239",
+      "street": "Rua Nazaré",
+      "complement": "",
+      "neighborhood": "São Judas Tadeu"
+    },
+    {
+      "cep": "45203-870",
+      "street": "Rua Netuno",
+      "complement": "",
+      "neighborhood": "São Judas Tadeu"
+    },
+    {
+      "cep": "45204-107",
+      "street": "Rua Nilza Pimentel",
+      "complement": "",
+      "neighborhood": "São Judas Tadeu"
+    },
+    {
+      "cep": "45204-227",
+      "street": "Rua Nossa Senhora da Conceição",
+      "complement": "",
+      "neighborhood": "São Judas Tadeu"
+    },
+    {
+      "cep": "45204-061",
+      "street": "Rua Oswaldo Alvares Meira",
+      "complement": "",
+      "neighborhood": "São Judas Tadeu"
+    },
+    {
+      "cep": "45204-072",
+      "street": "Rua Otônio Alves Guimarães",
+      "complement": "",
+      "neighborhood": "São Judas Tadeu"
+    },
+    {
+      "cep": "45204-361",
+      "street": "Rua Palmeira",
+      "complement": "",
+      "neighborhood": "São Judas Tadeu"
+    },
+    {
+      "cep": "45204-333",
+      "street": "Rua Pau Brasil",
+      "complement": "",
+      "neighborhood": "São Judas Tadeu"
+    },
+    {
+      "cep": "45204-317",
+      "street": "Rua Pau d'Alho",
+      "complement": "",
+      "neighborhood": "São Judas Tadeu"
+    },
+    {
+      "cep": "45204-303",
+      "street": "Rua Pau d'Arco",
+      "complement": "",
+      "neighborhood": "São Judas Tadeu"
+    },
+    {
+      "cep": "45204-283",
+      "street": "Rua Pau Ferro",
+      "complement": "",
+      "neighborhood": "São Judas Tadeu"
+    },
+    {
+      "cep": "45204-369",
+      "street": "Rua Pequi",
+      "complement": "",
+      "neighborhood": "São Judas Tadeu"
+    },
+    {
+      "cep": "45204-345",
+      "street": "Rua Peroba",
+      "complement": "",
+      "neighborhood": "São Judas Tadeu"
+    },
+    {
+      "cep": "45204-321",
+      "street": "Rua Pindaíba",
+      "complement": "",
+      "neighborhood": "São Judas Tadeu"
+    },
+    {
+      "cep": "45204-307",
+      "street": "Rua Pinheiro",
+      "complement": "",
+      "neighborhood": "São Judas Tadeu"
+    },
+    {
+      "cep": "45204-291",
+      "street": "Rua Pitangueira",
+      "complement": "",
+      "neighborhood": "São Judas Tadeu"
+    },
+    {
+      "cep": "45204-217",
+      "street": "Rua Prisco Viana",
+      "complement": "",
+      "neighborhood": "São Judas Tadeu"
+    },
+    {
+      "cep": "45203-836",
+      "street": "Rua Professora Adelaide Rodrigues",
+      "complement": "",
+      "neighborhood": "São Judas Tadeu"
+    },
+    {
+      "cep": "45203-840",
+      "street": "Rua Professora Faraildes Santos",
+      "complement": "",
+      "neighborhood": "São Judas Tadeu"
+    },
+    {
+      "cep": "45204-265",
+      "street": "Rua Putumuju",
+      "complement": "",
+      "neighborhood": "São Judas Tadeu"
+    },
+    {
+      "cep": "45204-363",
+      "street": "Rua Quixabeira",
+      "complement": "",
+      "neighborhood": "São Judas Tadeu"
+    },
+    {
+      "cep": "45204-219",
+      "street": "Rua Raimundo Nonato",
+      "complement": "",
+      "neighborhood": "São Judas Tadeu"
+    },
+    {
+      "cep": "45204-241",
+      "street": "Rua Rio Jordão",
+      "complement": "",
+      "neighborhood": "São Judas Tadeu"
+    },
+    {
+      "cep": "45203-832",
+      "street": "Rua Rubens Almeida",
+      "complement": "",
+      "neighborhood": "São Judas Tadeu"
+    },
+    {
+      "cep": "45204-205",
+      "street": "Rua São Francisco de Assis",
+      "complement": "",
+      "neighborhood": "São Judas Tadeu"
+    },
+    {
+      "cep": "45204-335",
+      "street": "Rua Sapopema",
+      "complement": "",
+      "neighborhood": "São Judas Tadeu"
+    },
+    {
+      "cep": "45204-387",
+      "street": "Rua Sapucaia",
+      "complement": "",
+      "neighborhood": "São Judas Tadeu"
+    },
+    {
+      "cep": "45210-130",
+      "street": "Rua Afrânio Peixoto",
+      "complement": "",
+      "neighborhood": "Mandacaru"
+    },
+    {
+      "cep": "45210-004",
+      "street": "Rua Bangu",
+      "complement": "",
+      "neighborhood": "Mandacaru"
+    },
+    {
+      "cep": "45207-020",
+      "street": "Rua Bangu",
+      "complement": "",
+      "neighborhood": "Mandacaru"
+    },
+    {
+      "cep": "45210-092",
+      "street": "Rua Bruno Neto",
+      "complement": "530/531 ao fim",
+      "neighborhood": "Mandacaru"
+    },
+    {
+      "cep": "45210-116",
+      "street": "Rua Bruno Neto",
+      "complement": "até 528/529",
+      "neighborhood": "Mandacaru"
+    },
+    {
+      "cep": "45210-168",
+      "street": "Rua C",
+      "complement": "Distrito Industrial",
+      "neighborhood": "Mandacaru"
+    },
+    {
+      "cep": "45210-140",
+      "street": "Rua Café Filho",
+      "complement": "",
+      "neighborhood": "Mandacaru"
+    },
+    {
+      "cep": "45210-056",
+      "street": "Rua Corinthians",
+      "complement": "",
+      "neighborhood": "Mandacaru"
+    },
+    {
+      "cep": "45210-042",
+      "street": "Rua Cruzeiro",
+      "complement": "",
+      "neighborhood": "Mandacaru"
+    },
+    {
+      "cep": "45210-164",
+      "street": "Rua D",
+      "complement": "Distrito Industrial",
+      "neighborhood": "Mandacaru"
+    },
+    {
+      "cep": "45210-216",
+      "street": "Rua da Torre",
+      "complement": "lado ímpar",
+      "neighborhood": "Mandacaru"
+    },
+    {
+      "cep": "45210-040",
+      "street": "Rua do Boiadeiro",
+      "complement": "",
+      "neighborhood": "Mandacaru"
+    },
+    {
+      "cep": "45210-184",
+      "street": "Rua do IBC",
+      "complement": "",
+      "neighborhood": "Mandacaru"
+    },
+    {
+      "cep": "45210-172",
+      "street": "Rua E",
+      "complement": "Distrito Industrial",
+      "neighborhood": "Mandacaru"
+    },
+    {
+      "cep": "45210-090",
+      "street": "Rua Edvaldo Cardoso Guimarães",
+      "complement": "",
+      "neighborhood": "Mandacaru"
+    },
+    {
+      "cep": "45207-150",
+      "street": "Rua Esporte Clube Cruzeiro",
+      "complement": "",
+      "neighborhood": "Mandacaru"
+    },
+    {
+      "cep": "45207-080",
+      "street": "Rua Euclides da Cunha",
+      "complement": "",
+      "neighborhood": "Mandacaru"
+    },
+    {
+      "cep": "45210-022",
+      "street": "Rua Euclides da Cunha",
+      "complement": "",
+      "neighborhood": "Mandacaru"
+    },
+    {
+      "cep": "45210-220",
+      "street": "Rua F",
+      "complement": "Distrito Industrial",
+      "neighborhood": "Mandacaru"
+    },
+    {
+      "cep": "45207-060",
+      "street": "Rua Fluminense",
+      "complement": "",
+      "neighborhood": "Mandacaru"
+    },
+    {
+      "cep": "45210-232",
+      "street": "Rua G",
+      "complement": "Distrito Industrial",
+      "neighborhood": "Mandacaru"
+    },
+    {
+      "cep": "45207-130",
+      "street": "Rua Galícia",
+      "complement": "",
+      "neighborhood": "Mandacaru"
+    },
+    {
+      "cep": "45210-132",
+      "street": "Rua Gervásio Ribeiro Gomes",
+      "complement": "",
+      "neighborhood": "Mandacaru"
+    },
+    {
+      "cep": "45210-084",
+      "street": "Rua Goiás",
+      "complement": "",
+      "neighborhood": "Mandacaru"
+    },
+    {
+      "cep": "45210-044",
+      "street": "Rua Grêmio",
+      "complement": "",
+      "neighborhood": "Mandacaru"
+    },
+    {
+      "cep": "45207-090",
+      "street": "Rua Guarani",
+      "complement": "",
+      "neighborhood": "Mandacaru"
+    },
+    {
+      "cep": "45210-032",
+      "street": "Rua Guarani",
+      "complement": "",
+      "neighborhood": "Mandacaru"
+    },
+    {
+      "cep": "45210-228",
+      "street": "Rua H",
+      "complement": "Distrito Industrial",
+      "neighborhood": "Mandacaru"
+    },
+    {
+      "cep": "45207-140",
+      "street": "Rua Humaitá",
+      "complement": "",
+      "neighborhood": "Mandacaru"
+    },
+    {
+      "cep": "45210-038",
+      "street": "Rua Humaitá",
+      "complement": "",
+      "neighborhood": "Mandacaru"
+    },
+    {
+      "cep": "45210-046",
+      "street": "Rua Internacional",
+      "complement": "",
+      "neighborhood": "Mandacaru"
+    },
+    {
+      "cep": "45210-034",
+      "street": "Rua Ipiranga",
+      "complement": "",
+      "neighborhood": "Mandacaru"
+    },
+    {
+      "cep": "45210-224",
+      "street": "Rua J",
+      "complement": "Distrito Industrial",
+      "neighborhood": "Mandacaru"
+    },
+    {
+      "cep": "45210-058",
+      "street": "Rua Jabaquara",
+      "complement": "",
+      "neighborhood": "Mandacaru"
+    },
+    {
+      "cep": "45210-098",
+      "street": "Rua José Alves",
+      "complement": "",
+      "neighborhood": "Mandacaru"
+    },
+    {
+      "cep": "45207-070",
+      "street": "Rua José Barros Meira",
+      "complement": "",
+      "neighborhood": "Mandacaru"
+    },
+    {
+      "cep": "45210-012",
+      "street": "Rua José Barros Meira",
+      "complement": "",
+      "neighborhood": "Mandacaru"
+    },
+    {
+      "cep": "45210-142",
+      "street": "Rua José Bonifácio",
+      "complement": "",
+      "neighborhood": "Mandacaru"
+    },
+    {
+      "cep": "45210-066",
+      "street": "Rua Júlia Maria de Jesus",
+      "complement": "",
+      "neighborhood": "Mandacaru"
+    },
+    {
+      "cep": "45210-124",
+      "street": "Rua Laudelino Martins",
+      "complement": "",
+      "neighborhood": "Mandacaru"
+    },
+    {
+      "cep": "45207-190",
+      "street": "Rua Madureira",
+      "complement": "",
+      "neighborhood": "Mandacaru"
+    },
+    {
+      "cep": "45210-054",
+      "street": "Rua Madureira",
+      "complement": "",
+      "neighborhood": "Mandacaru"
+    },
+    {
+      "cep": "45210-134",
+      "street": "Rua Manoel Rodrigues",
+      "complement": "",
+      "neighborhood": "Mandacaru"
+    },
+    {
+      "cep": "45210-086",
+      "street": "Rua Maria Elezenita Lessa",
+      "complement": "",
+      "neighborhood": "Mandacaru"
+    },
+    {
+      "cep": "45210-080",
+      "street": "Rua Miguel Gomes da Silva",
+      "complement": "",
+      "neighborhood": "Mandacaru"
+    },
+    {
+      "cep": "45207-170",
+      "street": "Rua Nita Costa",
+      "complement": "",
+      "neighborhood": "Mandacaru"
+    },
+    {
+      "cep": "45210-014",
+      "street": "Rua Olaria",
+      "complement": "",
+      "neighborhood": "Mandacaru"
+    },
+    {
+      "cep": "45207-030",
+      "street": "Rua Olaria",
+      "complement": "",
+      "neighborhood": "Mandacaru"
+    },
+    {
+      "cep": "45210-136",
+      "street": "Rua Pacaembu",
+      "complement": "",
+      "neighborhood": "Mandacaru"
+    },
+    {
+      "cep": "45210-126",
+      "street": "Rua Padre Tiago",
+      "complement": "",
+      "neighborhood": "Mandacaru"
+    },
+    {
+      "cep": "45207-110",
+      "street": "Rua Palmeiras",
+      "complement": "",
+      "neighborhood": "Mandacaru"
+    },
+    {
+      "cep": "45210-020",
+      "street": "Rua Palmeiras",
+      "complement": "",
+      "neighborhood": "Mandacaru"
+    },
+    {
+      "cep": "45210-078",
+      "street": "Rua Paraíba",
+      "complement": "",
+      "neighborhood": "Mandacaru"
+    },
+    {
+      "cep": "45210-114",
+      "street": "Rua Pedro Paulo Gomes",
+      "complement": "",
+      "neighborhood": "Mandacaru"
+    },
+    {
+      "cep": "45210-082",
+      "street": "Rua Pernambuco",
+      "complement": "",
+      "neighborhood": "Mandacaru"
+    },
+    {
+      "cep": "45207-180",
+      "street": "Rua Portuguesa",
+      "complement": "",
+      "neighborhood": "Mandacaru"
+    },
+    {
+      "cep": "45210-052",
+      "street": "Rua Portuguesa",
+      "complement": "",
+      "neighborhood": "Mandacaru"
+    },
+    {
+      "cep": "45210-146",
+      "street": "Rua Professor Damião Vieira",
+      "complement": "",
+      "neighborhood": "Mandacaru"
+    },
+    {
+      "cep": "45210-070",
+      "street": "Rua Professor Etelvino Torres",
+      "complement": "",
+      "neighborhood": "Mandacaru"
+    },
+    {
+      "cep": "45210-088",
+      "street": "Rua Rodolfo Pereira Lisboa",
+      "complement": "",
+      "neighborhood": "Mandacaru"
+    },
+    {
+      "cep": "45206-570",
+      "street": "Caminho 12",
+      "complement": "Parque das Algarobas",
+      "neighborhood": "Pompílio Sampaio"
+    },
+    {
+      "cep": "45206-195",
+      "street": "Caminho 25",
+      "complement": "Parque das Algarobas",
+      "neighborhood": "Pompílio Sampaio"
+    },
+    {
+      "cep": "45206-001",
+      "street": "1ª Travessa da Igreja São José",
+      "complement": "lado ímpar",
+      "neighborhood": "Pompílio Sampaio"
+    },
+    {
+      "cep": "45206-251",
+      "street": "1ª Travessa das Abelhas",
+      "complement": "",
+      "neighborhood": "Pompílio Sampaio"
+    },
+    {
+      "cep": "45206-053",
+      "street": "1ª Travessa dos Operários",
+      "complement": "",
+      "neighborhood": "Pompílio Sampaio"
+    },
+    {
+      "cep": "45206-003",
+      "street": "2ª Travessa da Igreja São José",
+      "complement": "",
+      "neighborhood": "Pompílio Sampaio"
+    },
+    {
+      "cep": "45206-253",
+      "street": "2ª Travessa das Abelhas",
+      "complement": "",
+      "neighborhood": "Pompílio Sampaio"
+    },
+    {
+      "cep": "45206-255",
+      "street": "3ª Travessa das Abelhas",
+      "complement": "",
+      "neighborhood": "Pompílio Sampaio"
+    },
+    {
+      "cep": "45206-061",
+      "street": "3ª Travessa Everaldo Santos",
+      "complement": "",
+      "neighborhood": "Pompílio Sampaio"
+    },
+    {
+      "cep": "45206-011",
+      "street": "Avenida Artur Moraes",
+      "complement": "",
+      "neighborhood": "Pompílio Sampaio"
+    },
+    {
+      "cep": "45206-010",
+      "street": "Avenida Artur Moraes",
+      "complement": "",
+      "neighborhood": "Pompílio Sampaio"
+    },
+    {
+      "cep": "45206-051",
+      "street": "Avenida César Borges",
+      "complement": "",
+      "neighborhood": "Pompílio Sampaio"
+    },
+    {
+      "cep": "45206-047",
+      "street": "Avenida dos Operários",
+      "complement": "lado ímpar",
+      "neighborhood": "Pompílio Sampaio"
+    },
+    {
+      "cep": "45206-210",
+      "street": "Avenida Iolanda Pires",
+      "complement": "",
+      "neighborhood": "Pompílio Sampaio"
+    },
+    {
+      "cep": "45206-070",
+      "street": "Avenida João Goulart",
+      "complement": "",
+      "neighborhood": "Pompílio Sampaio"
+    },
+    {
+      "cep": "45206-020",
+      "street": "Avenida Lions Club",
+      "complement": "",
+      "neighborhood": "Pompílio Sampaio"
+    },
+    {
+      "cep": "45206-013",
+      "street": "Beco Espinhaço II",
+      "complement": "",
+      "neighborhood": "Pompílio Sampaio"
+    },
+    {
+      "cep": "45206-049",
+      "street": "Beco Everaldo Santos",
+      "complement": "",
+      "neighborhood": "Pompílio Sampaio"
+    },
+    {
+      "cep": "45206-147",
+      "street": "Caminho 12",
+      "complement": "Parque das Algarobas",
+      "neighborhood": "Pompílio Sampaio"
+    },
+    {
+      "cep": "45206-165",
+      "street": "Caminho 13",
+      "complement": "Parque das Algarobas",
+      "neighborhood": "Pompílio Sampaio"
+    },
+    {
+      "cep": "45206-149",
+      "street": "Caminho 14",
+      "complement": "Parque das Algarobas",
+      "neighborhood": "Pompílio Sampaio"
+    },
+    {
+      "cep": "45206-151",
+      "street": "Caminho 15",
+      "complement": "Parque das Algarobas",
+      "neighborhood": "Pompílio Sampaio"
+    },
+    {
+      "cep": "45206-153",
+      "street": "Caminho 16",
+      "complement": "Parque das Algarobas",
+      "neighborhood": "Pompílio Sampaio"
+    },
+    {
+      "cep": "45206-171",
+      "street": "Caminho 18",
+      "complement": "Parque das Algarobas",
+      "neighborhood": "Pompílio Sampaio"
+    },
+    {
+      "cep": "45206-173",
+      "street": "Caminho 19",
+      "complement": "Parque das Algarobas",
+      "neighborhood": "Pompílio Sampaio"
+    },
+    {
+      "cep": "45206-119",
+      "street": "Caminho 2",
+      "complement": "Parque das Algarobas",
+      "neighborhood": "Pompílio Sampaio"
+    },
+    {
+      "cep": "45206-175",
+      "street": "Caminho 20",
+      "complement": "Parque das Algarobas",
+      "neighborhood": "Pompílio Sampaio"
+    },
+    {
+      "cep": "45206-177",
+      "street": "Caminho 21",
+      "complement": "Parque das Algarobas",
+      "neighborhood": "Pompílio Sampaio"
+    },
+    {
+      "cep": "45206-179",
+      "street": "Caminho 22",
+      "complement": "Parque das Algarobas",
+      "neighborhood": "Pompílio Sampaio"
+    },
+    {
+      "cep": "45206-181",
+      "street": "Caminho 23",
+      "complement": "Parque das Algarobas",
+      "neighborhood": "Pompílio Sampaio"
+    },
+    {
+      "cep": "45206-193",
+      "street": "Caminho 24",
+      "complement": "Parque das Algarobas",
+      "neighborhood": "Pompílio Sampaio"
+    },
+    {
+      "cep": "45206-185",
+      "street": "Caminho 26",
+      "complement": "Parque das Algarobas",
+      "neighborhood": "Pompílio Sampaio"
+    },
+    {
+      "cep": "45206-163",
+      "street": "Caminho 27",
+      "complement": "Parque das Algarobas",
+      "neighborhood": "Pompílio Sampaio"
+    },
+    {
+      "cep": "45206-161",
+      "street": "Caminho 28",
+      "complement": "Parque das Algarobas",
+      "neighborhood": "Pompílio Sampaio"
+    },
+    {
+      "cep": "45206-159",
+      "street": "Caminho 29",
+      "complement": "Parque das Algarobas",
+      "neighborhood": "Pompílio Sampaio"
+    },
+    {
+      "cep": "45206-121",
+      "street": "Caminho 3",
+      "complement": "Parque das Algarobas",
+      "neighborhood": "Pompílio Sampaio"
+    },
+    {
+      "cep": "45206-123",
+      "street": "Caminho 4",
+      "complement": "Parque das Algarobas",
+      "neighborhood": "Pompílio Sampaio"
+    },
+    {
+      "cep": "45206-125",
+      "street": "Caminho 5",
+      "complement": "Parque das Algarobas",
+      "neighborhood": "Pompílio Sampaio"
+    },
+    {
+      "cep": "45206-127",
+      "street": "Caminho 6",
+      "complement": "Parque das Algarobas",
+      "neighborhood": "Pompílio Sampaio"
+    },
+    {
+      "cep": "45206-129",
+      "street": "Caminho 7",
+      "complement": "Parque das Algarobas",
+      "neighborhood": "Pompílio Sampaio"
+    },
+    {
+      "cep": "45206-131",
+      "street": "Caminho 8",
+      "complement": "Parque das Algarobas",
+      "neighborhood": "Pompílio Sampaio"
+    },
+    {
+      "cep": "45206-035",
+      "street": "Escada 8",
+      "complement": "Loteamento Parque Colina",
+      "neighborhood": "Pompílio Sampaio"
+    },
+    {
+      "cep": "45206-140",
+      "street": "Praça Ademar Vieira",
+      "complement": "",
+      "neighborhood": "Pompílio Sampaio"
+    },
+    {
+      "cep": "45206-100",
+      "street": "Praça Duque de Caxias",
+      "complement": "",
+      "neighborhood": "Pompílio Sampaio"
+    },
+    {
+      "cep": "45206-280",
+      "street": "Praça Juracy Magalhães",
+      "complement": "",
+      "neighborhood": "Pompílio Sampaio"
+    },
+    {
+      "cep": "45206-130",
+      "street": "Praça Otaviano Saback",
+      "complement": "",
+      "neighborhood": "Pompílio Sampaio"
+    },
+    {
+      "cep": "45206-273",
+      "street": "Rótula Secundária A",
+      "complement": "",
+      "neighborhood": "Pompílio Sampaio"
+    },
+    {
+      "cep": "45206-093",
+      "street": "Rua 22",
+      "complement": "Loteamento Boa Vista",
+      "neighborhood": "Pompílio Sampaio"
+    },
+    {
+      "cep": "45206-109",
+      "street": "Rua 25",
+      "complement": "Loteamento Boa Vista",
+      "neighborhood": "Pompílio Sampaio"
+    },
+    {
+      "cep": "45206-097",
+      "street": "Rua 26",
+      "complement": "Loteamento Boa Vista",
+      "neighborhood": "Pompílio Sampaio"
+    },
+    {
+      "cep": "45206-083",
+      "street": "Rua 5",
+      "complement": "Loteamento Boa Vista",
+      "neighborhood": "Pompílio Sampaio"
+    },
+    {
+      "cep": "45206-041",
+      "street": "Rua 7",
+      "complement": "Loteamento Parque Colina",
+      "neighborhood": "Pompílio Sampaio"
+    },
+    {
+      "cep": "45206-065",
+      "street": "Rua 7",
+      "complement": "Loteamento Boa Vista",
+      "neighborhood": "Pompílio Sampaio"
+    },
+    {
+      "cep": "45206-067",
+      "street": "Rua 9",
+      "complement": "Loteamento Boa Vista",
+      "neighborhood": "Pompílio Sampaio"
+    },
+    {
+      "cep": "45206-101",
+      "street": "Rua A",
+      "complement": "Loteamento Boaventura",
+      "neighborhood": "Pompílio Sampaio"
+    },
+    {
+      "cep": "45206-113",
+      "street": "Rua A",
+      "complement": "Parque das Algarobas",
+      "neighborhood": "Pompílio Sampaio"
+    },
+    {
+      "cep": "45206-187",
+      "street": "Rua A",
+      "complement": "Loteamento Algarobas II",
+      "neighborhood": "Pompílio Sampaio"
+    },
+    {
+      "cep": "45206-043",
+      "street": "Rua A1",
+      "complement": "Loteamento Parque Colina",
+      "neighborhood": "Pompílio Sampaio"
+    },
+    {
+      "cep": "45206-095",
+      "street": "Rua Adrião Borges",
+      "complement": "",
+      "neighborhood": "Pompílio Sampaio"
+    },
+    {
+      "cep": "45206-260",
+      "street": "Rua Agapito Fernandes",
+      "complement": "",
+      "neighborhood": "Pompílio Sampaio"
+    },
+    {
+      "cep": "45206-111",
+      "street": "Rua Almirante Tamandaré",
+      "complement": "",
+      "neighborhood": "Pompílio Sampaio"
+    },
+    {
+      "cep": "45206-230",
+      "street": "Rua Ana Nery",
+      "complement": "",
+      "neighborhood": "Pompílio Sampaio"
+    },
+    {
+      "cep": "45206-030",
+      "street": "Rua Antônio Amaral",
+      "complement": "",
+      "neighborhood": "Pompílio Sampaio"
+    },
+    {
+      "cep": "45206-057",
+      "street": "Rua Antônio de Jesus Pereira",
+      "complement": "",
+      "neighborhood": "Pompílio Sampaio"
+    },
+    {
+      "cep": "45206-079",
+      "street": "Rua Arnóbio Aguiar",
+      "complement": "",
+      "neighborhood": "Pompílio Sampaio"
+    },
+    {
+      "cep": "45206-103",
+      "street": "Rua B",
+      "complement": "Loteamento Boaventura",
+      "neighborhood": "Pompílio Sampaio"
+    },
+    {
+      "cep": "45206-133",
+      "street": "Rua B",
+      "complement": "Parque das Algarobas",
+      "neighborhood": "Pompílio Sampaio"
+    },
+    {
+      "cep": "45206-207",
+      "street": "Rua B",
+      "complement": "Loteamento Algarobas II",
+      "neighborhood": "Pompílio Sampaio"
+    },
+    {
+      "cep": "45206-120",
+      "street": "Rua Brigadeiro Sá",
+      "complement": "",
+      "neighborhood": "Pompílio Sampaio"
+    },
+    {
+      "cep": "45206-211",
+      "street": "Rua C",
+      "complement": "Loteamento Algarobas II",
+      "neighborhood": "Pompílio Sampaio"
+    },
+    {
+      "cep": "45206-169",
+      "street": "Rua C",
+      "complement": "Parque das Algarobas",
+      "neighborhood": "Pompílio Sampaio"
+    },
+    {
+      "cep": "45206-290",
+      "street": "Rua Carlota Sá",
+      "complement": "",
+      "neighborhood": "Pompílio Sampaio"
+    },
+    {
+      "cep": "45206-081",
+      "street": "Rua Cristóvão Meira Gondim",
+      "complement": "",
+      "neighborhood": "Pompílio Sampaio"
+    },
+    {
+      "cep": "45206-167",
+      "street": "Rua D",
+      "complement": "Parque das Algarobas",
+      "neighborhood": "Pompílio Sampaio"
+    },
+    {
+      "cep": "45206-189",
+      "street": "Rua D",
+      "complement": "Loteamento Algarobas II",
+      "neighborhood": "Pompílio Sampaio"
+    },
+    {
+      "cep": "45206-009",
+      "street": "Rua da Banca",
+      "complement": "até 115 lado ímpar",
+      "neighborhood": "Pompílio Sampaio"
+    },
+    {
+      "cep": "45206-219",
+      "street": "Rua da Esperança",
+      "complement": "",
+      "neighborhood": "Pompílio Sampaio"
+    },
+    {
+      "cep": "45206-005",
+      "street": "Rua da Igreja São José",
+      "complement": "",
+      "neighborhood": "Pompílio Sampaio"
+    },
+    {
+      "cep": "45206-233",
+      "street": "Rua da Taturana",
+      "complement": "",
+      "neighborhood": "Pompílio Sampaio"
+    },
+    {
+      "cep": "45206-257",
+      "street": "Rua das Aranhas",
+      "complement": "",
+      "neighborhood": "Pompílio Sampaio"
+    },
+    {
+      "cep": "45206-213",
+      "street": "Rua das Borboletas",
+      "complement": "",
+      "neighborhood": "Pompílio Sampaio"
+    },
+    {
+      "cep": "45206-235",
+      "street": "Rua das Cigarras",
+      "complement": "",
+      "neighborhood": "Pompílio Sampaio"
+    },
+    {
+      "cep": "45206-239",
+      "street": "Rua das Libélulas",
+      "complement": "",
+      "neighborhood": "Pompílio Sampaio"
+    },
+    {
+      "cep": "45206-263",
+      "street": "Rua das Mariposas",
+      "complement": "",
+      "neighborhood": "Pompílio Sampaio"
+    },
+    {
+      "cep": "45206-259",
+      "street": "Rua das Tanajuras",
+      "complement": "",
+      "neighborhood": "Pompílio Sampaio"
+    },
+    {
+      "cep": "45206-215",
+      "street": "Rua das Vespas",
+      "complement": "",
+      "neighborhood": "Pompílio Sampaio"
+    },
+    {
+      "cep": "45206-105",
+      "street": "Rua de Ligação",
+      "complement": "",
+      "neighborhood": "Pompílio Sampaio"
+    },
+    {
+      "cep": "45206-223",
+      "street": "Rua do Zangão",
+      "complement": "",
+      "neighborhood": "Pompílio Sampaio"
+    },
+    {
+      "cep": "45206-261",
+      "street": "Rua dos Escaravelhos",
+      "complement": "",
+      "neighborhood": "Pompílio Sampaio"
+    },
+    {
+      "cep": "45206-227",
+      "street": "Rua dos Gafanhotos",
+      "complement": "",
+      "neighborhood": "Pompílio Sampaio"
+    },
+    {
+      "cep": "45206-107",
+      "street": "Travessa Antônio de Jesus Pereira",
+      "complement": "",
+      "neighborhood": "Pompílio Sampaio"
+    },
+    {
+      "cep": "45201-807",
+      "street": "1ª Travessa 6",
+      "complement": "Loteamento Cidade Nova",
+      "neighborhood": "Kennedy"
+    },
+    {
+      "cep": "45201-490",
+      "street": "1ª Travessa Alto do Cruzeiro",
+      "complement": "",
+      "neighborhood": "Kennedy"
+    },
+    {
+      "cep": "45201-755",
+      "street": "1ª Travessa Elísio Lapa",
+      "complement": "lado ímpar",
+      "neighborhood": "Kennedy"
+    },
+    {
+      "cep": "45201-805",
+      "street": "2ª Travessa 6",
+      "complement": "Loteamento Cidade Nova",
+      "neighborhood": "Kennedy"
+    },
+    {
+      "cep": "45201-627",
+      "street": "2ª Travessa Alto do Cruzeiro",
+      "complement": "",
+      "neighborhood": "Kennedy"
+    },
+    {
+      "cep": "45201-647",
+      "street": "2ª Travessa da Paróquia",
+      "complement": "",
+      "neighborhood": "Kennedy"
+    },
+    {
+      "cep": "45201-653",
+      "street": "2ª Travessa Joventino Antônio Rocha",
+      "complement": "lado par",
+      "neighborhood": "Kennedy"
+    },
+    {
+      "cep": "45201-639",
+      "street": "Avenida Governador Lomanto Júnior",
+      "complement": "2857 ao fim lado ímpar",
+      "neighborhood": "Kennedy"
+    },
+    {
+      "cep": "45201-637",
+      "street": "Avenida Governador Lomanto Júnior",
+      "complement": "2856 ao fim lado par",
+      "neighborhood": "Kennedy"
+    },
+    {
+      "cep": "45201-557",
+      "street": "Escada 10",
+      "complement": "Loteamento Vila Aparecida",
+      "neighborhood": "Kennedy"
+    },
+    {
+      "cep": "45201-567",
+      "street": "Escada 11",
+      "complement": "Loteamento Vila Aparecida",
+      "neighborhood": "Kennedy"
+    },
+    {
+      "cep": "45201-601",
+      "street": "Escada 13",
+      "complement": "Loteamento Cidade Nova",
+      "neighborhood": "Kennedy"
+    },
+    {
+      "cep": "45201-605",
+      "street": "Escada 15",
+      "complement": "Loteamento Cidade Nova",
+      "neighborhood": "Kennedy"
+    },
+    {
+      "cep": "45201-551",
+      "street": "Escada 6",
+      "complement": "Loteamento Vila Aparecida",
+      "neighborhood": "Kennedy"
+    },
+    {
+      "cep": "45201-549",
+      "street": "Escada 8",
+      "complement": "Loteamento Vila Aparecida",
+      "neighborhood": "Kennedy"
+    },
+    {
+      "cep": "45201-553",
+      "street": "Escada 9",
+      "complement": "Loteamento Vila Aparecida",
+      "neighborhood": "Kennedy"
+    },
+    {
+      "cep": "45201-539",
+      "street": "Rua 1",
+      "complement": "Loteamento Vila Aparecida",
+      "neighborhood": "Kennedy"
+    },
+    {
+      "cep": "45201-589",
+      "street": "Rua 10",
+      "complement": "Loteamento Vila Aparecida",
+      "neighborhood": "Kennedy"
+    },
+    {
+      "cep": "45201-619",
+      "street": "Rua 10",
+      "complement": "Loteamento Cidade Nova",
+      "neighborhood": "Kennedy"
+    },
+    {
+      "cep": "45201-581",
+      "street": "Rua 11",
+      "complement": "Loteamento Vila Aparecida",
+      "neighborhood": "Kennedy"
+    },
+    {
+      "cep": "45201-617",
+      "street": "Rua 11",
+      "complement": "Loteamento Cidade Nova",
+      "neighborhood": "Kennedy"
+    },
+    {
+      "cep": "45201-579",
+      "street": "Rua 12",
+      "complement": "Loteamento Vila Aparecida",
+      "neighborhood": "Kennedy"
+    },
+    {
+      "cep": "45201-615",
+      "street": "Rua 12",
+      "complement": "Loteamento Cidade Nova",
+      "neighborhood": "Kennedy"
+    },
+    {
+      "cep": "45201-571",
+      "street": "Rua 13",
+      "complement": "Loteamento Vila Aparecida",
+      "neighborhood": "Kennedy"
+    },
+    {
+      "cep": "45201-613",
+      "street": "Rua 13",
+      "complement": "Loteamento Cidade Nova",
+      "neighborhood": "Kennedy"
+    },
+    {
+      "cep": "45201-635",
+      "street": "Rua 13 de Maio",
+      "complement": "",
+      "neighborhood": "Kennedy"
+    },
+    {
+      "cep": "45201-585",
+      "street": "Rua 14",
+      "complement": "Loteamento Vila Aparecida",
+      "neighborhood": "Kennedy"
+    },
+    {
+      "cep": "45201-611",
+      "street": "Rua 14",
+      "complement": "Loteamento Cidade Nova",
+      "neighborhood": "Kennedy"
+    },
+    {
+      "cep": "45201-565",
+      "street": "Rua 15",
+      "complement": "Loteamento Vila Aparecida",
+      "neighborhood": "Kennedy"
+    },
+    {
+      "cep": "45201-607",
+      "street": "Rua 15",
+      "complement": "Loteamento Cidade Nova",
+      "neighborhood": "Kennedy"
+    },
+    {
+      "cep": "45201-599",
+      "street": "Rua 16",
+      "complement": "Loteamento Cidade Nova",
+      "neighborhood": "Kennedy"
+    },
+    {
+      "cep": "45201-577",
+      "street": "Rua 16",
+      "complement": "Loteamento Vila Aparecida",
+      "neighborhood": "Kennedy"
+    },
+    {
+      "cep": "45201-573",
+      "street": "Rua 17",
+      "complement": "Loteamento Vila Aparecida",
+      "neighborhood": "Kennedy"
+    },
+    {
+      "cep": "45201-595",
+      "street": "Rua 17",
+      "complement": "Loteamento Cidade Nova",
+      "neighborhood": "Kennedy"
+    },
+    {
+      "cep": "45201-587",
+      "street": "Rua 18",
+      "complement": "Loteamento Vila Aparecida",
+      "neighborhood": "Kennedy"
+    },
+    {
+      "cep": "45201-603",
+      "street": "Rua 18",
+      "complement": "Loteamento Cidade Nova",
+      "neighborhood": "Kennedy"
+    },
+    {
+      "cep": "45201-563",
+      "street": "Rua 19",
+      "complement": "Loteamento Vila Aparecida",
+      "neighborhood": "Kennedy"
+    },
+    {
+      "cep": "45201-593",
+      "street": "Rua 19",
+      "complement": "Loteamento Cidade Nova",
+      "neighborhood": "Kennedy"
+    },
+    {
+      "cep": "45201-583",
+      "street": "Rua 2",
+      "complement": "Loteamento Vila Aparecida",
+      "neighborhood": "Kennedy"
+    },
+    {
+      "cep": "45201-559",
+      "street": "Rua 20",
+      "complement": "Loteamento Vila Aparecida",
+      "neighborhood": "Kennedy"
+    },
+    {
+      "cep": "45201-591",
+      "street": "Rua 20",
+      "complement": "Loteamento Cidade Nova",
+      "neighborhood": "Kennedy"
+    },
+    {
+      "cep": "45201-545",
+      "street": "Rua 21",
+      "complement": "Loteamento Vila Aparecida",
+      "neighborhood": "Kennedy"
+    },
+    {
+      "cep": "45201-505",
+      "street": "Rua 22",
+      "complement": "Loteamento Vila Aparecida",
+      "neighborhood": "Kennedy"
+    },
+    {
+      "cep": "45201-503",
+      "street": "Rua 23",
+      "complement": "Loteamento Vila Aparecida",
+      "neighborhood": "Kennedy"
+    },
+    {
+      "cep": "45201-507",
+      "street": "Rua 24",
+      "complement": "Loteamento Vila Aparecida",
+      "neighborhood": "Kennedy"
+    },
+    {
+      "cep": "45201-511",
+      "street": "Rua 25",
+      "complement": "Loteamento Vila Aparecida",
+      "neighborhood": "Kennedy"
+    },
+    {
+      "cep": "45201-631",
+      "street": "Rua 25 de Dezembro",
+      "complement": "",
+      "neighborhood": "Kennedy"
+    },
+    {
+      "cep": "45201-515",
+      "street": "Rua 26",
+      "complement": "Loteamento Vila Aparecida",
+      "neighborhood": "Kennedy"
+    },
+    {
+      "cep": "45201-517",
+      "street": "Rua 27",
+      "complement": "Loteamento Vila Aparecida",
+      "neighborhood": "Kennedy"
+    },
+    {
+      "cep": "45201-519",
+      "street": "Rua 28",
+      "complement": "Loteamento Vila Aparecida",
+      "neighborhood": "Kennedy"
+    },
+    {
+      "cep": "45201-521",
+      "street": "Rua 29",
+      "complement": "Loteamento Vila Aparecida",
+      "neighborhood": "Kennedy"
+    },
+    {
+      "cep": "45201-765",
+      "street": "Rua 2A",
+      "complement": "",
+      "neighborhood": "Kennedy"
+    },
+    {
+      "cep": "45201-575",
+      "street": "Rua 3",
+      "complement": "Loteamento Vila Aparecida",
+      "neighborhood": "Kennedy"
+    },
+    {
+      "cep": "45201-525",
+      "street": "Rua 30",
+      "complement": "Loteamento Vila Aparecida",
+      "neighborhood": "Kennedy"
+    },
+    {
+      "cep": "45201-529",
+      "street": "Rua 31",
+      "complement": "Loteamento Vila Aparecida",
+      "neighborhood": "Kennedy"
+    },
+    {
+      "cep": "45201-533",
+      "street": "Rua 32",
+      "complement": "Loteamento Vila Aparecida",
+      "neighborhood": "Kennedy"
+    },
+    {
+      "cep": "45201-535",
+      "street": "Rua 33",
+      "complement": "Loteamento Vila Aparecida",
+      "neighborhood": "Kennedy"
+    },
+    {
+      "cep": "45201-509",
+      "street": "Rua 34",
+      "complement": "Loteamento Vila Aparecida",
+      "neighborhood": "Kennedy"
+    },
+    {
+      "cep": "45201-501",
+      "street": "Rua 35",
+      "complement": "Loteamento Vila Aparecida",
+      "neighborhood": "Kennedy"
+    },
+    {
+      "cep": "45201-513",
+      "street": "Rua 36",
+      "complement": "Loteamento Vila Aparecida",
+      "neighborhood": "Kennedy"
+    },
+    {
+      "cep": "45201-537",
+      "street": "Rua 37",
+      "complement": "Loteamento Vila Aparecida",
+      "neighborhood": "Kennedy"
+    },
+    {
+      "cep": "45201-531",
+      "street": "Rua 38",
+      "complement": "Loteamento Vila Aparecida",
+      "neighborhood": "Kennedy"
+    },
+    {
+      "cep": "45201-523",
+      "street": "Rua 39",
+      "complement": "Loteamento Vila Aparecida",
+      "neighborhood": "Kennedy"
+    },
+    {
+      "cep": "45201-569",
+      "street": "Rua 4",
+      "complement": "Loteamento Vila Aparecida",
+      "neighborhood": "Kennedy"
+    },
+    {
+      "cep": "45201-773",
+      "street": "Rua 4",
+      "complement": "",
+      "neighborhood": "Kennedy"
+    },
+    {
+      "cep": "45201-527",
+      "street": "Rua 40",
+      "complement": "Loteamento Vila Aparecida",
+      "neighborhood": "Kennedy"
+    },
+    {
+      "cep": "45201-597",
+      "street": "Rua 43",
+      "complement": "Loteamento Cidade Nova",
+      "neighborhood": "Kennedy"
+    },
+    {
+      "cep": "45201-561",
+      "street": "Rua 5",
+      "complement": "Loteamento Vila Aparecida",
+      "neighborhood": "Kennedy"
+    },
+    {
+      "cep": "45201-555",
+      "street": "Rua 6",
+      "complement": "Loteamento Vila Aparecida",
+      "neighborhood": "Kennedy"
+    },
+    {
+      "cep": "45201-803",
+      "street": "Rua 6",
+      "complement": "Loteamento Cidade Nova",
+      "neighborhood": "Kennedy"
+    },
+    {
+      "cep": "45201-809",
+      "street": "Rua 7",
+      "complement": "Loteamento Cidade Nova",
+      "neighborhood": "Kennedy"
+    },
+    {
+      "cep": "45201-547",
+      "street": "Rua 7",
+      "complement": "Loteamento Vila Aparecida",
+      "neighborhood": "Kennedy"
+    },
+    {
+      "cep": "45201-543",
+      "street": "Rua 8",
+      "complement": "Loteamento Vila Aparecida",
+      "neighborhood": "Kennedy"
+    },
+    {
+      "cep": "45201-811",
+      "street": "Rua 8",
+      "complement": "Loteamento Cidade Nova",
+      "neighborhood": "Kennedy"
+    },
+    {
+      "cep": "45201-541",
+      "street": "Rua 9",
+      "complement": "Loteamento Vila Aparecida",
+      "neighborhood": "Kennedy"
+    },
+    {
+      "cep": "45201-829",
+      "street": "Rua 9E",
+      "complement": "Loteamento Cidade Nova",
+      "neighborhood": "Kennedy"
+    },
+    {
+      "cep": "45201-823",
+      "street": "Rua 9F",
+      "complement": "Loteamento Cidade Nova",
+      "neighborhood": "Kennedy"
+    },
+    {
+      "cep": "45201-825",
+      "street": "Rua 9G",
+      "complement": "Loteamento Cidade Nova",
+      "neighborhood": "Kennedy"
+    },
+    {
+      "cep": "45201-827",
+      "street": "Rua 9H",
+      "complement": "Loteamento Cidade Nova",
+      "neighborhood": "Kennedy"
+    },
+    {
+      "cep": "45201-735",
+      "street": "Rua A",
+      "complement": "Conjunto Vida Jequié",
+      "neighborhood": "Kennedy"
+    },
+    {
+      "cep": "45201-783",
+      "street": "Rua Adalberto Almeida Júnior",
+      "complement": "",
+      "neighborhood": "Kennedy"
+    },
+    {
+      "cep": "45201-720",
+      "street": "Rua Alfredo Ribeiro",
+      "complement": "",
+      "neighborhood": "Kennedy"
+    },
+    {
+      "cep": "45201-480",
+      "street": "Rua Alto do Cruzeiro",
+      "complement": "",
+      "neighborhood": "Kennedy"
+    },
+    {
+      "cep": "45201-791",
+      "street": "Rua Alves Cardoso",
+      "complement": "",
+      "neighborhood": "Kennedy"
+    },
+    {
+      "cep": "45201-710",
+      "street": "Rua Ana Delmiro",
+      "complement": "",
+      "neighborhood": "Kennedy"
+    },
+    {
+      "cep": "45201-630",
+      "street": "Rua Astro Brayner",
+      "complement": "",
+      "neighborhood": "Kennedy"
+    },
+    {
+      "cep": "45201-633",
+      "street": "Rua Aureliano Barbosa",
+      "complement": "",
+      "neighborhood": "Kennedy"
+    },
+    {
+      "cep": "45201-749",
+      "street": "Rua B",
+      "complement": "Conjunto Vida Jequié",
+      "neighborhood": "Kennedy"
+    },
+    {
+      "cep": "45201-690",
+      "street": "Rua Barro Vermelho",
+      "complement": "",
+      "neighborhood": "Kennedy"
     }
   ],
   "sources": [
@@ -1733,5 +9453,210 @@
     "km iv": "KM IV",
     "caixa dagua": "Caixa D'Água",
     "caixa d agua": "Caixa D'Água"
+  },
+  "localityAliases": {
+    "Brasil Novo": "Jequiezinho",
+    "Conjunto Habitacional Brasil Novo": "Jequiezinho",
+    "Residencial Parque do Sol": "Jequiezinho",
+    "Parque do Sol": "Jequiezinho",
+    "Jardim Eldorado": "Jequiezinho",
+    "Loteamento Jardim Tropical": "Jequiezinho",
+    "Jardim Tropical": "Jequiezinho",
+    "Loteamento Tropical": "Jequiezinho",
+    "Vila Vitória": "Jequiezinho",
+    "Inocoop": "Jequiezinho",
+    "URBIS I": "Jequiezinho",
+    "URBIS II": "Jequiezinho",
+    "URBIS III": "Jequiezinho",
+    "URBIS IV": "Jequiezinho",
+    "Vida Nova I": "Jequiezinho",
+    "Vida Nova II": "Jequiezinho",
+    "Residencial Segredo": "Curral Novo",
+    "Segredo": "Curral Novo",
+    "Residencial Vida Jequié": "Curral Novo",
+    "Vida Jequié": "Kennedy",
+    "Residencial Beira Rio": "Kennedy",
+    "Residencial Mandacaru I": "Itaigara",
+    "Residencial Mandacaru II": "Itaigara",
+    "Cachoeirinha": "Cachoeirinha",
+    "Residencial Cachoeirinha I": "Cachoeirinha",
+    "Residencial Cachoeirinha II": "Cachoeirinha",
+    "Residencial Cachoeirinha III": "Cachoeirinha",
+    "Residencial Cachoeirinha IV": "Cachoeirinha",
+    "Feirinha do Jequiezinho": "Jequiezinho",
+    "Alto da Bela Vista": "Joaquim Romão",
+    "Residencial Colina": "Cansanção",
+    "Colina": "Cansanção",
+    "Residencial Campo Belo": "Cansanção",
+    "Campo Belo": "Cansanção",
+    "Jardins da Cachoeirinha I": "Cachoeirinha",
+    "Jardins da Cachoeirinha II": "Cachoeirinha",
+    "Jardins da Cachoeirinha III": "Cachoeirinha",
+    "Jardins da Cachoeirinha IV": "Cachoeirinha",
+    "Feirinha do Joaquim Romão": "Joaquim Romão",
+    "Largo da Feirinha do Joaquim Romão": "Joaquim Romão",
+    "Sol Nascente": "Joaquim Romão",
+    "Loteamento Sol Nascente": "Joaquim Romão",
+    "Alto do Amor": "Joaquim Romão",
+    "Jardim Alvorada": "Chácara Alvorada",
+    "Loteamento Jardim Alvorada": "Chácara Alvorada",
+    "Bom Sossego": "Jequiezinho",
+    "Vovó Camila": "Jequiezinho",
+    "Brinco de Ouro": "Jequiezinho",
+    "Casas Populares": "Jequiezinho",
+    "Agarradinho": "Jequiezinho",
+    "Parque das Algarobas": "Pompílio Sampaio",
+    "Pedras do Parque": "Pompílio Sampaio",
+    "Conjunto Takoma Park": "Mandacaru",
+    "Takoma Park": "Mandacaru",
+    "Zimbrune": "Itaigara",
+    "Zibrune": "Itaigara",
+    "Caranguejo": "Pompílio Sampaio",
+    "Prodecó": "Pompílio Sampaio",
+    "Prodecor": "Pompílio Sampaio",
+    "Mirassol": "Água Branca",
+    "Loteamento Mirassol": "Jequiezinho",
+    "Pau Ferro": "Pau Ferro",
+    "Alto do Cemitério": "Alto do Cemitério",
+    "Posto Manoel Antônio": "Posto Manoel Antônio",
+    "Cururu": "Cururu",
+    "Gustavo Ribeiro": "Gustavo Ribeiro",
+    "Osvaldo Costa Brito": "Osvaldo Costa Brito",
+    "Santo Antônio": "Santo Antônio",
+    "Bateu do Boi": "Bateu do Boi",
+    "Vila Esperança": "KM III",
+    "São Bento": "Cansanção",
+    "Pedrinhas": "Curral Novo",
+    "Bateu do Sol": "Bateu do Sol",
+    "Corredor Água Branca": "Água Branca",
+    "Mutirão do Curral Novo": "Curral Novo",
+    "Taquara Parque": "Taquara Parque",
+    "Mutirão do Pau Ferro": "Pau Ferro",
+    "Mutirão do São Judas Tadeu": "São Judas Tadeu",
+    "Santo Ivo": "Santo Ivo",
+    "Loteamento Água Branca": "Água Branca",
+    "Mandacaru I": "Itaigara",
+    "Mandacaru II": "Itaigara",
+    "Cilion": "Jequiezinho",
+    "Silion": "Jequiezinho",
+    "Galeria Cilion": "Jequiezinho",
+    "Praça da Bíblia": "Jequiezinho",
+    "Baixa do Bomfim": "Baixa do Bonfim",
+    "Baixa do Bonfim": "Baixa do Bonfim",
+    "Loteamento Belanápolis": "Jequiezinho",
+    "Loteamento Boa Vista": "Pompílio Sampaio",
+    "Loteamento da Colina": "Jequiezinho",
+    "Loteamento Espaço Nobre": "Jequiezinho",
+    "Loteamento Ribeiro": "Jequiezinho",
+    "Loteamento Vicente Grilo": "Jequiezinho",
+    "Loteamento Vila Aeroporto": "Jequiezinho",
+    "Urbis I": "Jequiezinho",
+    "Loteamento Jardim Amaralina": "São Judas Tadeu",
+    "Jardim Amaralina": "São Judas Tadeu",
+    "Loteamento Pacaembu": "Mandacaru",
+    "Distrito Industrial": "Mandacaru",
+    "Loteamento Itaigara": "Mandacaru",
+    "Mutirão Curral Novo": "Curral Novo",
+    "Loteamento Ipanema": "Curral Novo",
+    "Loteamento Santa Luz": "Cansanção",
+    "Condomínio Bela Vista": "São Judas Tadeu",
+    "Loteamento Cleonice": "São Judas Tadeu",
+    "Loteamento Pindorama": "São Judas Tadeu",
+    "Loteamento Jardim Paquetá": "São José",
+    "Pacaembu": "Mandacaru",
+    "Loteamento Vila Aparecida": "Kennedy",
+    "Vila Aparecida": "Kennedy",
+    "Loteamento Cidade Nova": "Kennedy",
+    "Conjunto Vida Jequié": "Kennedy",
+    "Loteamento Parque Colina": "Pompílio Sampaio",
+    "Loteamento Boaventura": "Pompílio Sampaio",
+    "Loteamento Algarobas II": "Pompílio Sampaio"
+  },
+  "localityNeighborhoods": {
+    "Brasil Novo": [
+      "Jequiezinho",
+      "Água Branca"
+    ],
+    "Conjunto Habitacional Brasil Novo": [
+      "Jequiezinho",
+      "Água Branca"
+    ],
+    "Inocoop": [
+      "Jequiezinho",
+      "Água Branca",
+      "São José"
+    ],
+    "Cilion": [
+      "Jequiezinho"
+    ],
+    "Silion": [
+      "Jequiezinho"
+    ],
+    "Galeria Cilion": [
+      "Jequiezinho"
+    ],
+    "Baixa do Bonfim": [
+      "Jequiezinho",
+      "Baixa do Bonfim",
+      "Tropical"
+    ],
+    "Baixa do Bomfim": [
+      "Jequiezinho",
+      "Baixa do Bonfim",
+      "Tropical"
+    ],
+    "Jardim Tropical": [
+      "Tropical",
+      "Jequiezinho",
+      "Baixa do Bonfim"
+    ],
+    "Loteamento Jardim Tropical": [
+      "Tropical",
+      "Jequiezinho",
+      "Baixa do Bonfim"
+    ],
+    "Cachoeirinha": [
+      "Tropical",
+      "Baixa do Bonfim"
+    ],
+    "Residencial Cachoeirinha I": [
+      "Tropical",
+      "Baixa do Bonfim"
+    ],
+    "Residencial Cachoeirinha II": [
+      "Tropical",
+      "Baixa do Bonfim"
+    ],
+    "Residencial Cachoeirinha III": [
+      "Tropical",
+      "Baixa do Bonfim"
+    ],
+    "Residencial Cachoeirinha IV": [
+      "Tropical",
+      "Baixa do Bonfim"
+    ],
+    "Parque do Sol": [
+      "Jequiezinho",
+      "Vila Rodoviária"
+    ],
+    "Residencial Parque do Sol": [
+      "Jequiezinho",
+      "Vila Rodoviária"
+    ],
+    "Praça da Bíblia": [
+      "Jequiezinho"
+    ],
+    "Feirinha do Jequiezinho": [
+      "Jequiezinho"
+    ],
+    "Feirinha do Joaquim Romão": [
+      "Joaquim Romão"
+    ],
+    "Alto da Bela Vista": [
+      "Joaquim Romão"
+    ],
+    "Alto do Amor": [
+      "Joaquim Romão"
+    ]
   }
 }
