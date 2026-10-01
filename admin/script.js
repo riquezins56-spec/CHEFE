@@ -71,6 +71,9 @@ let autoPrintReady=false,autoPrintBusy=false;
 function autoPrintedIds(){try{return new Set(JSON.parse(localStorage.getItem(AUTO_PRINT_KEY)||'[]').map(String))}catch{return new Set()}}
 function saveAutoPrinted(ids){localStorage.setItem(AUTO_PRINT_KEY,JSON.stringify([...ids].slice(-300)))}
 async function autoPrintNewOrders(){
+  const ua=(navigator.userAgent||'').toLowerCase();
+  // iPhone/iPad: impressão é manual. Não marcar pedido como autoimpresso.
+  if(/iphone|ipad|ipod/.test(ua))return;
   if(!token||autoPrintBusy||document.hidden)return;
   autoPrintBusy=true;
   try{
