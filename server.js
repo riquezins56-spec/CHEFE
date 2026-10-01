@@ -793,8 +793,10 @@ async function api(req,res,pathname){
     if(req.method==='GET'&&cepMatch){try{return send(res,200,await lookupCep(cepMatch[1]));}catch(e){return send(res,404,{error:e.message});}}
     if(req.method==='POST'&&pathname==='/api/delivery-quote-address'){
       const b=await body(req),d=await read();
-      if(!String(b.street||'').trim()||!String(b.number||'').trim()||!String(b.neighborhood||'').trim())
-        return send(res,400,{error:'Informe rua, número e bairro para calcular a entrega.'});
+      if(!String(b.street||'').trim()||!String(b.neighborhood||'').trim())
+        return send(res,400,{error:'Informe rua e bairro/localidade para calcular a entrega.'});
+      // O número é detalhe de entrega e não participa da geocodificação/rota.
+      b.number='';
       let addressInput={...b,city:String(b.city||d.settings.storeCity||'Jequié').trim(),state:String(b.state||d.settings.storeState||'BA').trim()};
       try{
         addressInput=await enrichJequieAddress(addressInput);
