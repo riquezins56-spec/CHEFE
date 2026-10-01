@@ -248,10 +248,6 @@ function printJson(entries){return JSON.stringify(Object.fromEntries(entries.map
 function addText(entries,content,bold=0,align=0,format=0){entries.push({type:0,content:String(content??''),bold,align,format});}
 
 const adminTokens = new Set();
-const customerOtp = new Map();
-const customerTokens = new Map();
-function cleanPhone(v){return String(v||'').replace(/\D/g,'').replace(/^55(?=\d{10,11}$)/,'');}
-function customerByToken(req,d){const h=String(req.headers['x-customer-token']||'');if(!h)return null;const phone=customerTokens.get(h);return phone?(d.customers||[]).find(c=>c.phone===phone):((d.customers||[]).find(c=>c.sessionToken===h)||null);}
 function auth(req){ const h=req.headers.authorization||''; return h.startsWith('Bearer ') && adminTokens.has(h.slice(7)); }
 function normalizeDeliveryText(v){return String(v??'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/\s+/g,' ').trim();}
 function resolveDeliveryFee(zones, neighborhood, street){
@@ -602,7 +598,7 @@ async function printEndpoint(req,res,pathname){
   const e=[]; addText(e,'CHEFE TELLES',1,1,2); addText(e,'PEDIDO '+String(o.number).padStart(2,'0'),1,1,1); addText(e,new Date(o.createdAt).toLocaleString('pt-BR',{timeZone:'America/Sao_Paulo'}),0,1,0); addText(e,'--------------------------------');
   addText(e,'STATUS: '+(o.status||'Novo')); addText(e,'CLIENTE: '+(o.customer?.name||'')); if(o.customer?.phone)addText(e,'WHATSAPP: '+o.customer.phone); if(o.customer?.reference)addText(e,'PONTO DE REFERÊNCIA: '+o.customer.reference); addText(e,'--------------------------------');
   for(const i of (o.items||[])) addText(e,`${i.qty}x ${i.name} - R$ ${(Number(i.price||0)*Number(i.qty||0)).toFixed(2)}`);
-  addText(e,'--------------------------------'); addText(e,'SUBTOTAL: R$ '+Number(o.subtotal||o.total||0).toFixed(2)); addText(e,'ENTREGA: R$ '+Number(o.deliveryFee||0).toFixed(2)); addText(e,'TOTAL: R$ '+Number(o.total||0).toFixed(2),1,0,1); addText(e,'FORMA DE PAGAMENTO: '+(o.customer?.payment||'')); addText(e,o.customer?.delivery==='Retirada'?'TIPO: RETIRADA NA LOJA':'ENDEREÇO: '+(o.customer?.address||'')); if(o.deliveryDistanceKm)addText(e,'DISTÂNCIA: '+o.deliveryDistanceKm+' km'); addText(e,'OBS: '+(o.customer?.note||'Nenhuma')); addText(e,' '); addText(e,' ');
+  addText(e,'--------------------------------'); addText(e,'SUBTOTAL: R$ '+Number(o.subtotal||o.total||0).toFixed(2)); if(o.customer?.delivery!=='Retirada')addText(e,'ENTREGA: R$ '+Number(o.deliveryFee||0).toFixed(2)); addText(e,'TOTAL: R$ '+Number(o.total||0).toFixed(2),1,0,1); addText(e,'FORMA DE PAGAMENTO: '+(o.customer?.payment||'')); addText(e,o.customer?.delivery==='Retirada'?'TIPO: RETIRADA NA LOJA':'ENDEREÇO: '+(o.customer?.address||'')); if(o.deliveryDistanceKm)addText(e,'DISTÂNCIA: '+o.deliveryDistanceKm+' km'); addText(e,'OBS: '+(o.customer?.note||'Nenhuma')); addText(e,' '); addText(e,' ');
   return send(res,200,JSON.parse(printJson(e)));
 }
 
@@ -632,26 +628,6 @@ async function api(req,res,pathname){
     if(req.method==='GET'&&pathname==='/api/store'){
       const d=await read();
       return send(res,200,{settings:{name:d.settings.name,whatsapp:d.settings.whatsapp,pixKey:d.settings.pixKey||'',pixRecipient:d.settings.pixRecipient||'',pixType:d.settings.pixType||'',pixQr:d.settings.pixQr||'',botWhatsapp:d.settings.botWhatsapp||d.settings.whatsapp,botMessage:d.settings.botMessage||'',deliveryMode:'route',storeLat:d.settings.storeLat||'',storeLng:d.settings.storeLng||'',storeCity:d.settings.storeCity||'',storeState:d.settings.storeState||'',storeNeighborhood:d.settings.storeNeighborhood||'',extraKmFee:Number(d.settings.extraKmFee)||0,maxDeliveryKm:Number(d.settings.maxDeliveryKm)||0},categories:d.categories,products:d.products.filter(p=>p.active),deliveryZones:[],addressHints:(d.addressCache||[]).slice(-300).map(a=>({street:a.street,neighborhood:a.neighborhood,city:a.city,state:a.state})),deliveryKmRanges:(d.deliveryKmRanges||[]).filter(z=>z.active!==false)});
-    }
-    if(req.method==='POST'&&pathname==='/api/customer/request-code'){
-      const b=await body(req),phone=cleanPhone(b.phone);if(phone.length<10)return send(res,400,{error:'Informe um celular válido.'});
-      const code=String(crypto.randomInt(100000,999999));customerOtp.set(phone,{code,expires:Date.now()+10*60*1000});
-      // Modo de teste: quando nenhum provedor OTP está configurado, devolvemos o código apenas para validar o fluxo.
-      return send(res,200,{ok:true,testMode:true,testCode:code,message:'Código gerado em modo de teste.'});
-    }
-    if(req.method==='POST'&&pathname==='/api/customer/verify-code'){
-      const b=await body(req),phone=cleanPhone(b.phone),hit=customerOtp.get(phone);
-      if(!hit||hit.expires<Date.now()||String(b.code||'')!==hit.code)return send(res,400,{error:'Código inválido ou expirado.'});
-      customerOtp.delete(phone);const d=await read();let c=(d.customers||[]).find(x=>x.phone===phone);
-      if(!c){c={id:crypto.randomUUID(),phone,name:'',verifiedAt:new Date().toISOString(),address:{},createdAt:new Date().toISOString(),updatedAt:new Date().toISOString()};d.customers.push(c);await write(d);}
-      const token=crypto.randomBytes(32).toString('hex');customerTokens.set(token,phone);c.sessionToken=token;c.updatedAt=new Date().toISOString();await write(d);return send(res,200,{ok:true,token,customer:c});
-    }
-    if(req.method==='GET'&&pathname==='/api/customer/me'){
-      const d=await read(),c=customerByToken(req,d);if(!c)return send(res,401,{error:'Sessão do cliente inválida.'});return send(res,200,c);
-    }
-    if(req.method==='PUT'&&pathname==='/api/customer/profile'){
-      const b=await body(req),d=await read(),c=customerByToken(req,d);if(!c)return send(res,401,{error:'Sessão do cliente inválida.'});
-      c.name=String(b.name||c.name||'').trim();c.address={...(c.address||{}),...(b.address||{})};c.updatedAt=new Date().toISOString();await write(d);return send(res,200,c);
     }
     if(req.method==='POST'&&pathname==='/api/login'){
       const b=await body(req),d=await read();
@@ -871,12 +847,10 @@ async function api(req,res,pathname){
         deliveryFee=Number(resolved.toFixed(2)); b.deliveryDistanceKm=Number(route.km.toFixed(2)); b.deliveryRouteType=route.source;
       }
       const customer={...(b.customer||{})};
-      const profile=customerByToken(req,d);
       if(customer.delivery!=='Retirada'){
         const street=String(customer.street||'').trim(), number=String(customer.number||'').trim(), complement=String(customer.complement||'').trim(), neighborhood=String(customer.neighborhood||'').trim(), reference=String(customer.reference||'').trim();
         customer.address=[street,number&&('Nº '+number),neighborhood,complement,reference&&('Referência: '+reference)].filter(Boolean).join(', ');
       }else customer.address='Retirada na loja';
-      if(profile){profile.name=String(customer.name||profile.name||'').trim();if(customer.delivery!=='Retirada')profile.address={street:customer.street||'',number:customer.number||'',neighborhood:customer.neighborhood||'',complement:customer.complement||'',reference:customer.reference||'',lat:customer.lat||'',lng:customer.lng||'',address:customer.address||''};profile.updatedAt=new Date().toISOString();}
       const createdAt=new Date().toISOString();
       const createdAtText=new Date(createdAt).toLocaleString('pt-BR',{timeZone:'America/Sao_Paulo',day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'});
       const order={...b,customer,id:Date.now(),trackingToken:crypto.randomBytes(16).toString('hex'),estimatedMinutes:Number(d.settings.defaultEtaMinutes||0),day:today,number:count,status:'Novo',statusHistory:[{status:'Novo',at:createdAt}],driverId:null,estimatedMinutes:Number(d.settings.defaultEtaMinutes||0),createdAt,createdAtText,subtotal,deliveryFee,total:subtotal+deliveryFee};

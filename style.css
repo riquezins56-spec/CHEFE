@@ -144,9 +144,3 @@ body>#successModal .success-card{width:min(520px,100%)!important;max-height:calc
 .address-search-results{display:none;gap:8px;flex-direction:column;margin:10px 0}.address-search-results.show{display:flex}.address-result{width:100%;text-align:left;border:1px solid rgba(255,255,255,.12);background:#171717;color:#fff;border-radius:10px;padding:11px 12px;cursor:pointer}.address-result b,.address-result span{display:block}.address-result span{font-size:12px;opacity:.72;margin-top:3px}.address-result:hover{border-color:rgba(255,255,255,.3)}
 
 .smart-address{margin:12px 0 6px}.smart-address label{font-weight:700}.smart-address input{margin-top:7px}.smart-address .address-search-results{max-height:300px;overflow:auto;-webkit-overflow-scrolling:touch}
-/* V10.68 — cadastro persistente do cliente */
-#customerRegisterModal{z-index:2147483000;background:rgba(0,0,0,.9)}
-#customerRegisterModal.show{display:flex!important;align-items:center;justify-content:center}
-.customer-register-card{width:min(500px,calc(100vw - 24px));max-height:calc(100dvh - 24px);overflow:auto}
-.customer-register-card label{display:block;margin:12px 0}.register-help{opacity:.78;line-height:1.45}
-#registerTestCode{margin:8px 0 12px;font-weight:800}
