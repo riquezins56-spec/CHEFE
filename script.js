@@ -140,7 +140,16 @@ document.querySelector('#lookupCep')?.addEventListener('click',async()=>{
 });
 async function calculateByTypedAddress(){
   const st=document.querySelector('#gpsStatus'); st.textContent='Localizando endereço e calculando rota...';
-  try{const x=await quoteAddressDelivery({});document.querySelector('#customerLat').value=x.lat;document.querySelector('#customerLng').value=x.lng;document.querySelector('#deliveryFee').value=x.deliveryFee;document.querySelector('#deliveryFeePreview').textContent=money(x.deliveryFee);st.textContent=`Endereço localizado • rota ${Number(x.distanceKm).toFixed(1)} km • taxa ${money(x.deliveryFee)}`;return x;}catch(e){document.querySelector('#deliveryFee').value='0';document.querySelector('#deliveryFeePreview').textContent='Confira o endereço';st.textContent=e.message;throw e;}
+  try{
+    const x=await quoteAddressDelivery({});
+    document.querySelector('#customerLat').value=x.lat;document.querySelector('#customerLng').value=x.lng;
+    document.querySelector('#deliveryFee').value=x.deliveryFee;document.querySelector('#deliveryFeePreview').textContent=money(x.deliveryFee);
+    ensureDeliveryMap(x.lat,x.lng);
+    const rs=document.querySelector('#routeSummary');if(rs){rs.style.display='block';rs.innerHTML=`<b>Entrega calculada pela rota</b><span>${Number(x.distanceKm).toFixed(2)} km → ${money(x.deliveryFee)}</span>`;}
+    const approx=x.locationPrecision==='street-reference'||x.locationPrecision==='cep-reference';
+    st.textContent=`Endereço localizado • rota ${Number(x.distanceKm).toFixed(1)} km • taxa ${money(x.deliveryFee)}${approx?' • confira o pino no mapa':''}`;
+    return x;
+  }catch(e){document.querySelector('#deliveryFee').value='0';document.querySelector('#deliveryFeePreview').textContent='Confira o endereço';const rs=document.querySelector('#routeSummary');if(rs)rs.style.display='none';st.textContent=e.message;throw e;}
 }
 // V9.6 — cálculo automático da entrega pelo endereço (sem botão manual)
 let autoDeliveryTimer=null;

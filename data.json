@@ -18,7 +18,13 @@
     "pixType": "",
     "pixQr": "",
     "botWhatsapp": "5573982451160",
-    "botMessage": "👋 Olá! Bem-vindo ao CHEFE TELLES FAST FOOD!\n\n🍔 Faça seu pedido pelo nosso site.\n\nAssim que finalizar, envie o comprovante PIX por aqui."
+    "botMessage": "👋 Olá! Bem-vindo ao CHEFE TELLES FAST FOOD!\n\n🍔 Faça seu pedido pelo nosso site.\n\nAssim que finalizar, envie o comprovante PIX por aqui.",
+    "deliveryTableVersion": 1,
+    "deliveryMode": "route",
+    "extraKmFee": 0,
+    "maxDeliveryKm": 0,
+    "storeLat": "",
+    "storeLng": ""
   },
   "products": [
     {
@@ -123,5 +129,45 @@
     }
   ],
   "deliveryZones": [],
-  "orders": []
+  "orders": [],
+  "addressCache": [],
+  "deliveryKmRanges": [
+    {
+      "id": 1001,
+      "maxKm": 1,
+      "fee": 5,
+      "active": true
+    },
+    {
+      "id": 1002,
+      "maxKm": 2,
+      "fee": 8,
+      "active": true
+    },
+    {
+      "id": 1003,
+      "maxKm": 4,
+      "fee": 10,
+      "active": true
+    },
+    {
+      "id": 1004,
+      "maxKm": 6,
+      "fee": 12,
+      "active": true
+    },
+    {
+      "id": 1005,
+      "maxKm": 8,
+      "fee": 15,
+      "active": true
+    },
+    {
+      "id": 1006,
+      "maxKm": 9,
+      "fee": 18,
+      "active": true
+    }
+  ],
+  "drivers": []
 }

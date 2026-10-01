@@ -25,13 +25,16 @@ async function loadJequieNeighborhood(nb){
   nb=bestNeighborhoodName(nb); const key=normAddress(nb); if(!key)return [];
   if(directoryMemory.has(key))return directoryMemory.get(key);
   let rows=seedDirectoryFor(nb);
-  // Fonte pública estruturada por bairro. Falha externa nunca bloqueia o checkout: usa base/cache + geocodificador.
+  // A base local é a fonte primária: se já conhecemos o bairro, devolvemos imediatamente.
+  // Isso elimina diferenças entre PC/celular causadas por timeout ou mudança de site externo.
+  if(rows.length){directoryMemory.set(key,rows);return rows;}
+  // Fonte externa serve SOMENTE para complementar bairros ainda ausentes da base local.
   try{
     const slug=neighborhoodSlug(nb),u=`https://codigo-postal.org/pt-br/brasil/ba/jequie/${slug}/`;
-    const r=await fetch(u,{headers:{'User-Agent':'CHEFE-TELLES/10.52 address directory','Accept-Language':'pt-BR'},signal:AbortSignal.timeout(6500)});
+    const r=await fetch(u,{headers:{'User-Agent':'CHEFE-TELLES/10.57 address directory','Accept-Language':'pt-BR'},signal:AbortSignal.timeout(6500)});
     if(r.ok){const h=await r.text();const trs=h.match(/<tr[\s\S]*?<\/tr>/gi)||[];const parsed=[];
       for(const tr of trs){const td=[...tr.matchAll(/<td[^>]*>([\s\S]*?)<\/td>/gi)].map(m=>htmlText(m[1]));if(td.length>=4&&/^\d{5}-?\d{3}$/.test(td[0]))parsed.push({cep:td[0],street:td[1],complement:td[2]||'',neighborhood:td[3]||nb});}
-      if(parsed.length)rows=[...rows,...parsed];
+      if(parsed.length)rows=parsed;
     }
   }catch{}
   const uniq=[];const seen=new Set();for(const x of rows){const k=[normAddress(x.neighborhood),normAddress(x.street),String(x.cep).replace(/\D/g,''),normAddress(x.complement)].join('|');if(!seen.has(k)){seen.add(k);uniq.push(x)}}
@@ -47,7 +50,7 @@ function pickDirectoryRow(rows,street,number){
 async function enrichJequieAddress(x){
   const city=String(x.city||'Jequié').trim(),state=String(x.state||'BA').trim();if(normAddress(city)!=='jequie'||normAddress(state)!=='ba')return {...x};
   const rows=await loadJequieNeighborhood(x.neighborhood);const row=pickDirectoryRow(rows,x.street,x.number);if(!row)return {...x,city:'Jequié',state:'BA'};
-  return {...x,street:row.street||x.street,neighborhood:row.neighborhood||x.neighborhood,cep:String(row.cep||'').replace(/\D/g,''),city:'Jequié',state:'BA',directoryMatch:true};
+  return {...x,street:row.street||x.street,neighborhood:row.neighborhood||x.neighborhood,cep:String(row.cep||'').replace(/\D/g,''),city:'Jequié',state:'BA',directoryMatch:true,directoryLat:Number.isFinite(Number(row.lat))?Number(row.lat):null,directoryLng:Number.isFinite(Number(row.lng))?Number(row.lng):null};
 }
 
 
@@ -269,7 +272,8 @@ async function snapAddressPointToRoad(lat,lng){
 }
 async function deliveryKmForTypedAddress(settings,lat,lng){
   const p=await snapAddressPointToRoad(lat,lng);
-  return await deliveryKm(settings,p.lat,p.lng);
+  const route=await deliveryKm(settings,p.lat,p.lng);
+  return {...route,lat:p.lat,lng:p.lng};
 }
 
 async function lookupCep(cep){
@@ -403,7 +407,10 @@ async function geocodeBrazilAddress(x,cache=[]){
     }catch{}
   }
   if(!candidates.length){
-    throw Error('Não conseguimos calcular este endereço. Confira os dados ou use Minha localização.');
+    const dl=Number(x.directoryLat),dn=Number(x.directoryLng);
+    if(Number.isFinite(dl)&&Number.isFinite(dn))return {lat:dl,lng:dn,displayName:[street,neighborhood,city,state].filter(Boolean).join(', '),precision:'street-reference'};
+    if(cepPoint)return {lat:cepPoint.lat,lng:cepPoint.lng,displayName:[street,neighborhood,city,state,cep].filter(Boolean).join(', '),precision:'cep-reference'};
+    throw Error('Não conseguimos localizar essa rua no mapa. Use Minha localização ou confirme o ponto no mapa.');
   }
 
   const norm=v=>String(v||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().trim();
@@ -418,7 +425,7 @@ async function geocodeBrazilAddress(x,cache=[]){
     const stateOk=!state||!cs||gotState===wantedState||gotState.endsWith('-'+wantedState);
     return cityOk&&stateOk;
   });
-  if(!candidates.length)throw Error('Não conseguimos calcular este endereço. Confira os dados ou use Minha localização.');
+  if(!candidates.length){const dl=Number(x.directoryLat),dn=Number(x.directoryLng);if(Number.isFinite(dl)&&Number.isFinite(dn))return {lat:dl,lng:dn,displayName:[street,neighborhood,city,state].filter(Boolean).join(', '),precision:'street-reference'};if(cepPoint)return {lat:cepPoint.lat,lng:cepPoint.lng,displayName:[street,neighborhood,city,state,cep].filter(Boolean).join(', '),precision:'cep-reference'};throw Error('Não conseguimos localizar essa rua no mapa. Use Minha localização ou confirme o ponto no mapa.');}
 
   const scored=candidates.map(c=>{
     const a=c.address||{}; let score=0;
@@ -445,8 +452,12 @@ async function geocodeBrazilAddress(x,cache=[]){
   const bestRoad=ba.road||ba.pedestrian||ba.residential||'';
   const bestPost=String(ba.postcode||'').replace(/\D/g,'');
   if(city && bestCity && norm(bestCity)!==norm(city))throw Error('O endereço encontrado pertence a outra cidade. Confira os dados ou confirme no mapa.');
-  if(street && bestRoad && searchSimilarity(street,bestRoad)<.60 && !norm(best.display_name).includes(norm(street)))
-    throw Error('Não conseguimos calcular este endereço. Confira os dados ou use Minha localização.');
+  if(street && bestRoad && searchSimilarity(street,bestRoad)<.60 && !norm(best.display_name).includes(norm(street))){
+    const dl=Number(x.directoryLat),dn=Number(x.directoryLng);
+    if(Number.isFinite(dl)&&Number.isFinite(dn))return {lat:dl,lng:dn,displayName:[street,neighborhood,city,state].filter(Boolean).join(', '),precision:'street-reference'};
+    if(cepPoint)return {lat:cepPoint.lat,lng:cepPoint.lng,displayName:[street,neighborhood,city,state,cep].filter(Boolean).join(', '),precision:'cep-reference'};
+    throw Error('O mapa encontrou outra rua. Use Minha localização ou confirme o ponto correto no mapa.');
+  }
   // O bairro digitado continua pesando no ranking, mas não bloqueia a entrega:
   // bases públicas frequentemente associam uma mesma rua a outro bairro adjacente.
   // A segurança fica na confirmação da rua + cidade/UF e, depois, na rota rodoviária.
@@ -691,7 +702,8 @@ async function api(req,res,pathname){
     }
 
     if(req.method==='GET'&&pathname==='/api/address-directory'){
-      const d=await read(),rawNb=String(searchUrl.searchParams.get('neighborhood')||'').trim(),nb=bestNeighborhoodName(rawNb);
+      const directoryUrl=new URL(req.url,'http://localhost');
+      const d=await read(),rawNb=String(directoryUrl.searchParams.get('neighborhood')||'').trim(),nb=bestNeighborhoodName(rawNb);
       if(!rawNb)return send(res,200,{neighborhoods:jequieBase.neighborhoods||[],streets:[],selectedNeighborhood:''});
       const rows=await loadJequieNeighborhood(nb);const streets=[...new Set(rows.map(x=>x.street).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'pt-BR'));
       return send(res,200,{neighborhoods:jequieBase.neighborhoods||[],streets,selectedNeighborhood:nb});
@@ -711,7 +723,7 @@ async function api(req,res,pathname){
         learnAddress(d,addressInput,geo); await write(d);
         const fee=resolveKmFee(d.deliveryKmRanges,route.km,d.settings);
         if(fee===null)return send(res,400,{error:'Endereço fora da distância máxima de entrega.',distanceKm:Number(route.km.toFixed(2))});
-        return send(res,200,{lat:geo.lat,lng:geo.lng,addressFound:geo.displayName,distanceKm:Number(route.km.toFixed(2)),deliveryFee:fee,routeType:route.source});
+        return send(res,200,{lat:route.lat??geo.lat,lng:route.lng??geo.lng,addressFound:geo.displayName,distanceKm:Number(route.km.toFixed(2)),deliveryFee:fee,routeType:route.source,locationPrecision:geo.precision||'address'});
       }catch(e){return send(res,400,{error:e.message||'Não foi possível calcular a entrega pelo endereço.'});}
     }
     if(req.method==='POST'&&pathname==='/api/delivery-quote'){

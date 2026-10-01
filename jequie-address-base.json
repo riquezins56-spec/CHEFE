@@ -257,7 +257,10 @@
       "cep": "45201-270",
       "street": "Rua Professor Sá Nunes",
       "neighborhood": "Joaquim Romão",
-      "complement": ""
+      "complement": "",
+      "lat": -13.861195,
+      "lng": -40.1003255,
+      "coordinateType": "street-reference"
     },
     {
       "cep": "45201-620",
