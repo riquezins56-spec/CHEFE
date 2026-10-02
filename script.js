@@ -48,7 +48,11 @@ for(const el of [cepEl,bairro,rua,document.querySelector('[name=number]'),compEl
   // V10.78: o próprio fluxo principal do checkout dispara a rota.
   // Assim Bairro + Rua não dependem do botão Buscar endereço.
   if(addressReadyForQuote()) scheduleAutomaticDelivery();
-}type.onchange=update;bairro.oninput=update;bairro.onchange=update;rua.oninput=update;rua.onchange=update;document.querySelector('[name=number]').oninput=buildAddress;document.querySelector('[name=complement]').oninput=buildAddress;update();}
+}type.onchange=update;
+bairro.oninput=()=>{invalidateAutomaticAddress();update();};
+bairro.onchange=()=>{invalidateAutomaticAddress();update();};
+rua.oninput=()=>{invalidateAutomaticAddress();update();};
+rua.onchange=()=>{invalidateAutomaticAddress();update();};document.querySelector('[name=number]').oninput=buildAddress;document.querySelector('[name=complement]').oninput=buildAddress;update();}
 
 function syncOrderTypeUI(){
   const retirada=document.querySelector('#deliveryType')?.value==='Retirada';
@@ -170,7 +174,12 @@ function clearAddressQuote(){
   if(preview)preview.textContent='Aguardando rota';
   if(summary)summary.style.display='none';
   if(sticky && document.querySelector('#deliveryType')?.value!=='Retirada')sticky.textContent='Entrega • endereço alterado, recalculando rota';
+}
+function invalidateAutomaticAddress(){
   lastAutoAddress='';
+  autoDeliveryInFlight='';
+  ++autoDeliverySeq;
+  clearTimeout(autoDeliveryTimer);
 }
 function addressReadyForQuote(){
   const cep=(document.querySelector('#cep')?.value||'').replace(/\D/g,'');
@@ -214,7 +223,7 @@ function scheduleAutomaticDelivery(){
 document.querySelector('#neighborhood')?.addEventListener('input',()=>{clearTimeout(directoryTimer);directoryTimer=setTimeout(refreshJequieDirectory,250)});document.querySelector('#neighborhood')?.addEventListener('change',refreshJequieDirectory);setTimeout(()=>refreshJequieDirectory(),300);
 
 document.querySelector('#cep')?.addEventListener('input',()=>{
-  clearAddressQuote(); clearTimeout(autoCepTimer); clearTimeout(autoDeliveryTimer);
+  invalidateAutomaticAddress(); clearAddressQuote(); clearTimeout(autoCepTimer);
   const cep=document.querySelector('#cep'),clean=(cep?.value||'').replace(/\D/g,'');
   if(clean.length!==8) return;
   autoCepTimer=setTimeout(async()=>{
