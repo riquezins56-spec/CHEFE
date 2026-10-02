@@ -38,6 +38,20 @@ function renderDashboard(){
  $('#statProducts').textContent=(state.products||[]).filter(p=>p.active!==false).length;
 }
 async function loadOrders(){try{const os=await api('/api/orders');state.orders=os;renderDashboard();const drivers=state.drivers||[];$('#ordersList').innerHTML=os.length?os.map(o=>`<article class="order"><div><h3>PEDIDO ${String(o.number).padStart(2,'0')}</h3><p><b>${esc(o.customer?.name||'Cliente')}</b> · ${esc(o.customer?.phone||'')}</p><p>${o.customer?.delivery==='Retirada'?'Retirada na loja':'Entrega · '+esc(o.customer?.address||'')}</p><p>${(o.items||[]).map(i=>`${i.qty}x ${esc(i.name)}`).join(' · ')}</p><p><b>Feito em:</b> ${esc(orderDateTime(o))}</p><p class="total">${money(o.total)} <span class="tag">${esc(o.customer?.payment||'')}</span></p></div><div class="order-actions order-manage"><label>Status<select data-status="${o.id}">${['Novo','Em preparo','Pronto','Saiu para entrega','Entregue','Cancelado'].map(s=>`<option ${o.status===s?'selected':''}>${s}</option>`).join('')}</select></label>${o.customer?.delivery==='Retirada'?'':`<label>Motoboy<select data-driver="${o.id}"><option value="">Sem entregador</option>${drivers.filter(d=>d.active!==false).map(d=>`<option value="${d.id}" ${String(o.driverId||'')===String(d.id)?'selected':''}>${esc(d.name)}${d.phone?' · '+esc(d.phone):''}</option>`).join('')}</select></label>`}<button class="btn" data-print="${o.id}">Imprimir</button><button class="btn" data-order-del="${o.id}">Excluir</button></div></article>`).join(''):'<div class="panel">Nenhum pedido ainda.</div>';$$('[data-status]').forEach(x=>x.onchange=async()=>{await api('/api/orders/'+x.dataset.status,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({status:x.value})});await loadOrders()});$$('[data-driver]').forEach(x=>x.onchange=async()=>{await api('/api/orders/'+x.dataset.driver,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({driverId:x.value||null})});await loadOrders()});$$('[data-print]').forEach(b=>b.onclick=()=>printOrder(b.dataset.print));$$('[data-order-del]').forEach(b=>b.onclick=async()=>{if(confirm('Excluir este pedido definitivamente? Somente o dono pode fazer isso.')){await api('/api/orders/'+b.dataset.orderDel,{method:'DELETE'});const ids=autoPrintedIds();ids.delete(String(b.dataset.orderDel));saveAutoPrinted(ids);await refreshAll();}})}catch(err){if(token)$('#ordersList').innerHTML='<div class="panel error">'+esc(err.message)+'</div>'}}
+
+function receiptLinesForOrder(o){
+ const a=['CHEFE TELLES FAST FOOD','PEDIDO '+String(o.number||o.id||'').padStart(2,'0'),orderDateTime(o),'--------------------------------','CLIENTE: '+(o.customer?.name||'')];
+ if(o.customer?.phone)a.push('WHATSAPP: '+o.customer.phone); a.push(o.customer?.delivery==='Retirada'?'TIPO: RETIRADA':'TIPO: ENTREGA');
+ if(o.customer?.delivery!=='Retirada'&&o.customer?.address)a.push('ENDERECO: '+o.customer.address); if(o.customer?.reference)a.push('REFERENCIA: '+o.customer.reference); a.push('--------------------------------');
+ for(const i of (o.items||[]))a.push((i.qty||1)+'x '+(i.name||'')+'  '+money(Number(i.price||0)*Number(i.qty||1))); a.push('--------------------------------','SUBTOTAL: '+money(o.subtotal||o.total||0));
+ if(o.customer?.delivery!=='Retirada')a.push('ENTREGA: '+money(o.deliveryFee||0)); a.push('TOTAL: '+money(o.total||0),'FORMA DE PAGAMENTO: '+(o.customer?.payment||'')); if(o.customer?.note)a.push('OBS: '+o.customer.note); a.push('','Obrigado pela preferencia!'); return a;
+}
+async function shareReceiptToThermerIOS(o){
+ const lines=receiptLinesForOrder(o),w=576,pad=28,lh=32,c=document.createElement('canvas'); const wrapped=lines.map(line=>String(line??'').match(/.{1,34}(?:\s|$)|.{1,34}/g)||['']); const total=wrapped.reduce((n,a)=>n+a.length,0); c.width=w;c.height=Math.max(360,pad*2+total*lh); const x=c.getContext('2d'); x.fillStyle='#fff';x.fillRect(0,0,c.width,c.height);x.fillStyle='#000';x.textBaseline='top';let y=pad;
+ for(let n=0;n<wrapped.length;n++){x.font=n<2?'bold 26px monospace':'24px monospace';for(const q of wrapped[n]){x.fillText(q.trimEnd(),pad,y);y+=lh}}
+ const b=await new Promise(r=>c.toBlob(r,'image/png'));if(!b)throw Error('Nao foi possivel gerar o recibo.');const f=new File([b],'pedido-'+String(o.number||o.id||'')+'.png',{type:'image/png'});
+ if(navigator.canShare&&navigator.canShare({files:[f]})&&navigator.share){await navigator.share({files:[f],title:'Pedido CHEFE TELLES'});return;} const u=URL.createObjectURL(b);window.open(u,'_blank');setTimeout(()=>URL.revokeObjectURL(u),60000);
+}
 function printOrder(id){
   const u=location.origin+'/print/'+encodeURIComponent(id)+'?v='+Date.now();
   const ua=navigator.userAgent.toLowerCase();
@@ -61,8 +75,9 @@ function printOrder(id){
     // Android: envia o pedido direto ao Thermer/Bluetooth Print sem trocar a página do painel.
     abrirAppImpressao('my.bluetoothprint.scheme://');
   }else if(/iphone|ipad|ipod/.test(ua)){
-    // iPhone: impressão manual; o toque abre o Thermer já integrado ao projeto.
-    window.location.href='my.bluetoothprint.scheme://'+u;
+    const o=(state.orders||[]).find(x=>String(x.id)===String(id));
+    if(!o){alert('Pedido nao encontrado para impressao.');return;}
+    shareReceiptToThermerIOS(o).catch(err=>{if(err?.name!=='AbortError')alert('Nao foi possivel enviar ao Thermer: '+(err?.message||err));});
   }else{
     // PC: mantém o método já existente em janela separada.
     window.open('/thermer-test.html?order='+encodeURIComponent(id),'chefePrint','width=520,height=720');
