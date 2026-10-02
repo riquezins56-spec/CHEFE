@@ -44,7 +44,7 @@ function receiptLinesForOrder(o){
  if(o.customer?.phone)a.push('WHATSAPP: '+o.customer.phone); a.push(o.customer?.delivery==='Retirada'?'TIPO: RETIRADA':'TIPO: ENTREGA');
  if(o.customer?.delivery!=='Retirada'&&o.customer?.address)a.push('ENDERECO: '+o.customer.address); if(o.customer?.reference)a.push('REFERENCIA: '+o.customer.reference); a.push('--------------------------------');
  for(const i of (o.items||[]))a.push((i.qty||1)+'x '+(i.name||'')+'  '+money(Number(i.price||0)*Number(i.qty||1))); a.push('--------------------------------','SUBTOTAL: '+money(o.subtotal||o.total||0));
- if(o.customer?.delivery!=='Retirada')a.push('ENTREGA: '+money(o.deliveryFee||0)); a.push('TOTAL: '+money(o.total||0),'FORMA DE PAGAMENTO: '+(o.customer?.payment||'')); if(o.customer?.note)a.push('OBS: '+o.customer.note); a.push('','Obrigado pela preferencia!'); return a;
+ if(o.customer?.delivery!=='Retirada')a.push('ENTREGA: '+money(o.deliveryFee||0)); a.push('TOTAL: '+money(o.total||0),'FORMA DE PAGAMENTO: '+(o.customer?.payment||'')); if(o.customer?.note)a.push('OBS: '+o.customer.note); return a;
 }
 function shareReceiptToThermerIOS(o){
  const lines=receiptLinesForOrder(o),w=384,pad=12,lh=31,c=document.createElement('canvas');
