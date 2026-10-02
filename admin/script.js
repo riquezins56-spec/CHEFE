@@ -42,7 +42,10 @@ async function loadOrders(){try{const os=await api('/api/orders');state.orders=o
 function receiptLinesForOrder(o){
  const a=['Cheff Telles','PEDIDO '+String(o.number||o.id||'').padStart(2,'0'),orderDateTime(o),'--------------------------------','CLIENTE: '+(o.customer?.name||'')];
  if(o.customer?.phone)a.push('WHATSAPP: '+o.customer.phone); a.push(o.customer?.delivery==='Retirada'?'TIPO: RETIRADA':'TIPO: ENTREGA');
- if(o.customer?.delivery!=='Retirada'&&o.customer?.address)a.push('ENDERECO: '+o.customer.address); if(o.customer?.reference)a.push('REFERENCIA: '+o.customer.reference); a.push('--------------------------------');
+ if(o.customer?.delivery!=='Retirada'&&o.customer?.address){
+   const printAddress=String(o.customer.address).replace(/,?\s*Refer[eê]ncia:\s*.*$/i,'').trim();
+   if(printAddress)a.push('ENDERECO: '+printAddress);
+ } if(o.customer?.reference)a.push('REFERENCIA: '+o.customer.reference); a.push('--------------------------------');
  for(const i of (o.items||[]))a.push((i.qty||1)+'x '+(i.name||'')+'  '+money(Number(i.price||0)*Number(i.qty||1))); a.push('--------------------------------','SUBTOTAL: '+money(o.subtotal||o.total||0));
  if(o.customer?.delivery!=='Retirada')a.push('ENTREGA: '+money(o.deliveryFee||0)); a.push('TOTAL: '+money(o.total||0),'FORMA DE PAGAMENTO: '+(o.customer?.payment||'')); if(o.customer?.note)a.push('OBS: '+o.customer.note); return a;
 }
