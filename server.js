@@ -88,7 +88,16 @@ async function loadJequieNeighborhood(nb){
 }
 function pickDirectoryRow(rows,street,number){
   const sn=normAddress(street),num=Number(String(number||'').match(/\d+/)?.[0]||0);
-  let same=rows.filter(x=>normAddress(x.street)===sn);if(!same.length)same=rows.filter(x=>normAddress(x.street).includes(sn)||sn.includes(normAddress(x.street)));if(!same.length)return null;if(same.length===1)return same[0];
+  let same=rows.filter(x=>normAddress(x.street)===sn);
+  if(!same.length)same=rows.filter(x=>normAddress(x.street).includes(sn)||sn.includes(normAddress(x.street)));
+  // Digitação direta: aceita pequenas diferenças de prefixo/acento/grafia e resolve
+  // para o mesmo logradouro canônico usado quando o cliente escolhe na busca.
+  if(!same.length){
+    const ranked=rows.map(x=>({x,score:searchSimilarity(sn,normAddress(x.street))}))
+      .filter(o=>o.score>=.68).sort((a,b)=>b.score-a.score);
+    if(ranked.length) same=ranked.filter(o=>o.score>=ranked[0].score-.03).map(o=>o.x);
+  }
+  if(!same.length)return null;if(same.length===1)return same[0];
   const parity=same.find(x=>/lado par/i.test(x.complement||'')&&num%2===0)||same.find(x=>/lado (?:impar|ímpar)/i.test(x.complement||'')&&num%2===1);if(parity)return parity;
   for(const x of same){const m=String(x.complement||'').match(/at[eé]\s+(\d+)(?:\/(\d+))?/i);if(m&&num&&num<=Math.max(Number(m[1]),Number(m[2]||0)))return x;}
   return same[0];
