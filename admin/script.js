@@ -46,11 +46,22 @@ function receiptLinesForOrder(o){
  for(const i of (o.items||[]))a.push((i.qty||1)+'x '+(i.name||'')+'  '+money(Number(i.price||0)*Number(i.qty||1))); a.push('--------------------------------','SUBTOTAL: '+money(o.subtotal||o.total||0));
  if(o.customer?.delivery!=='Retirada')a.push('ENTREGA: '+money(o.deliveryFee||0)); a.push('TOTAL: '+money(o.total||0),'FORMA DE PAGAMENTO: '+(o.customer?.payment||'')); if(o.customer?.note)a.push('OBS: '+o.customer.note); a.push('','Obrigado pela preferencia!'); return a;
 }
-async function shareReceiptToThermerIOS(o){
- const lines=receiptLinesForOrder(o),w=576,pad=28,lh=32,c=document.createElement('canvas'); const wrapped=lines.map(line=>String(line??'').match(/.{1,34}(?:\s|$)|.{1,34}/g)||['']); const total=wrapped.reduce((n,a)=>n+a.length,0); c.width=w;c.height=Math.max(360,pad*2+total*lh); const x=c.getContext('2d'); x.fillStyle='#fff';x.fillRect(0,0,c.width,c.height);x.fillStyle='#000';x.textBaseline='top';let y=pad;
- for(let n=0;n<wrapped.length;n++){x.font=n<2?'bold 26px monospace':'24px monospace';for(const q of wrapped[n]){x.fillText(q.trimEnd(),pad,y);y+=lh}}
- const b=await new Promise(r=>c.toBlob(r,'image/png'));if(!b)throw Error('Nao foi possivel gerar o recibo.');const f=new File([b],'pedido-'+String(o.number||o.id||'')+'.png',{type:'image/png'});
- if(navigator.canShare&&navigator.canShare({files:[f]})&&navigator.share){await navigator.share({files:[f],title:'Pedido CHEFE TELLES'});return;} const u=URL.createObjectURL(b);window.open(u,'_blank');setTimeout(()=>URL.revokeObjectURL(u),60000);
+function shareReceiptToThermerIOS(o){
+ const lines=receiptLinesForOrder(o),w=384,pad=12,lh=31,c=document.createElement('canvas');
+ const wrapped=lines.map(line=>String(line??'').match(/.{1,25}(?:\s|$)|.{1,25}/g)||['']);
+ const total=wrapped.reduce((n,a)=>n+a.length,0);
+ c.width=w;c.height=Math.max(360,pad*2+total*lh);
+ const x=c.getContext('2d');x.fillStyle='#fff';x.fillRect(0,0,c.width,c.height);x.fillStyle='#000';x.textBaseline='top';let y=pad;
+ for(let n=0;n<wrapped.length;n++){x.font=n<2?'bold 30px monospace':'26px monospace';for(const q of wrapped[n]){x.fillText(q.trimEnd(),pad,y);y+=lh}}
+ // IMPORTANTE NO IPHONE: cria o arquivo de forma síncrona para manter o clique do usuário ativo.
+ const data=c.toDataURL('image/png'),bin=atob(data.split(',')[1]),bytes=new Uint8Array(bin.length);
+ for(let i=0;i<bin.length;i++)bytes[i]=bin.charCodeAt(i);
+ const f=new File([bytes],'pedido-'+String(o.number||o.id||'')+'.png',{type:'image/png'});
+ if(navigator.canShare&&navigator.canShare({files:[f]})&&navigator.share){
+   navigator.share({files:[f],title:'Pedido CHEFE TELLES'}).catch(err=>{if(err?.name!=='AbortError')alert('Nao foi possivel compartilhar o pedido: '+(err?.message||err));});
+   return;
+ }
+ const u=URL.createObjectURL(f);window.open(u,'_blank');setTimeout(()=>URL.revokeObjectURL(u),60000);
 }
 function printOrder(id){
   const u=location.origin+'/print/'+encodeURIComponent(id)+'?v='+Date.now();
@@ -75,9 +86,9 @@ function printOrder(id){
     // Android: envia o pedido direto ao Thermer/Bluetooth Print sem trocar a página do painel.
     abrirAppImpressao('my.bluetoothprint.scheme://');
   }else if(/iphone|ipad|ipod/.test(ua)){
-    const o=(state.orders||[]).find(x=>String(x.id)===String(id));
+    const o=(state.orders||[]).find(x=>String(x.id)===String(id)||String(x.number)===String(id));
     if(!o){alert('Pedido nao encontrado para impressao.');return;}
-    shareReceiptToThermerIOS(o).catch(err=>{if(err?.name!=='AbortError')alert('Nao foi possivel enviar ao Thermer: '+(err?.message||err));});
+    shareReceiptToThermerIOS(o);
   }else{
     // PC: mantém o método já existente em janela separada.
     window.open('/thermer-test.html?order='+encodeURIComponent(id),'chefePrint','width=520,height=720');
