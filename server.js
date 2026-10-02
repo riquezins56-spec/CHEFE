@@ -624,7 +624,6 @@ async function printEndpoint(req,res,pathname){
   lines.push('STATUS: '+(o.status||'Novo'));
   lines.push('CLIENTE: '+(o.customer?.name||''));
   if(o.customer?.phone)lines.push('WHATSAPP: '+o.customer.phone);
-  if(o.customer?.reference)lines.push('PONTO DE REFERENCIA: '+o.customer.reference);
   lines.push('--------------------------------');
   for(const i of (o.items||[])) lines.push(`${i.qty}x ${i.name} - R$ ${(Number(i.price||0)*Number(i.qty||0)).toFixed(2)}`);
   lines.push('--------------------------------');
@@ -632,7 +631,12 @@ async function printEndpoint(req,res,pathname){
   if(o.customer?.delivery!=='Retirada')lines.push('ENTREGA: R$ '+Number(o.deliveryFee||0).toFixed(2));
   lines.push('TOTAL: R$ '+Number(o.total||0).toFixed(2));
   lines.push('FORMA DE PAGAMENTO: '+(o.customer?.payment||''));
-  lines.push(o.customer?.delivery==='Retirada'?'TIPO: RETIRADA NA LOJA':'ENDERECO: '+(o.customer?.address||''));
+  if(o.customer?.delivery==='Retirada')lines.push('TIPO: RETIRADA NA LOJA');
+  else {
+    const printAddress=String(o.customer?.address||'').replace(/,?\s*Refer[eê]ncia:\s*.*$/i,'').trim();
+    lines.push('ENDERECO: '+printAddress);
+    if(o.customer?.reference)lines.push('PONTO DE REFERENCIA: '+o.customer.reference);
+  }
   if(o.deliveryDistanceKm)lines.push('DISTANCIA: '+o.deliveryDistanceKm+' km');
   lines.push('OBS: '+(o.customer?.note||'Nenhuma'));
   lines.push(''); lines.push('');
