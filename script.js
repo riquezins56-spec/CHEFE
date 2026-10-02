@@ -190,7 +190,7 @@ function scheduleAutomaticDelivery(){
     }
   },700);
 }
-// V10.54: não calcula enquanto o cliente digita; a busca confirma a rua primeiro.
+// V10.77: Bairro + Rua digitados calculam automaticamente; Buscar endereço é apenas ajuda opcional.
 document.querySelector('#neighborhood')?.addEventListener('input',()=>{clearTimeout(directoryTimer);directoryTimer=setTimeout(refreshJequieDirectory,250)});document.querySelector('#neighborhood')?.addEventListener('change',refreshJequieDirectory);setTimeout(()=>refreshJequieDirectory(),300);
 
 document.querySelector('#cep')?.addEventListener('input',()=>{
@@ -449,8 +449,8 @@ async function runAddressSearch(){
   }catch(e){renderAddressResults([]);if(st)st.textContent=e.message||'Não foi possível buscar o endereço agora.';}
 }
 document.querySelector('#searchAddressBtn')?.addEventListener('click',runAddressSearch);
-document.querySelector('#street')?.addEventListener('input',()=>{selectedManualAddress=false;renderAddressResults([]);clearAddressQuote();});
-document.querySelector('#neighborhood')?.addEventListener('input',()=>{selectedManualAddress=false;renderAddressResults([]);clearAddressQuote();});
+document.querySelector('#street')?.addEventListener('input',()=>{selectedManualAddress=false;renderAddressResults([]);clearAddressQuote();scheduleAutomaticDelivery();});
+document.querySelector('#neighborhood')?.addEventListener('input',()=>{selectedManualAddress=false;renderAddressResults([]);clearAddressQuote();scheduleAutomaticDelivery();});
 document.querySelector('[name=number]')?.addEventListener('input',()=>{
   // Número é somente detalhe para o entregador: nunca invalida nem recalcula a rota.
   const street=document.querySelector('#street')?.value.trim()||'',num=document.querySelector('[name=number]')?.value.trim()||'',nb=document.querySelector('#neighborhood')?.value.trim()||'',comp=document.querySelector('[name=complement]')?.value.trim()||'',ref=document.querySelector('[name=reference]')?.value.trim()||'';
