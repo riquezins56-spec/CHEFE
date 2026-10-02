@@ -103,7 +103,7 @@ async function enrichJequieAddress(x){
 const seed = {
   categories: ['Hambúrgueres','Pizzas','Combos','Bebidas','Açaí na Garrafa'],
   settings: {
-    name: 'CHEFE TELLES',
+    name: 'Cheff Telles',
     whatsapp: '5573982451160',
     adminPassword: '1234',
     autoPrint: true,
@@ -596,7 +596,7 @@ async function printEndpoint(req,res,pathname){
   });
   if(pathname==='/print/test'){
     return send(res,200,oneText([
-      'CHEFE TELLES',
+      'Cheff Telles',
       'TESTE DE IMPRESSAO',
       '--------------------------------',
       'THERMER WEB PRINT OK',
@@ -608,7 +608,7 @@ async function printEndpoint(req,res,pathname){
   const m=pathname.match(/^\/print\/(\d+)$/); if(!m)return false;
   const d=await read(),o=d.orders.find(x=>String(x.id)===m[1]); if(!o)return send(res,404,{error:'Pedido nao encontrado'});
   const lines=[];
-  lines.push('CHEFE TELLES');
+  lines.push('Cheff Telles');
   lines.push('PEDIDO '+String(o.number).padStart(2,'0'));
   lines.push(new Date(o.createdAt).toLocaleString('pt-BR',{timeZone:'America/Sao_Paulo'}));
   lines.push('--------------------------------');
@@ -639,14 +639,14 @@ function printAgentAuthorized(req){
 async function api(req,res,pathname){
   try{
 
-    // CHEFE TELLES Print Android: leitura segura de pedidos para impressão.
+    // Cheff Telles Print Android: leitura segura de pedidos para impressão.
     if(req.method==='GET'&&pathname==='/api/print-agent/orders'){
       if(!printAgentAuthorized(req))return send(res,401,{error:'Agente de impressão não autorizado'});
       const d=await read();
       return send(res,200,d.orders.filter(o=>(o.status||'Novo')==='Novo').slice().reverse());
     }
 
-    if(req.method==='GET'&&pathname==='/api/health')return send(res,200,{ok:true,store:'CHEFE TELLES',version:'2.0.0'});
+    if(req.method==='GET'&&pathname==='/api/health')return send(res,200,{ok:true,store:'Cheff Telles',version:'2.0.0'});
     if(req.method==='GET'&&pathname==='/api/network'){
       const nets=os.networkInterfaces(), ips=[];
       for(const list of Object.values(nets)) for(const n of (list||[])) if(n.family==='IPv4'&&!n.internal) ips.push(n.address);
@@ -995,6 +995,6 @@ function listenOnAvailablePort(server, port) {
     console.error('Não foi possível iniciar o servidor:', err.message);
     process.exitCode = 1;
   });
-  server.listen(port,'0.0.0.0',()=>console.log(`\nCHEFE TELLES v2.0 — servidor online\nLoja:   http://localhost:${port}/\nDono:   http://localhost:${port}/admin\nThermer: http://localhost:${port}/thermer-test.html\n`));
+  server.listen(port,'0.0.0.0',()=>console.log(`\nCheff Telles v2.0 — servidor online\nLoja:   http://localhost:${port}/\nDono:   http://localhost:${port}/admin\nThermer: http://localhost:${port}/thermer-test.html\n`));
 }
 listenOnAvailablePort(server, PORT);

@@ -18,7 +18,7 @@ function checkPort(port) {
       res.on('end', () => {
         try {
           const j = JSON.parse(data);
-          resolve(j && j.ok === true && j.store === 'CHEFE TELLES' && j.version === '1.9.0');
+          resolve(j && j.ok === true && j.store === 'Cheff Telles' && j.version === '1.9.0');
         } catch { resolve(false); }
       });
     });
@@ -39,7 +39,7 @@ function open(url) {
 async function main() {
   console.clear();
   console.log('========================================');
-  console.log('       CHEFE TELLES - INICIADOR');
+  console.log('       Cheff Telles - INICIADOR');
   console.log('========================================\n');
   console.log('Iniciando servidor...');
 
@@ -60,7 +60,7 @@ async function main() {
   }
 
   if (!port) {
-    console.log('\nERRO: o CHEFE TELLES não conseguiu iniciar.');
+    console.log('\nERRO: o Cheff Telles não conseguiu iniciar.');
     console.log('Verifique se o Node.js está instalado e se as portas 3000-3010 estão disponíveis.');
     process.exitCode = 1;
     return;
@@ -75,7 +75,7 @@ async function main() {
   }
   const lan = [...new Set(ips)][0] || null;
   console.log('\n========================================');
-  console.log('       CHEFE TELLES - ONLINE v2.0');
+  console.log('       Cheff Telles - ONLINE v2.0');
   console.log('========================================');
   console.log(`Loja PC :      ${base}/`);
   console.log(`Dono PC :      ${base}/admin`);

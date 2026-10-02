@@ -7,7 +7,7 @@
     "Açaí na Garrafa"
   ],
   "settings": {
-    "name": "CHEFE TELLES",
+    "name": "Cheff Telles",
     "whatsapp": "5573982451160",
     "adminPassword": "1234",
     "autoPrint": true,
@@ -18,7 +18,7 @@
     "pixType": "",
     "pixQr": "",
     "botWhatsapp": "5573982451160",
-    "botMessage": "👋 Olá! Bem-vindo ao CHEFE TELLES FAST FOOD!\n\n🍔 Faça seu pedido pelo nosso site.\n\nAssim que finalizar, envie o comprovante PIX por aqui.",
+    "botMessage": "👋 Olá! Bem-vindo ao Cheff Telles!\n\n🍔 Faça seu pedido pelo nosso site.\n\nAssim que finalizar, envie o comprovante PIX por aqui.",
     "deliveryTableVersion": 1,
     "deliveryMode": "route",
     "extraKmFee": 0,
