@@ -161,6 +161,7 @@ let autoDeliveryTimer=null;
 let autoCepTimer=null;
 let lastAutoAddress='';
 let autoDeliverySeq=0;
+let autoDeliveryInFlight='';
 function clearAddressQuote(){
   const lat=document.querySelector('#customerLat'),lng=document.querySelector('#customerLng');
   const fee=document.querySelector('#deliveryFee'),preview=document.querySelector('#deliveryFeePreview');
@@ -178,23 +179,34 @@ function addressReadyForQuote(){
   return street.length>=3 && nb.length>=2;
 }
 function scheduleAutomaticDelivery(){
-  clearAddressQuote(); clearTimeout(autoDeliveryTimer);
-  const seq=++autoDeliverySeq;
+  clearTimeout(autoDeliveryTimer);
   if(!addressReadyForQuote()) return;
   const key=[document.querySelector('#cep')?.value,document.querySelector('#street')?.value,document.querySelector('#neighborhood')?.value].join('|');
+
+  // Se este mesmo endereço já tem rota válida, não apaga nem recalcula.
+  if(key===lastAutoAddress && document.querySelector('#customerLat')?.value && document.querySelector('#customerLng')?.value) return;
+  // Também não inicia outra consulta enquanto o mesmo endereço já está sendo calculado.
+  if(key===autoDeliveryInFlight) return;
+
+  const seq=++autoDeliverySeq;
+  clearAddressQuote();
   autoDeliveryTimer=setTimeout(async()=>{
     if(seq!==autoDeliverySeq) return;
-    if(key===lastAutoAddress && document.querySelector('#customerLat')?.value) return;
+    autoDeliveryInFlight=key;
     const st=document.querySelector('#gpsStatus');
     const preview=document.querySelector('#deliveryFeePreview');
     if(st)st.textContent='Localizando endereço e calculando a entrega...';
     if(preview)preview.textContent='Calculando...';
     try{
-      await calculateByTypedAddress(); if(seq!==autoDeliverySeq)return; lastAutoAddress=key;
+      await calculateByTypedAddress();
+      if(seq!==autoDeliverySeq)return;
+      lastAutoAddress=key;
     }catch(e){
       if(seq!==autoDeliverySeq)return;
       if(st)st.textContent=e.message||'Não foi possível calcular a entrega.';
       if(preview)preview.textContent='Não calculado';
+    }finally{
+      if(autoDeliveryInFlight===key)autoDeliveryInFlight='';
     }
   },950);
 }
