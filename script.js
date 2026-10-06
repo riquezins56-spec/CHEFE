@@ -54,8 +54,19 @@ for(const el of [cepEl,bairro,rua,document.querySelector('[name=number]'),compEl
 function addressFieldChanged(kind){
   const current=kind==='bairro'?bairro.value:rua.value;
   const previous=kind==='bairro'?lastNeighborhoodValue:lastStreetValue;
-  if(current===previous)return;
   if(kind==='bairro')lastNeighborhoodValue=current; else lastStreetValue=current;
+  if(current===previous)return;
+
+  // iPhone/Safari pode disparar CHANGE atrasado no campo Rua/Bairro quando o
+  // usuário toca em Número. Se Rua+Bairro continuam sendo a rota já calculada,
+  // esse evento tardio não pode invalidar nem recalcular a entrega.
+  const routeKey=[rua.value.trim(),bairro.value.trim()].join('|');
+  if(routeKey===lastAutoAddress &&
+     document.querySelector('#customerLat')?.value &&
+     document.querySelector('#customerLng')?.value){
+    buildAddress();
+    return;
+  }
   invalidateAutomaticAddress();update();
 }
 lastNeighborhoodValue=bairro.value;lastStreetValue=rua.value;
