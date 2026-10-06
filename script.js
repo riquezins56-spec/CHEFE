@@ -1,3 +1,11 @@
+async function addressFetch(url,opt={}){
+ const ctrl=new AbortController(),timer=setTimeout(()=>ctrl.abort(),30000);
+ const external=opt.signal,abort=()=>ctrl.abort();
+ if(external){if(external.aborted)ctrl.abort();else external.addEventListener('abort',abort,{once:true});}
+ try{const r=await fetch(url,{...opt,signal:ctrl.signal});const body=await r.text();return {ok:r.ok,status:r.status,json:async()=>JSON.parse(body)};}
+ catch(e){if(e.name==='AbortError')throw Error('A consulta demorou demais ou foi cancelada. Tente novamente.');throw e;}
+ finally{clearTimeout(timer);external?.removeEventListener('abort',abort);}
+}
 
 function chefeTone(kind){
  try{
@@ -26,7 +34,7 @@ document.querySelector('#cartBtn').onclick=openCart;document.querySelector('#cle
 let deliveryZones=[];const normalizeText=v=>String(v??'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/\s+/g,' ').trim();function findDeliveryZone(neighborhood,street){const nb=normalizeText(neighborhood),st=normalizeText(street);if(!nb)return null;const same=deliveryZones.filter(z=>z.active!==false&&normalizeText(z.neighborhood)===nb);if(!same.length)return null;const bairro=same.find(z=>!normalizeText(z.street));return bairro||null;}
 
 async function loadJequieDirectory(neighborhood=''){
-  try{const r=await fetch('/api/address-directory?'+new URLSearchParams({neighborhood}));const x=await r.json();if(!r.ok)return null;return x}catch{return null}
+  try{const r=await addressFetch('/api/address-directory?'+new URLSearchParams({neighborhood}));const x=await r.json();if(!r.ok)return null;return x}catch{return null}
 }
 let directoryTimer=null;
 async function refreshJequieDirectory(){
@@ -35,7 +43,8 @@ async function refreshJequieDirectory(){
   if(Array.isArray(x.neighborhoods)&&x.neighborhoods.length)nl.innerHTML=x.neighborhoods.map(v=>`<option value="${esc(v)}">`).join('');
   if(Array.isArray(x.streets)&&x.streets.length)sl.innerHTML=x.streets.map(v=>`<option value="${esc(v)}">`).join('');
 }
-function setupDelivery(){deliveryZones=store.addressHints||[];
+let deliverySetupDone=false;
+function setupDelivery(){deliveryZones=store.addressHints||[];if(deliverySetupDone)return;deliverySetupDone=true;
 let lastNeighborhoodValue='',lastStreetValue='';
 const type=document.querySelector('#deliveryType'),bairro=document.querySelector('#neighborhood'),rua=document.querySelector('#street'),fee=document.querySelector('#deliveryFee'),feePreview=document.querySelector('#deliveryFeePreview'),fields=document.querySelector('#deliveryFields'),addr=document.querySelector('#address'),addrLabel=document.querySelector('#addressLabel'),hint=document.querySelector('#deliveryHint'),nbList=document.querySelector('#neighborhoodList'),streetList=document.querySelector('#streetList');if(!type||!bairro)return;nbList.innerHTML=[...new Set(deliveryZones.map(z=>z.neighborhood).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'pt-BR')).map(x=>`<option value="${esc(x)}">`).join('');refreshJequieDirectory();function refreshStreetSuggestions(){const nb=normalizeText(bairro.value);streetList.innerHTML=[...new Set(deliveryZones.filter(z=>(!nb||normalizeText(z.neighborhood)===nb)&&normalizeText(z.street)).map(z=>z.street))].sort((a,b)=>a.localeCompare(b,'pt-BR')).map(x=>`<option value="${esc(x)}">`).join('');}function buildAddress(){if(type.value==='Retirada'){addr.value='Retirada na loja';return;}const street=rua.value.trim(),num=document.querySelector('[name=number]').value.trim(),comp=document.querySelector('[name=complement]').value.trim(),ref=(document.querySelector('[name=reference]')?.value||'').trim();addr.value=[street,num&&('Nº '+num),bairro.value.trim(),comp,ref&&('Referência: '+ref)].filter(Boolean).join(', ');}function update(){const retirada=type.value==='Retirada';syncOrderTypeUI();fields.style.display=retirada?'none':'block';addrLabel.style.display=retirada?'none':'block';addr.required=!retirada;bairro.required=!retirada;rua.required=!retirada;document.querySelector('[name=number]').required=false;
 const cepEl=document.querySelector('#cep'),compEl=document.querySelector('[name=complement]'),refEl=document.querySelector('[name=reference]');
@@ -50,30 +59,19 @@ for(const el of [cepEl,bairro,rua,document.querySelector('[name=number]'),compEl
   // V10.78: o próprio fluxo principal do checkout dispara a rota.
   // Assim Bairro + Rua não dependem do botão Buscar endereço.
   if(addressReadyForQuote()) scheduleAutomaticDelivery();
-}type.onchange=update;
+}type.onchange=()=>{invalidateAutomaticAddress();clearAddressQuote();update();};
 function addressFieldChanged(kind){
   const current=kind==='bairro'?bairro.value:rua.value;
   const previous=kind==='bairro'?lastNeighborhoodValue:lastStreetValue;
+  if(normalizeText(current)===normalizeText(previous)||(confirmedQuote&&lastAutoAddress===currentAddressKey()))return;
   if(kind==='bairro')lastNeighborhoodValue=current; else lastStreetValue=current;
-  if(current===previous)return;
-
-  // iPhone/Safari pode disparar CHANGE atrasado no campo Rua/Bairro quando o
-  // usuário toca em Número. Se Rua+Bairro continuam sendo a rota já calculada,
-  // esse evento tardio não pode invalidar nem recalcular a entrega.
-  const routeKey=[rua.value.trim(),bairro.value.trim()].join('|');
-  if(routeKey===lastAutoAddress &&
-     document.querySelector('#customerLat')?.value &&
-     document.querySelector('#customerLng')?.value){
-    buildAddress();
-    return;
-  }
   invalidateAutomaticAddress();update();
 }
 lastNeighborhoodValue=bairro.value;lastStreetValue=rua.value;
 bairro.oninput=()=>addressFieldChanged('bairro');
 bairro.onchange=()=>addressFieldChanged('bairro');
 rua.oninput=()=>addressFieldChanged('rua');
-rua.onchange=()=>addressFieldChanged('rua');document.querySelector('[name=number]').oninput=buildAddress;document.querySelector('[name=complement]').oninput=buildAddress;update();}
+rua.onchange=()=>addressFieldChanged('rua');document.querySelector('[name=number]').oninput=buildAddress;document.querySelector('[name=complement]').oninput=buildAddress;document.querySelector('[name=reference]').oninput=buildAddress;update();}
 
 function syncOrderTypeUI(){
   const retirada=document.querySelector('#deliveryType')?.value==='Retirada';
@@ -98,7 +96,7 @@ document.querySelector('#deliveryType')?.addEventListener('change',syncOrderType
 
 document.querySelector('#orderForm').onsubmit=async e=>{e.preventDefault();if(!cart.length)return;const f=new FormData(e.target),formData=Object.fromEntries(f),subtotal=cart.reduce((s,i)=>s+i.price*i.qty,0);if(formData.delivery==='Retirada'){formData.payment=document.querySelector('#paymentMain')?.value||formData.payment||'Pix';formData.note=document.querySelector('#noteMain')?.value||'';formData.address='Retirada na loja';formData.deliveryFee=0;formData.lat='';formData.lng='';}if(formData.delivery!=='Retirada'){
   try{
-    const q=(formData.lat&&formData.lng)?await quoteRoadDelivery(formData.lat,formData.lng):await quoteAddressDelivery({...formData,number:''});
+    const q=(confirmedQuote&&lastAutoAddress===currentAddressKey())?confirmedQuote:(formData.lat&&formData.lng)?await quoteRoadDelivery(formData.lat,formData.lng):await quoteAddressDelivery({...formData,number:''});
     if((store.settings?.deliveryMode||'route')==='route'&&(!Number.isFinite(Number(q.distanceKm))||Number(q.distanceKm)<0.1||q.routeType!=='road'))throw Error('Não foi possível validar a rota real pelas ruas. Confirme o ponto correto no mapa.');
     if(q.lat){formData.lat=q.lat;document.querySelector('#customerLat').value=q.lat;}
     if(q.lng){formData.lng=q.lng;document.querySelector('#customerLng').value=q.lng;}
@@ -137,7 +135,7 @@ new MutationObserver(()=>{const sm=document.querySelector('#successModal');if(re
 // O endereço final é montado normalmente no envio; nenhuma alteração aqui dispara nova cotação.
 
 
-async function quoteRoadDelivery(lat,lng){const r=await fetch('/api/delivery-quote',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({lat,lng})});const j=await r.json();if(!r.ok)throw Error(j.error||'Não foi possível calcular a rota.');return j}
+async function quoteRoadDelivery(lat,lng,signal){const r=await addressFetch('/api/delivery-quote',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({lat,lng}),signal});const j=await r.json();if(!r.ok)throw Error(j.error||'Não foi possível calcular a rota.');return j}
 document.querySelector('#useLocationLegacyDisabled')?.addEventListener('click',()=>{const st=document.querySelector('#gpsStatus');if(!navigator.geolocation){st.textContent='GPS não disponível neste aparelho.';return}st.textContent='Obtendo localização e calculando rota pelas ruas...';navigator.geolocation.getCurrentPosition(async pos=>{const lat=pos.coords.latitude,lng=pos.coords.longitude;document.querySelector('#customerLat').value=lat;document.querySelector('#customerLng').value=lng;if(true){try{const x=await quoteRoadDelivery(lat,lng);document.querySelector('#deliveryFee').value=x.deliveryFee;document.querySelector('#deliveryFeePreview').textContent=money(x.deliveryFee);st.textContent=`Rota calculada • ${Number(x.distanceKm).toFixed(1)} km • taxa ${money(x.deliveryFee)} • rota pelas ruas`;}catch(e){document.querySelector('#deliveryFee').value='0';document.querySelector('#deliveryFeePreview').textContent='Fora da área';st.textContent=e.message}}},()=>{st.textContent='Não foi possível acessar a localização. Permita o GPS no navegador.'},{enableHighAccuracy:true,timeout:12000,maximumAge:60000})});
 
 
@@ -145,21 +143,22 @@ document.querySelector('#useLocationLegacyDisabled')?.addEventListener('click',(
 async function lookupCepValue(cep){
   const clean=String(cep||'').replace(/\D/g,'');
   if(clean.length!==8) throw Error('Digite um CEP com 8 números.');
-  const r=await fetch('/api/cep/'+clean); const j=await r.json();
+  const r=await addressFetch('/api/cep/'+clean); const j=await r.json();
   if(!r.ok) throw Error(j.error||'CEP não encontrado.'); return j;
 }
-async function quoteAddressDelivery(data){
+async function quoteAddressDelivery(data,signal){
   const payload={cep:data.cep||document.querySelector('#cep')?.value||'',street:data.street||document.querySelector('#street')?.value||'',number:'',neighborhood:data.neighborhood||document.querySelector('#neighborhood')?.value||'',city:store?.settings?.storeCity||'',state:store?.settings?.storeState||''};
-  const ctrl=new AbortController(); const timer=setTimeout(()=>ctrl.abort(),18000);
+  const ctrl=new AbortController(); const timer=setTimeout(()=>ctrl.abort(),30000);
+  const abort=()=>ctrl.abort();if(signal){if(signal.aborted)ctrl.abort();else signal.addEventListener('abort',abort,{once:true});}
   try{
-    const r=await fetch('/api/delivery-quote-address',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload),signal:ctrl.signal});
+    const r=await addressFetch('/api/delivery-quote-address',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload),signal:ctrl.signal});
     const j=await r.json();
     if(!r.ok) throw Error(j.error||'Não foi possível localizar esse endereço.');
     return j;
   }catch(e){
     if(e?.name==='AbortError')throw Error('O cálculo da entrega demorou demais. Tente novamente ou use Minha localização.');
     throw e;
-  }finally{clearTimeout(timer);}
+  }finally{clearTimeout(timer);signal?.removeEventListener('abort',abort);}
 }
 function formatCepInput(el){let v=el.value.replace(/\D/g,'').slice(0,8);el.value=v.length>5?v.slice(0,5)+'-'+v.slice(5):v;}
 document.querySelector('#cep')?.addEventListener('input',e=>formatCepInput(e.target));
@@ -168,10 +167,11 @@ document.querySelector('#lookupCep')?.addEventListener('click',async()=>{
   try{const x=await lookupCepValue(cep.value); if(x.street)document.querySelector('#street').value=x.street;if(x.neighborhood)document.querySelector('#neighborhood').value=x.neighborhood;st.textContent='CEP encontrado. Confira rua e bairro. Número e complemento são opcionais.';document.querySelector('[name=number]')?.focus();document.querySelector('#street').dispatchEvent(new Event('input',{bubbles:true}));}
   catch(e){st.textContent=e.message}
 });
-async function calculateByTypedAddress(){
+async function calculateByTypedAddress(seq=autoDeliverySeq){
   const st=document.querySelector('#gpsStatus'); st.textContent='Localizando endereço e calculando rota...';
   try{
-    const x=await quoteAddressDelivery({});
+    const x=await quoteAddressDelivery({},autoQuoteController?.signal);
+    if(seq!==autoDeliverySeq)return null;
     document.querySelector('#customerLat').value=x.lat;document.querySelector('#customerLng').value=x.lng;
     document.querySelector('#deliveryFee').value=x.deliveryFee;document.querySelector('#deliveryFeePreview').textContent=money(x.deliveryFee);
     ensureDeliveryMap(x.lat,x.lng);
@@ -179,7 +179,7 @@ async function calculateByTypedAddress(){
     const approx=x.locationPrecision==='street-reference'||x.locationPrecision==='cep-reference';
     st.textContent=`Endereço localizado • rota ${Number(x.distanceKm).toFixed(1)} km • taxa ${money(x.deliveryFee)}${approx?' • confira o pino no mapa':''}`;
     return x;
-  }catch(e){document.querySelector('#deliveryFee').value='0';document.querySelector('#deliveryFeePreview').textContent='Confira o endereço';const rs=document.querySelector('#routeSummary');if(rs)rs.style.display='none';st.textContent=e.message;throw e;}
+  }catch(e){if(seq!==autoDeliverySeq)return null;document.querySelector('#deliveryFee').value='0';document.querySelector('#deliveryFeePreview').textContent='Confira o endereço';const rs=document.querySelector('#routeSummary');if(rs)rs.style.display='none';st.textContent=e.message;throw e;}
 }
 // V9.6 — cálculo automático da entrega pelo endereço (sem botão manual)
 let autoDeliveryTimer=null;
@@ -187,7 +187,10 @@ let autoCepTimer=null;
 let lastAutoAddress='';
 let autoDeliverySeq=0;
 let autoDeliveryInFlight='';
+let autoQuoteController=null,confirmedQuote=null;
+function currentAddressKey(){return [document.querySelector('#street')?.value,document.querySelector('#neighborhood')?.value].map(normalizeText).join('|');}
 function clearAddressQuote(){
+  if(confirmedQuote&&lastAutoAddress===currentAddressKey())return;
   const lat=document.querySelector('#customerLat'),lng=document.querySelector('#customerLng');
   const fee=document.querySelector('#deliveryFee'),preview=document.querySelector('#deliveryFeePreview');
   const summary=document.querySelector('#routeSummary'),sticky=document.querySelector('#checkoutStickyInfo');
@@ -197,7 +200,9 @@ function clearAddressQuote(){
   if(sticky && document.querySelector('#deliveryType')?.value!=='Retirada')sticky.textContent='Entrega • endereço alterado, recalculando rota';
 }
 function invalidateAutomaticAddress(){
-  lastAutoAddress='';
+  lastAutoAddress='';confirmedQuote=null;
+  autoQuoteController?.abort();autoQuoteController=null;
+  clearTimeout(mapQuoteTimer);
   autoDeliveryInFlight='';
   ++autoDeliverySeq;
   clearTimeout(autoDeliveryTimer);
@@ -211,7 +216,7 @@ function addressReadyForQuote(){
 function scheduleAutomaticDelivery(){
   clearTimeout(autoDeliveryTimer);
   if(!addressReadyForQuote()) return;
-  const key=[document.querySelector('#street')?.value.trim(),document.querySelector('#neighborhood')?.value.trim()].join('|');
+  const key=currentAddressKey();
 
   // Se este mesmo endereço já tem rota válida, não apaga nem recalcula.
   if(key===lastAutoAddress && document.querySelector('#customerLat')?.value && document.querySelector('#customerLng')?.value) return;
@@ -222,15 +227,15 @@ function scheduleAutomaticDelivery(){
   clearAddressQuote();
   autoDeliveryTimer=setTimeout(async()=>{
     if(seq!==autoDeliverySeq) return;
-    autoDeliveryInFlight=key;
+    autoDeliveryInFlight=key;autoQuoteController=new AbortController();
     const st=document.querySelector('#gpsStatus');
     const preview=document.querySelector('#deliveryFeePreview');
     if(st)st.textContent='Localizando endereço e calculando a entrega...';
     if(preview)preview.textContent='Calculando...';
     try{
-      await calculateByTypedAddress();
+      const result=await calculateByTypedAddress(seq);
       if(seq!==autoDeliverySeq)return;
-      lastAutoAddress=key;
+      lastAutoAddress=key;confirmedQuote=result;
     }catch(e){
       if(seq!==autoDeliverySeq)return;
       if(st)st.textContent=e.message||'Não foi possível calcular a entrega.';
@@ -300,7 +305,7 @@ function ensureDeliveryMap(lat,lng){
 }
 
 async function reverseCustomerPoint(lat,lng){
-  const r=await fetch('/api/customer-location/reverse',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({lat,lng})});
+  const r=await addressFetch('/api/customer-location/reverse',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({lat,lng})});
   const x=await r.json(); if(!r.ok)throw Error(x.error||'Não foi possível identificar o ponto.');
   return x;
 }
@@ -317,6 +322,7 @@ function fillCustomerAddressFromReverse(rev={}){
   return parts.length>0;
 }
 async function setConfirmedPoint(lat,lng,fromDrag=false){
+  invalidateAutomaticAddress();const seq=autoDeliverySeq;autoQuoteController=new AbortController();
   document.querySelector('#customerLat').value=Number(lat).toFixed(7);
   document.querySelector('#customerLng').value=Number(lng).toFixed(7);
   ensureDeliveryMap(lat,lng);
@@ -325,13 +331,16 @@ async function setConfirmedPoint(lat,lng,fromDrag=false){
   clearTimeout(mapQuoteTimer);
   mapQuoteTimer=setTimeout(async()=>{
     try{
-      const q=await quoteRoadDelivery(lat,lng);
+      const q=await quoteRoadDelivery(lat,lng,autoQuoteController.signal);
+      if(seq!==autoDeliverySeq || document.querySelector('#deliveryType')?.value==='Retirada')return;
+      confirmedQuote=q;lastAutoAddress=currentAddressKey();
       document.querySelector('#deliveryFee').value=q.deliveryFee;
       document.querySelector('#deliveryFeePreview').textContent=money(q.deliveryFee);
       if(st)st.textContent=`Ponto localizado • rota ${Number(q.distanceKm).toFixed(1)} km • taxa ${money(q.deliveryFee)}`;
       const rs=document.querySelector('#routeSummary');
       if(rs){rs.style.display='block';rs.innerHTML=`<b>Entrega calculada pela rota</b><span>${Number(q.distanceKm).toFixed(2)} km → ${money(q.deliveryFee)}</span>`;}
     }catch(e){
+      if(seq!==autoDeliverySeq)return;
       document.querySelector('#deliveryFee').value='';
       document.querySelector('#deliveryFeePreview').textContent='Aguardando rota válida';
       const rs=document.querySelector('#routeSummary');if(rs)rs.style.display='none';
@@ -368,7 +377,7 @@ smartSearch?.addEventListener('input',()=>{
   smartTimer=setTimeout(async()=>{
     const seq=++smartSeq;
     try{
-      const r=await fetch('/api/address-suggest-local?'+new URLSearchParams({q}));const arr=await r.json();if(seq!==smartSeq||!r.ok)return;
+      const r=await addressFetch('/api/address-suggest-local?'+new URLSearchParams({q}));const arr=await r.json();if(seq!==smartSeq||!r.ok)return;
       smartSuggestions.innerHTML=arr.map((x,i)=>`<button type="button" class="address-result" data-smart="${i}"><b>${esc(x.label)}</b><span>${esc(x.type==='locality'?'Bairro / localidade':[(x.neighborhood||''),x.complement||'',x.cep||''].filter(Boolean).join(' • '))}</span></button>`).join('');
       smartSuggestions.classList.toggle('show',arr.length>0);
       smartSuggestions.querySelectorAll('[data-smart]').forEach(el=>el.onclick=async()=>{
@@ -398,14 +407,14 @@ searchEl?.addEventListener('input',()=>{
     const st=document.querySelector('#addressSearchStatus');
     if(st)st.textContent='Buscando ruas e endereços...';
     try{
-      const r=await fetch('/api/address-search?'+new URLSearchParams({
+      const r=await addressFetch('/api/address-search?'+new URLSearchParams({
     q,
     street:(document.querySelector('#street')?.value||'').trim(),
     number:(document.querySelector('[name=number]')?.value||'').trim(),
     neighborhood:(document.querySelector('#neighborhood')?.value||'').trim(),
     cep:(document.querySelector('#cep')?.value||'').trim()
   }).toString());
-      const arr=await r.json(); if(!r.ok)throw Error(arr.error||'Erro na busca');
+      const arr=await r.json();if(seq!==addressSearchSeq)return; if(!r.ok)throw Error(arr.error||'Erro na busca');
       suggestions.innerHTML=arr.map((x,i)=>`<div class="address-suggestion" data-i="${i}"><b>${esc((x.label||'').split(',').slice(0,2).join(','))}</b><small>${esc((x.label||'').split(',').slice(2).join(','))}</small></div>`).join('');
       suggestions.classList.toggle('show',arr.length>0);
       if(st)st.textContent=arr.length?`${arr.length} resultado(s). Toque no endereço correto.`:'Nenhum endereço encontrado. Tente só parte do nome da rua.';
@@ -470,7 +479,7 @@ async function runAddressSearch(){
   const street=(document.querySelector('#street')?.value||'').trim();
   const st=document.querySelector('#gpsStatus');
   if(nb.length<2){if(st)st.textContent='Informe o Bairro para listar as ruas.';return;}
-  selectedManualAddress=false;clearAddressQuote();if(st)st.textContent='Buscando ruas neste bairro...';
+  selectedManualAddress=false;if(st)st.textContent='Buscando ruas neste bairro...';
   try{
     const dir=await loadJequieDirectory(nb);let items=[];
     const norm=v=>normalizeText(v),wanted=norm(street);
@@ -490,7 +499,7 @@ async function runAddressSearch(){
       if(!items.length){renderAddressResults([]);if(st)st.textContent='Essa rua não apareceu na base deste bairro. Confira a escrita ou use Minha localização.';return;}
     }else if(wanted){
       const params=new URLSearchParams({q:street,street,neighborhood:nb});
-      const r=await fetch('/api/address-search?'+params),arr=await r.json();if(!r.ok)throw Error(arr.error||'Não foi possível buscar o endereço.');
+      const r=await addressFetch('/api/address-search?'+params),arr=await r.json();if(!r.ok)throw Error(arr.error||'Não foi possível buscar o endereço.');
       items=(arr||[]).map(x=>{const a=x.address||{};return {street:a.road||a.pedestrian||a.residential||x.road||street,neighborhood:a.suburb||a.neighbourhood||a.quarter||a.city_district||x.neighborhood||nb,label:x.label};}).filter((x,i,a)=>x.street&&a.findIndex(y=>norm(y.street)+'|'+norm(y.neighborhood)===norm(x.street)+'|'+norm(x.neighborhood))===i);
     }
     if(!items.length){renderAddressResults([]);if(st)st.textContent=wanted?'Nenhuma rua correspondente foi encontrada nesse bairro.':'Nenhuma rua cadastrada foi encontrada nesse bairro.';return;}

@@ -353,7 +353,7 @@ async function deliveryKmForTypedAddress(settings,lat,lng){
 
 async function lookupCep(cep){
   const c=String(cep||'').replace(/\D/g,''); if(c.length!==8) throw Error('CEP inválido.');
-  const r=await fetch(`https://viacep.com.br/ws/${c}/json/`,{headers:{'User-Agent':'CHEFE-TELLES/9.2'}}); if(!r.ok) throw Error('Não foi possível consultar o CEP.');
+  const r=await fetch(`https://viacep.com.br/ws/${c}/json/`,{headers:{'User-Agent':'CHEFE-TELLES/9.2'},signal:AbortSignal.timeout(6500)}); if(!r.ok) throw Error('Não foi possível consultar o CEP.');
   const j=await r.json(); if(j.erro) throw Error('CEP não encontrado.');
   return {cep:j.cep||c,street:j.logradouro||'',neighborhood:j.bairro||'',city:j.localidade||'',state:j.uf||''};
 }
@@ -450,7 +450,7 @@ async function geocodeBrazilAddress(x,cache=[]){
   let cepPoint=null;
   if(cep.length===8){
     try{
-      const br=await fetch(`https://brasilapi.com.br/api/cep/v2/${cep}`,{headers:{'User-Agent':'CHEFE-TELLES/10.0'}});
+      const br=await fetch(`https://brasilapi.com.br/api/cep/v2/${cep}`,{headers:{'User-Agent':'CHEFE-TELLES/10.0'},signal:AbortSignal.timeout(6500)});
       if(br.ok){
         const bj=await br.json(), c=bj?.location?.coordinates||{};
         const lat=Number(c.latitude),lng=Number(c.longitude);
@@ -573,7 +573,7 @@ async function reverseGeocodeBrazil(lat,lng){
   lat=Number(lat); lng=Number(lng);
   if(!Number.isFinite(lat)||!Number.isFinite(lng)) throw Error('Coordenadas inválidas.');
   const url='https://nominatim.openstreetmap.org/reverse?format=jsonv2&addressdetails=1&zoom=18&lat='+encodeURIComponent(lat)+'&lon='+encodeURIComponent(lng);
-  const r=await fetch(url,{headers:{'User-Agent':'CHEFE-TELLES/9.5 (store reverse geocoder)','Accept-Language':'pt-BR'}});
+  const r=await fetch(url,{headers:{'User-Agent':'CHEFE-TELLES/9.5 (store reverse geocoder)','Accept-Language':'pt-BR'},signal:AbortSignal.timeout(6500)});
   if(!r.ok) throw Error('Não foi possível consultar o endereço desta localização.');
   const j=await r.json(); const a=j.address||{};
   return {
@@ -787,7 +787,7 @@ async function api(req,res,pathname){
       if(!Number.isFinite(lat)||!Number.isFinite(lng))return send(res,400,{error:'Localização inválida.'});
       try{
         const query=`[out:json][timeout:12];way(around:2500,${lat},${lng})["highway"]["name"];out tags center;`;
-        const r=await fetch('https://overpass-api.de/api/interpreter',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded','User-Agent':'CHEFE-TELLES/10.8'},body:'data='+encodeURIComponent(query)});
+        const r=await fetch('https://overpass-api.de/api/interpreter',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded','User-Agent':'CHEFE-TELLES/10.8'},body:'data='+encodeURIComponent(query),signal:AbortSignal.timeout(12000)});
         if(!r.ok)throw Error('Serviço de ruas indisponível.');
         const data=await r.json(),seen=new Set(),roads=[];
         for(const x of (data.elements||[])){
