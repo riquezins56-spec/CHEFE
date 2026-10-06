@@ -1,3 +1,11 @@
+async function addressFetch(url,opt={}){
+ const ctrl=new AbortController(),timer=setTimeout(()=>ctrl.abort(),30000);
+ const external=opt.signal,abort=()=>ctrl.abort();
+ if(external){if(external.aborted)ctrl.abort();else external.addEventListener('abort',abort,{once:true});}
+ try{const r=await fetch(url,{...opt,signal:ctrl.signal});const body=await r.text();return {ok:r.ok,status:r.status,json:async()=>JSON.parse(body)};}
+ catch(e){if(e.name==='AbortError')throw Error('A consulta demorou demais ou foi cancelada. Tente novamente.');throw e;}
+ finally{clearTimeout(timer);external?.removeEventListener('abort',abort);}
+}
 
 function chefeTone(kind){
  try{
@@ -13,7 +21,7 @@ function orderDateTime(o){return o.createdAtText||new Date(o.createdAt).toLocale
 let API_BASE = window.CHEFE_API_BASE || (location.protocol==='file:' ? '' : location.origin);
 let token=localStorage.getItem('chefeAdminToken')||'',state={};const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)],money=v=>Number(v||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'}),esc=s=>String(s??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;');
 async function discoverBase(){for(const p of [3000,3001,3002,3003,3004,3005,3006,3007,3008,3009,3010]){try{const r=await fetch('http://127.0.0.1:'+p+'/api/health',{cache:'no-store'});if(r.ok){const h=await r.json();if(h.ok&&h.store==='Cheff Telles'&&h.version==='2.0.0'){API_BASE='http://127.0.0.1:'+p;localStorage.setItem('chefeApiBase',API_BASE);return API_BASE}}}catch(e){}}throw Error('Não foi possível conectar ao servidor. Execute o INICIAR.bat.');}
-async function api(path,opt={}){opt.headers={...(opt.headers||{}),...(token?{Authorization:'Bearer '+token}:{})};try{const r=await fetch(API_BASE+path,opt);let d={};try{d=await r.json()}catch{}if(r.status===401){token='';localStorage.removeItem('chefeAdminToken');showLogin();throw Error('Não autorizado')}if(!r.ok)throw Error(d.error||'Erro no servidor');return d}catch(first){if(location.protocol==='file:' || !API_BASE){API_BASE=await discoverBase();const r=await fetch(API_BASE+path,opt);let d={};try{d=await r.json()}catch{}if(!r.ok)throw Error(d.error||'Erro no servidor');return d}throw first}}
+async function api(path,opt={}){opt.headers={...(opt.headers||{}),...(token?{Authorization:'Bearer '+token}:{})};try{const r=await addressFetch(API_BASE+path,opt);let d={};try{d=await r.json()}catch{}if(r.status===401){token='';localStorage.removeItem('chefeAdminToken');showLogin();throw Error('Não autorizado')}if(!r.ok)throw Error(d.error||'Erro no servidor');return d}catch(first){if(location.protocol==='file:'){API_BASE=await discoverBase();const r=await addressFetch(API_BASE+path,opt);let d={};try{d=await r.json()}catch{}if(!r.ok)throw Error(d.error||'Erro no servidor');return d}throw first}}
 function showLogin(){$('#login').classList.remove('hidden');$('#app').classList.add('hidden')}function showApp(){$('#login').classList.add('hidden');$('#app').classList.remove('hidden')}
 $('#loginForm').onsubmit=async e=>{e.preventDefault();$('#loginError').textContent='';try{const d=await api('/api/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({password:$('#password').value})});token=d.token;localStorage.setItem('chefeAdminToken',token);$('#password').value='';showApp();await refreshAll()}catch(err){$('#loginError').textContent=err.message}};
 $('#viewStore').onclick=e=>{if(location.protocol==='file:'){e.preventDefault();discoverBase().then(base=>window.open(base+'/','_blank')).catch(()=>{})}};$('#logout').onclick=async()=>{try{await api('/api/logout',{method:'POST'})}catch{}token='';localStorage.removeItem('chefeAdminToken');showLogin()};
@@ -164,7 +172,7 @@ setTimeout(()=>renderV9(),300);
 
 // V9.3: cadastro amigável da localização da loja por CEP/endereço ou GPS
 function fillStoreAddress(s={}){ if($('#sStoreCep')){$('#sStoreCep').value=s.storeCep||'';$('#sStoreStreet').value=s.storeStreet||'';$('#sStoreNumber').value=s.storeNumber||'';$('#sStoreNeighborhood').value=s.storeNeighborhood||'';$('#sStoreCity').value=s.storeCity||'';$('#sStoreState').value=s.storeState||'';} }
-async function lookupStoreCep(){const cep=$('#sStoreCep').value.replace(/\D/g,'');if(cep.length!==8)throw Error('Informe um CEP com 8 números.');const r=await fetch('https://viacep.com.br/ws/'+cep+'/json/');const j=await r.json();if(!r.ok||j.erro)throw Error('CEP não encontrado.');$('#sStoreStreet').value=j.logradouro||'';$('#sStoreNeighborhood').value=j.bairro||'';$('#sStoreCity').value=j.localidade||'';$('#sStoreState').value=j.uf||'';return j;}
+async function lookupStoreCep(){const cep=$('#sStoreCep').value.replace(/\D/g,'');if(cep.length!==8)throw Error('Informe um CEP com 8 números.');const r=await addressFetch('https://viacep.com.br/ws/'+cep+'/json/');const j=await r.json();if(!r.ok||j.erro)throw Error('CEP não encontrado.');$('#sStoreStreet').value=j.logradouro||'';$('#sStoreNeighborhood').value=j.bairro||'';$('#sStoreCity').value=j.localidade||'';$('#sStoreState').value=j.uf||'';return j;}
 $('#findStoreCep')?.addEventListener('click',async()=>{const m=$('#storeLocationMsg');try{m.textContent='Buscando CEP...';await lookupStoreCep();m.textContent='CEP encontrado. Confira o endereço e informe o número.';}catch(e){m.textContent=e.message}});
 $('#useStoreGps')?.addEventListener('click',()=>{
  const m=$('#storeLocationMsg');
@@ -180,7 +188,7 @@ $('#useStoreGps')?.addEventListener('click',()=>{
        if(r.cep)$('#sStoreCep').value=r.cep;if(r.street)$('#sStoreStreet').value=r.street;if(r.number)$('#sStoreNumber').value=r.number;
        if(r.neighborhood)$('#sStoreNeighborhood').value=r.neighborhood;if(r.city)$('#sStoreCity').value=r.city;
        if(r.state)$('#sStoreState').value=String(r.state).replace(/^BR-/,'').slice(0,2).toUpperCase();
-     }catch{}
+     }catch{m.textContent='Coordenadas GPS obtidas. Salvando o ponto; endereço textual indisponível.';}
      const savePayload={deliveryMode:'route',storeLat:String(lat),storeLng:String(lng),storeCep:$('#sStoreCep').value.trim(),storeStreet:$('#sStoreStreet').value.trim(),storeNumber:$('#sStoreNumber').value.trim(),storeNeighborhood:$('#sStoreNeighborhood').value.trim(),storeCity:$('#sStoreCity').value.trim()||'Jequié',storeState:($('#sStoreState').value.trim()||'BA').toUpperCase()};
      await api('/api/settings',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(savePayload)});
      state.settings={...state.settings,...savePayload};
