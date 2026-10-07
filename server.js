@@ -634,13 +634,13 @@ async function printEndpoint(req,res,pathname){
   if(o.customer?.delivery==='Retirada')lines.push('TIPO: RETIRADA NA LOJA');
   else {
     const printAddress=String(o.customer?.address||'').replace(/,?\s*Refer[eê]ncia:\s*.*$/i,'').trim();
-    lines.push('ENDERECO: '+printAddress);
-    if(o.customer?.reference)lines.push('PONTO DE REFERENCIA: '+o.customer.reference);
+    lines.push('Endereço: '+printAddress);
+    if(o.customer?.reference)lines.push('Referência: '+o.customer.reference);
   }
   if(o.deliveryDistanceKm)lines.push('DISTANCIA: '+o.deliveryDistanceKm+' km');
   lines.push('OBS: '+(o.customer?.note||'Nenhuma'));
   lines.push(''); lines.push('');
-  return send(res,200,oneText(lines));
+  return send(res,200,oneText(lines.flatMap((line,index)=>index&&line&&lines[index-1]?[ '',line ]:[line])));
 }
 
 function printAgentAuthorized(req){
