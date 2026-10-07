@@ -4,6 +4,7 @@ const path = require('path');
 const { URL } = require('url');
 const crypto = require('crypto');
 const os = require('os');
+const preparation = require('./preparation');
 const { Pool } = require('pg');
 
 const DEFAULT_PORT = Number(process.env.PORT || 3000);
@@ -893,7 +894,8 @@ async function api(req,res,pathname){
       }else customer.address='Retirada na loja';
       const createdAt=new Date().toISOString();
       const createdAtText=new Date(createdAt).toLocaleString('pt-BR',{timeZone:'America/Sao_Paulo',day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'});
-      const order={...b,customer,id:Date.now(),trackingToken:crypto.randomBytes(16).toString('hex'),estimatedMinutes:Number(d.settings.defaultEtaMinutes||0),day:today,number:count,status:'Novo',statusHistory:[{status:'Novo',at:createdAt}],driverId:null,estimatedMinutes:Number(d.settings.defaultEtaMinutes||0),createdAt,createdAtText,subtotal,deliveryFee,total:subtotal+deliveryFee};
+      const prepRange=preparation.range(d.settings);
+      const order={...b,preparationMinMinutes:prepRange.min,preparationMaxMinutes:prepRange.max,customer,id:Date.now(),trackingToken:crypto.randomBytes(16).toString('hex'),estimatedMinutes:Number(d.settings.defaultEtaMinutes||0),day:today,number:count,status:'Novo',statusHistory:[{status:'Novo',at:createdAt}],driverId:null,estimatedMinutes:Number(d.settings.defaultEtaMinutes||0),createdAt,createdAtText,subtotal,deliveryFee,total:subtotal+deliveryFee};
       d.orders.push(order);await write(d);return send(res,201,order);
     }
 
@@ -902,7 +904,7 @@ async function api(req,res,pathname){
       const d=await read(),o=d.orders.find(x=>String(x.trackingToken||'')===tm[1]);
       if(!o)return send(res,404,{error:'Pedido não encontrado'});
       const driver=(d.drivers||[]).find(x=>String(x.id)===String(o.driverId||''));
-      return send(res,200,{number:o.number,status:o.status||'Novo',createdAt:o.createdAt,createdAtText:o.createdAtText,estimatedMinutes:Number(o.estimatedMinutes||0),customer:{name:o.customer?.name||'',delivery:o.customer?.delivery||'',address:o.customer?.address||'',payment:o.customer?.payment||''},items:o.items||[],subtotal:Number(o.subtotal||0),deliveryFee:Number(o.deliveryFee||0),total:Number(o.total||0),driver:driver?{name:driver.name||'',phone:driver.phone||''}:null});
+      return send(res,200,{number:o.number,status:o.status||'Novo',createdAt:o.createdAt,createdAtText:o.createdAtText,estimatedMinutes:Number(o.estimatedMinutes||0),preparationMinMinutes:preparation.range(o).min,preparationMaxMinutes:preparation.range(o).max,preparationEndedAt:['Pronto','Saiu para entrega','Entregue','Cancelado'].includes(o.status)?(o.statusHistory||[]).find(h=>['Pronto','Saiu para entrega','Entregue','Cancelado'].includes(h.status))?.at:null,customer:{name:o.customer?.name||'',delivery:o.customer?.delivery||'',address:o.customer?.address||'',payment:o.customer?.payment||''},items:o.items||[],subtotal:Number(o.subtotal||0),deliveryFee:Number(o.deliveryFee||0),total:Number(o.total||0),driver:driver?{name:driver.name||'',phone:driver.phone||''}:null});
     }
 
     if(!auth(req)) return send(res,401,{error:'Não autorizado'});
@@ -922,7 +924,7 @@ async function api(req,res,pathname){
 
     if(req.method==='GET'&&pathname==='/api/admin'){ const d=await read(); return send(res,200,d); }
     if(req.method==='PUT'&&pathname==='/api/settings'){
-      const b=await body(req),d=await read();if(b.adminPassword!==undefined&&String(b.adminPassword).trim()==='') delete b.adminPassword; d.settings={...d.settings,...b,deliveryMode:'route'}; await write(d); return send(res,200,{ok:true});
+      const b=await body(req),d=await read();if(b.defaultPrepMinMinutes!==undefined||b.defaultPrepMaxMinutes!==undefined){const min=Number(b.defaultPrepMinMinutes??d.settings.defaultPrepMinMinutes??30),max=Number(b.defaultPrepMaxMinutes??d.settings.defaultPrepMaxMinutes??40);if(!Number.isFinite(min)||!Number.isFinite(max)||min<=0||max<min)return send(res,400,{error:'Informe tempos positivos, com o máximo maior ou igual ao mínimo.'});b.defaultPrepMinMinutes=min;b.defaultPrepMaxMinutes=max;b.defaultEtaMinutes=max;}if(b.adminPassword!==undefined&&String(b.adminPassword).trim()==='') delete b.adminPassword; d.settings={...d.settings,...b,deliveryMode:'route'}; await write(d); return send(res,200,{ok:true});
     }
     if(req.method==='GET'&&pathname==='/api/orders')return send(res,200,(await read()).orders.slice().reverse());
     const om=pathname.match(/^\/api\/orders\/(\d+)$/);
