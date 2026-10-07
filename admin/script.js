@@ -35,6 +35,11 @@ async function loadNetworkLinks(){
  box.innerHTML=`<div><span>SERVIDOR ONLINE</span><b>${esc(base)}</b><br><small>O Thermer busca cada pedido diretamente neste servidor.</small></div>`;
 }
 
+function revenueParts(o){
+ const delivery=o.customer?.delivery==='Retirada'?0:Number(o.deliveryFee||0);
+ const subtotal=o.subtotal!==undefined&&o.subtotal!==null&&o.subtotal!==''?Number(o.subtotal):NaN;
+ return {products:Number.isFinite(subtotal)?subtotal:Number(o.total||0)-delivery,delivery};
+}
 function renderDashboard(){
  const now=new Date(),today=now.toLocaleDateString('en-CA',{timeZone:'America/Sao_Paulo'}),month=today.slice(0,7),all=state.orders||[];
  const os=all.filter(o=>o.day===today),ms=all.filter(o=>String(o.day||'').slice(0,7)===month);
@@ -42,6 +47,10 @@ function renderDashboard(){
  $('#statRevenue').textContent=money(os.reduce((sum,o)=>sum+Number(o.total||0),0));
  $('#statMonthOrders').textContent=ms.length;
  $('#statMonthRevenue').textContent=money(ms.reduce((sum,o)=>sum+Number(o.total||0),0));
+ for(const [orders,productId,deliveryId] of [[os,'statProductRevenue','statDeliveryRevenue'],[ms,'statMonthProductRevenue','statMonthDeliveryRevenue']]){
+   const totals=orders.reduce((sum,o)=>{const part=revenueParts(o);sum.products+=part.products;sum.delivery+=part.delivery;return sum;},{products:0,delivery:0});
+   $('#'+productId).textContent=money(totals.products);$('#'+deliveryId).textContent=money(totals.delivery);
+ }
  $('#statNew').textContent=os.filter(o=>o.status==='Novo').length;
  $('#statProducts').textContent=(state.products||[]).filter(p=>p.active!==false).length;
 }
@@ -52,10 +61,10 @@ function receiptLinesForOrder(o){
  if(o.customer?.phone)a.push('WHATSAPP: '+o.customer.phone); a.push(o.customer?.delivery==='Retirada'?'TIPO: RETIRADA':'TIPO: ENTREGA');
  if(o.customer?.delivery!=='Retirada'&&o.customer?.address){
    const printAddress=String(o.customer.address).replace(/,?\s*Refer[eê]ncia:\s*.*$/i,'').trim();
-   if(printAddress)a.push('ENDERECO: '+printAddress);
- } if(o.customer?.reference)a.push('REFERENCIA: '+o.customer.reference); a.push('--------------------------------');
+   if(printAddress)a.push('Endereço: '+printAddress);
+ } if(o.customer?.reference)a.push('Referência: '+o.customer.reference); a.push('--------------------------------');
  for(const i of (o.items||[]))a.push((i.qty||1)+'x '+(i.name||'')+'  '+money(Number(i.price||0)*Number(i.qty||1))); a.push('--------------------------------','SUBTOTAL: '+money(o.subtotal||o.total||0));
- if(o.customer?.delivery!=='Retirada')a.push('ENTREGA: '+money(o.deliveryFee||0)); a.push('TOTAL: '+money(o.total||0),'FORMA DE PAGAMENTO: '+(o.customer?.payment||'')); if(o.customer?.note)a.push('OBS: '+o.customer.note); return a;
+ if(o.customer?.delivery!=='Retirada')a.push('ENTREGA: '+money(o.deliveryFee||0)); a.push('TOTAL: '+money(o.total||0),'FORMA DE PAGAMENTO: '+(o.customer?.payment||'')); if(o.customer?.note)a.push('OBS: '+o.customer.note); return a.flatMap((line,index)=>index?[ '',line ]:[line]);
 }
 function shareReceiptToThermerIOS(o){
  const lines=receiptLinesForOrder(o),w=384,pad=12,lh=31,c=document.createElement('canvas');
