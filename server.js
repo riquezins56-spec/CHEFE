@@ -5,6 +5,7 @@ const { URL } = require('url');
 const crypto = require('crypto');
 const os = require('os');
 const preparation = require('./preparation');
+const features = require('./store-features');
 const { Pool } = require('pg');
 
 const DEFAULT_PORT = Number(process.env.PORT || 3000);
@@ -629,10 +630,10 @@ async function printEndpoint(req,res,pathname){
   for(const i of (o.items||[])) lines.push(`${i.qty}x ${i.name} - R$ ${(Number(i.price||0)*Number(i.qty||0)).toFixed(2)}`);
   lines.push('--------------------------------');
   lines.push('SUBTOTAL: R$ '+Number(o.subtotal||o.total||0).toFixed(2));
-  if(o.customer?.delivery!=='Retirada')lines.push('ENTREGA: R$ '+Number(o.deliveryFee||0).toFixed(2));
+  if(o.customer?.delivery==='Entrega')lines.push('ENTREGA: R$ '+Number(o.deliveryFee||0).toFixed(2));
   lines.push('TOTAL: R$ '+Number(o.total||0).toFixed(2));
   lines.push('FORMA DE PAGAMENTO: '+(o.customer?.payment||''));
-  if(o.customer?.delivery==='Retirada')lines.push('TIPO: RETIRADA NA LOJA');
+  if(o.customer?.delivery!=='Entrega')lines.push('TIPO: '+(o.customer?.address||o.customer?.delivery));
   else {
     const printAddress=String(o.customer?.address||'').replace(/,?\s*Refer[eê]ncia:\s*.*$/i,'').trim();
     lines.push('Endereço: '+printAddress);
@@ -668,7 +669,7 @@ async function api(req,res,pathname){
     }
     if(req.method==='GET'&&pathname==='/api/store'){
       const d=await read();
-      return send(res,200,{settings:{name:d.settings.name,whatsapp:d.settings.whatsapp,pixKey:d.settings.pixKey||'',pixRecipient:d.settings.pixRecipient||'',pixType:d.settings.pixType||'',pixQr:d.settings.pixQr||'',botWhatsapp:d.settings.botWhatsapp||d.settings.whatsapp,botMessage:d.settings.botMessage||'',deliveryMode:'route',storeLat:d.settings.storeLat||'',storeLng:d.settings.storeLng||'',storeCity:d.settings.storeCity||'',storeState:d.settings.storeState||'',storeNeighborhood:d.settings.storeNeighborhood||'',extraKmFee:Number(d.settings.extraKmFee)||0,maxDeliveryKm:Number(d.settings.maxDeliveryKm)||0},categories:d.categories,products:d.products.filter(p=>p.active),deliveryZones:[],addressHints:(d.addressCache||[]).slice(-300).map(a=>({street:a.street,neighborhood:a.neighborhood,city:a.city,state:a.state})),deliveryKmRanges:(d.deliveryKmRanges||[]).filter(z=>z.active!==false)});
+      return send(res,200,{settings:{defaultPrepMinMinutes:d.settings.defaultPrepMinMinutes,defaultPrepMaxMinutes:d.settings.defaultPrepMaxMinutes,defaultEtaMinutes:d.settings.defaultEtaMinutes,appearance:d.settings.appearance||{},business:d.settings.business||null,dineInEnabled:d.settings.dineInEnabled===true,addons:d.settings.addons||[],promotions:d.settings.promotions||[],isOpen:features.open(d.settings),name:d.settings.name,whatsapp:d.settings.whatsapp,pixKey:d.settings.pixKey||'',pixRecipient:d.settings.pixRecipient||'',pixType:d.settings.pixType||'',pixQr:d.settings.pixQr||'',botWhatsapp:d.settings.botWhatsapp||d.settings.whatsapp,botMessage:d.settings.botMessage||'',deliveryMode:'route',storeLat:d.settings.storeLat||'',storeLng:d.settings.storeLng||'',storeCity:d.settings.storeCity||'',storeState:d.settings.storeState||'',storeNeighborhood:d.settings.storeNeighborhood||'',extraKmFee:Number(d.settings.extraKmFee)||0,maxDeliveryKm:Number(d.settings.maxDeliveryKm)||0},categories:d.categories,products:d.products.filter(p=>p.active),deliveryZones:[],addressHints:(d.addressCache||[]).slice(-300).map(a=>({street:a.street,neighborhood:a.neighborhood,city:a.city,state:a.state})),deliveryKmRanges:(d.deliveryKmRanges||[]).filter(z=>z.active!==false)});
     }
     if(req.method==='POST'&&pathname==='/api/login'){
       const b=await body(req),d=await read();
@@ -866,9 +867,13 @@ async function api(req,res,pathname){
     if(req.method==='POST'&&pathname==='/api/orders'){
       const b=await body(req),d=await read(),today=localDay();
       const count=d.orders.filter(o=>o.day===today).length+1;
-      const subtotal=Number(b.subtotal ?? b.total ?? 0);
+      if(!features.open(d.settings))return send(res,409,{error:'A loja está fechada. Tente novamente no horário de funcionamento.'});
+      if(!['Entrega','Retirada','Consumir no local'].includes(b.customer?.delivery))return send(res,400,{error:'Tipo de pedido inválido.'});
+      if(b.customer.delivery==='Consumir no local'&&d.settings.dineInEnabled!==true)return send(res,400,{error:'Consumo no local indisponível.'});
+      try{b.items=features.orderItems(d.settings,d.products,b.items)}catch(e){return send(res,400,{error:e.message})}
+      const subtotal=Math.round(b.items.reduce((t,i)=>t+i.price*i.qty,0)*100)/100;
       let deliveryFee=0;
-      if(b.customer?.delivery==='Retirada'){
+      if(b.customer?.delivery!=='Entrega'){
         deliveryFee=0;
       }else{
         if(!d.settings.storeLat||!d.settings.storeLng)return send(res,400,{error:'A localização da loja ainda não foi confirmada no painel do dono.'});
@@ -888,10 +893,10 @@ async function api(req,res,pathname){
         deliveryFee=Number(resolved.toFixed(2)); b.deliveryDistanceKm=Number(route.km.toFixed(2)); b.deliveryRouteType=route.source;
       }
       const customer={...(b.customer||{})};
-      if(customer.delivery!=='Retirada'){
+      if(customer.delivery==='Entrega'){
         const street=String(customer.street||'').trim(), number=String(customer.number||'').trim(), complement=String(customer.complement||'').trim(), neighborhood=String(customer.neighborhood||'').trim(), reference=String(customer.reference||'').trim();
         customer.address=[street,number&&('Nº '+number),neighborhood,complement,reference&&('Referência: '+reference)].filter(Boolean).join(', ');
-      }else customer.address='Retirada na loja';
+      }else customer.address=customer.delivery==='Retirada'?'Retirada na loja':'Consumir no local'+(customer.table?' · Mesa/identificação: '+String(customer.table).slice(0,80):'');
       const createdAt=new Date().toISOString();
       const createdAtText=new Date(createdAt).toLocaleString('pt-BR',{timeZone:'America/Sao_Paulo',day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'});
       const prepRange=preparation.range(d.settings);
@@ -924,7 +929,7 @@ async function api(req,res,pathname){
 
     if(req.method==='GET'&&pathname==='/api/admin'){ const d=await read(); return send(res,200,d); }
     if(req.method==='PUT'&&pathname==='/api/settings'){
-      const b=await body(req),d=await read();if(b.defaultPrepMinMinutes!==undefined||b.defaultPrepMaxMinutes!==undefined){const min=Number(b.defaultPrepMinMinutes??d.settings.defaultPrepMinMinutes??30),max=Number(b.defaultPrepMaxMinutes??d.settings.defaultPrepMaxMinutes??40);if(!Number.isFinite(min)||!Number.isFinite(max)||min<=0||max<min)return send(res,400,{error:'Informe tempos positivos, com o máximo maior ou igual ao mínimo.'});b.defaultPrepMinMinutes=min;b.defaultPrepMaxMinutes=max;b.defaultEtaMinutes=max;}if(b.adminPassword!==undefined&&String(b.adminPassword).trim()==='') delete b.adminPassword; d.settings={...d.settings,...b,deliveryMode:'route'}; await write(d); return send(res,200,{ok:true});
+      const b=await body(req),d=await read();delete b.copyright;delete b.creator;try{features.validate(b,d)}catch(e){return send(res,400,{error:e.message})}if(b.defaultPrepMinMinutes!==undefined||b.defaultPrepMaxMinutes!==undefined){const min=Number(b.defaultPrepMinMinutes??d.settings.defaultPrepMinMinutes??30),max=Number(b.defaultPrepMaxMinutes??d.settings.defaultPrepMaxMinutes??40);if(!Number.isFinite(min)||!Number.isFinite(max)||min<=0||max<min)return send(res,400,{error:'Informe tempos positivos, com o máximo maior ou igual ao mínimo.'});b.defaultPrepMinMinutes=min;b.defaultPrepMaxMinutes=max;b.defaultEtaMinutes=max;}if(b.adminPassword!==undefined&&String(b.adminPassword).trim()==='') delete b.adminPassword; d.settings={...d.settings,...b,deliveryMode:'route'}; await write(d); return send(res,200,{ok:true});
     }
     if(req.method==='GET'&&pathname==='/api/orders')return send(res,200,(await read()).orders.slice().reverse());
     const om=pathname.match(/^\/api\/orders\/(\d+)$/);
@@ -950,14 +955,14 @@ async function api(req,res,pathname){
       if(old===undefined)return send(res,404,{error:'Categoria não encontrada'});
       if(!name)return send(res,400,{error:'Informe o nome da categoria'});
       if(d.categories.some((c,i)=>i!==idx&&normalizeDeliveryText(c)===normalizeDeliveryText(name)))return send(res,409,{error:'Categoria já existe'});
-      d.categories[idx]=name; d.products.forEach(p=>{if(normalizeDeliveryText(p.cat)===normalizeDeliveryText(old))p.cat=name}); await write(d); return send(res,200,{name});
+      d.categories[idx]=name; (d.settings.addons||[]).forEach(e=>{if(e.cat===old)e.cat=name}); d.products.forEach(p=>{if(normalizeDeliveryText(p.cat)===normalizeDeliveryText(old))p.cat=name}); await write(d); return send(res,200,{name});
     }
     if(cm&&req.method==='DELETE'){
       const d=await read(),idx=Number(cm[1]),name=d.categories[idx];
       if(name===undefined)return send(res,404,{error:'Categoria não encontrada'});
       const used=d.products.some(p=>normalizeDeliveryText(p.cat)===normalizeDeliveryText(name)&&p.active!==false);
       if(used)return send(res,409,{error:'Não é possível excluir: existem produtos ativos nesta categoria. Edite ou mova os produtos primeiro.'});
-      d.categories.splice(idx,1); await write(d); return send(res,200,{ok:true});
+      d.categories.splice(idx,1);d.settings.addons=(d.settings.addons||[]).filter(e=>e.cat!==name||e.productId); await write(d); return send(res,200,{ok:true});
     }
 
     if(req.method==='POST'&&pathname==='/api/products'){
@@ -989,7 +994,8 @@ async function api(req,res,pathname){
 
 const server=http.createServer(async(req,res)=>{
   const pathname = decodeURIComponent(new URL(req.url, 'http://localhost').pathname);
-  if(await printEndpoint(req,res,pathname))return;
+  await printEndpoint(req,res,pathname);
+  if(res.writableEnded)return;
   if(pathname.startsWith('/api/'))return api(req,res,pathname);
   if(pathname==='/admin'||pathname==='/admin/'){
     const f=path.join(ROOT,'admin','index.html');
