@@ -74,6 +74,9 @@ rua.oninput=()=>addressFieldChanged('rua');
 rua.onchange=()=>addressFieldChanged('rua');document.querySelector('[name=number]').oninput=buildAddress;document.querySelector('[name=complement]').oninput=buildAddress;document.querySelector('[name=reference]').oninput=buildAddress;update();}
 
 function syncOrderTypeUI(){
+  const local=document.querySelector('#deliveryType')?.value==='Consumir no local';
+  const tableLabel=document.querySelector('#tableLabel');if(tableLabel)tableLabel.hidden=!local;
+  const table=document.querySelector('[name=table]');if(table){table.disabled=!local;if(!local)table.value='';}
   const retirada=document.querySelector('#deliveryType')?.value!=='Entrega';
   const delivery=document.querySelector('#deliveryFields'),address=document.querySelector('#addressLabel');
   const pay=document.querySelector('#paymentLabel'),note=document.querySelector('#noteLabel');
@@ -87,14 +90,15 @@ function syncOrderTypeUI(){
     const preview=document.querySelector('#deliveryFeePreview'),summary=document.querySelector('#routeSummary'),map=document.querySelector('#deliveryMapWrap');
     if(fee)fee.value='0'; if(lat)lat.value=''; if(lng)lng.value='';
     if(preview)preview.textContent=''; if(summary)summary.style.display='none'; if(map)map.classList.remove('show');
-    if(sticky)sticky.textContent='Retirada na loja';
+    if(sticky)sticky.textContent=document.querySelector('#deliveryType').value==='Consumir no local'?'Consumir no local · Sem taxa de entrega':'Retirada na loja · Sem taxa de entrega';
   }else if(sticky)sticky.textContent='Entrega • confirme o endereço e a rota';
   if(confirm){confirm.style.display='block';confirm.disabled=false;confirm.textContent='CONFIRMAR PEDIDO';}
 }
 document.querySelector('#deliveryType')?.addEventListener('change',syncOrderTypeUI);
 
 
-document.querySelector('#orderForm').onsubmit=async e=>{e.preventDefault();if(!cart.length)return;if(!StoreFeatures.open(store.settings))return alert('A loja está fechada.');const f=new FormData(e.target),formData=Object.fromEntries(f),subtotal=cart.reduce((s,i)=>s+i.price*i.qty,0);if(formData.delivery!=='Entrega'){formData.payment=document.querySelector('#paymentMain')?.value||formData.payment||'Pix';formData.note=document.querySelector('#noteMain')?.value||'';formData.address=formData.delivery==='Retirada'?'Retirada na loja':'Consumir no local';formData.deliveryFee=0;formData.lat='';formData.lng='';}if(formData.delivery==='Entrega'){
+let orderSubmitBusy=false;
+document.querySelector('#orderForm').onsubmit=async e=>{e.preventDefault();if(orderSubmitBusy)return;if(!cart.length)return;if(!StoreFeatures.open(store.settings))return alert('A loja está fechada.');const f=new FormData(e.target),formData=Object.fromEntries(f),subtotal=cart.reduce((s,i)=>s+i.price*i.qty,0);if(formData.delivery!=='Entrega'){formData.payment=document.querySelector('#paymentMain')?.value||formData.payment||'Pix';formData.note=document.querySelector('#noteMain')?.value||'';formData.address=formData.delivery==='Retirada'?'Retirada na loja':'Consumir no local';formData.deliveryFee=0;formData.lat='';formData.lng='';}if(formData.delivery==='Entrega'){
   try{
     const q=(confirmedQuote&&lastAutoAddress===currentAddressKey())?confirmedQuote:(formData.lat&&formData.lng)?await quoteRoadDelivery(formData.lat,formData.lng):await quoteAddressDelivery({...formData,number:''});
     if((store.settings?.deliveryMode||'route')==='route'&&(!Number.isFinite(Number(q.distanceKm))||Number(q.distanceKm)<0.1||q.routeType!=='road'))throw Error('Não foi possível validar a rota real pelas ruas. Confirme o ponto correto no mapa.');
@@ -103,9 +107,10 @@ document.querySelector('#orderForm').onsubmit=async e=>{e.preventDefault();if(!c
     formData.deliveryFee=q.deliveryFee;document.querySelector('#deliveryFee').value=q.deliveryFee;
   }catch(err){alert(err.message||'Não foi possível validar a rota da entrega.');return;}
 }
-const order={customer:formData,items:cart.map(({id,name,price,qty,addons})=>({id,name,price,qty,addons})),subtotal,deliveryFee:formData.delivery!=='Entrega'?0:Number(formData.deliveryFee||0),total:subtotal+(formData.delivery!=='Entrega'?0:Number(formData.deliveryFee||0))};try{const r=await fetch('/api/orders',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(order)});const saved=await r.json();
-    chefeTone('done');if(!r.ok)throw Error(saved.error||'Erro');const itens=saved.items.map(i=>`${i.qty}x ${i.name} — ${money(i.price*i.qty)}`).join('\n');const tipoPedido=saved.customer.delivery.toUpperCase();
-const msg=`NOVO PEDIDO ${String(saved.number).padStart(2,'0')}\nDATA/HORA: ${saved.createdAtText||new Date(saved.createdAt).toLocaleString('pt-BR')}\nTIPO: ${tipoPedido}\n\nCliente: ${saved.customer.name}\nWhatsApp: ${saved.customer.phone}\n\nPEDIDO:\n${itens}\n\nSUBTOTAL: ${money(saved.subtotal)}${saved.customer.delivery!=='Entrega'?'':'\nENTREGA: '+money(saved.deliveryFee)}\nTOTAL: ${money(saved.total)}\n\n${saved.customer.delivery!=='Entrega'?saved.customer.address:'ENDEREÇO:\n'+saved.customer.address}\n\nFORMA DE PAGAMENTO: ${saved.customer.payment}\n\nOBSERVAÇÃO:\n${saved.customer.note||'Nenhuma'}\n\nACOMPANHAR PEDIDO:\n${location.origin+'/acompanhar.html?t='+saved.trackingToken}`;window.lastOrderWhatsappUrl='https://wa.me/'+String(store.settings.whatsapp||'').replace(/\D/g,'')+'?text='+encodeURIComponent(msg);cart=[];renderCart();document.querySelector('#checkoutModal').classList.remove('show');document.querySelector('#successTitle').textContent=`Pedido ${String(saved.number).padStart(2,'0')} confirmado!`;document.querySelector('#successText').textContent=`Pedido realizado em ${saved.createdAtText||new Date(saved.createdAt).toLocaleString('pt-BR')}. Toque em ENVIAR PEDIDO para abrir o WhatsApp.`;if(saved.trackingToken)localStorage.setItem('chefeTellesTrackingToken',saved.trackingToken);const sendBtn=document.querySelector('#sendOrderWhatsapp');
+if(orderSubmitBusy)return;orderSubmitBusy=true;const submitButton=document.querySelector('#confirmDelivery');if(submitButton)submitButton.disabled=true;
+const order={customer:formData,items:cart.map(({id,name,price,qty,addons,note})=>({id,name,price,qty,addons,note})),subtotal,deliveryFee:formData.delivery!=='Entrega'?0:Number(formData.deliveryFee||0),total:subtotal+(formData.delivery!=='Entrega'?0:Number(formData.deliveryFee||0))};try{const r=await fetch('/api/orders',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(order)});const saved=await r.json();
+    chefeTone('done');if(!r.ok)throw Error(saved.error||'Erro');const itens=saved.items.map(i=>`${i.qty}x ${i.name} — ${money(i.price*i.qty)}${i.note?'\n  Observação: '+i.note:''}`).join('\n');const tipoPedido=saved.customer.delivery.toUpperCase();
+const msg=`NOVO PEDIDO ${String(saved.number).padStart(2,'0')}\nDATA/HORA: ${saved.createdAtText||new Date(saved.createdAt).toLocaleString('pt-BR')}\nTIPO: ${tipoPedido}\n\nCliente: ${saved.customer.name}\nWhatsApp: ${saved.customer.phone}\n\nPEDIDO:\n${itens}\n\nSUBTOTAL: ${money(saved.subtotal)}${saved.customer.delivery!=='Entrega'?'':'\nENTREGA: '+money(saved.deliveryFee)}\nTOTAL: ${money(saved.total)}\n\n${saved.customer.delivery!=='Entrega'?saved.customer.address:'ENDEREÇO:\n'+saved.customer.address}\n\nFORMA DE PAGAMENTO: ${saved.customer.payment}${saved.customer.payment==='Dinheiro'?(saved.customer.needsChange?'\nTROCO PARA: '+money(saved.customer.changeFor)+'\nTROCO: '+money(saved.customer.changeDue):'\nSEM TROCO'):''}\n\nOBSERVAÇÃO:\n${saved.customer.note||'Nenhuma'}\n\nACOMPANHAR PEDIDO:\n${location.origin+'/acompanhar.html?t='+saved.trackingToken}`;window.lastOrderWhatsappUrl='https://wa.me/'+String(store.settings.whatsapp||'').replace(/\D/g,'')+'?text='+encodeURIComponent(msg);cart=[];renderCart();document.querySelector('#checkoutModal').classList.remove('show');document.querySelector('#successTitle').textContent=`Pedido ${String(saved.number).padStart(2,'0')} confirmado!`;document.querySelector('#successText').textContent=`Pedido realizado em ${saved.createdAtText||new Date(saved.createdAt).toLocaleString('pt-BR')}. Toque em ENVIAR PEDIDO para abrir o WhatsApp.`;if(saved.trackingToken)localStorage.setItem('chefeTellesTrackingToken',saved.trackingToken);const sendBtn=document.querySelector('#sendOrderWhatsapp');
 if(sendBtn)sendBtn.style.display='block';
 const success=document.querySelector('#successModal');
 document.querySelector('#checkoutModal')?.classList.remove('show');
@@ -122,7 +127,7 @@ if(success){
 }
 // NÃO reseta/reabre o checkout aqui. O formulário só é preparado para
 // um novo pedido quando o cliente sair da confirmação.
-}catch(err){alert(err.message||'Não foi possível enviar o pedido.');}};
+}catch(err){alert(err.message||'Não foi possível enviar o pedido.');}finally{orderSubmitBusy=false;if(submitButton)submitButton.disabled=false;}};
 loadStore();renderCart();setInterval(loadStore,15000);
 
 function updatePixCheckout(){const pay=document.querySelector('[name="payment"]')?.value;const b=document.querySelector('#pixCheckout');if(!b)return;const show=pay==='Pix'&&store?.settings?.pixKey;b.style.display=show?'flex':'none';if(show){document.querySelector('#pixCheckoutKey').textContent=store.settings.pixKey;document.querySelector('#pixCheckoutRecipient').textContent=(store.settings.pixRecipient||'')+(store.settings.pixType?' · '+store.settings.pixType:'');const im=document.querySelector('#pixCheckoutQr');if(store.settings.pixQr){im.src=store.settings.pixQr;im.style.display='block'}else im.style.display='none'}}

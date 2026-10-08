@@ -355,6 +355,7 @@ async function deliveryKmForTypedAddress(settings,lat,lng){
 }
 
 async function lookupCep(cep){
+  const local=(jequieBase.entries||[]).find(e=>String(e.cep||'').replace(/\D/g,'')===String(cep||'').replace(/\D/g,''));if(local)return {cep:local.cep,street:local.street,neighborhood:local.neighborhood,city:'Jequié',state:'BA'};
   const c=String(cep||'').replace(/\D/g,''); if(c.length!==8) throw Error('CEP inválido.');
   const r=await fetch(`https://viacep.com.br/ws/${c}/json/`,{headers:{'User-Agent':'CHEFE-TELLES/9.2'},signal:AbortSignal.timeout(6500)}); if(!r.ok) throw Error('Não foi possível consultar o CEP.');
   const j=await r.json(); if(j.erro) throw Error('CEP não encontrado.');
@@ -532,7 +533,7 @@ async function geocodeBrazilAddress(x,cache=[]){
   const bestRoad=ba.road||ba.pedestrian||ba.residential||'';
   const bestPost=String(ba.postcode||'').replace(/\D/g,'');
   const bestNeighborhood=ba.suburb||ba.neighbourhood||ba.quarter||ba.city_district||'';
-  if(neighborhood&&bestNeighborhood&&searchSimilarity(bestNeighborhoodName(neighborhood),bestNeighborhoodName(bestNeighborhood))<.68)throw Error('O mapa associou a rua a outro bairro. Confira o ponto no mapa ou use Minha localização.');
+  if(neighborhood&&bestNeighborhood&&searchSimilarity(bestNeighborhoodName(neighborhood),bestNeighborhoodName(bestNeighborhood))<.68&&!(x.directoryMatch&&searchSimilarity(street,ba.road||ba.pedestrian||ba.residential||'')>=.90))throw Error('O mapa associou a rua a outro bairro. Confira o ponto no mapa ou use Minha localização.');
   if(!validPoint(best.lat,best.lon))throw Error('O mapa não retornou um ponto válido. Use Minha localização.');
   if(city && bestCity && norm(bestCity)!==norm(city))throw Error('O endereço encontrado pertence a outra cidade. Confira os dados ou confirme no mapa.');
   if(street && bestRoad && searchSimilarity(street,bestRoad)<.60 && !norm(best.display_name).includes(norm(street))){
@@ -634,12 +635,12 @@ async function printEndpoint(req,res,pathname){
   lines.push('CLIENTE: '+(o.customer?.name||''));
   if(o.customer?.phone)lines.push('WHATSAPP: '+o.customer.phone);
   lines.push('--------------------------------');
-  for(const i of (o.items||[])) lines.push(`${i.qty}x ${i.name} - R$ ${(Number(i.price||0)*Number(i.qty||0)).toFixed(2)}`);
+  for(const i of (o.items||[])){lines.push(`${i.qty}x ${i.name} - R$ ${(Number(i.price||0)*Number(i.qty||0)).toFixed(2)}`);if(i.note)lines.push('Observação: '+i.note);}
   lines.push('--------------------------------');
   lines.push('SUBTOTAL: R$ '+Number(o.subtotal||o.total||0).toFixed(2));
   if(o.customer?.delivery==='Entrega')lines.push('ENTREGA: R$ '+Number(o.deliveryFee||0).toFixed(2));
   lines.push('TOTAL: R$ '+Number(o.total||0).toFixed(2));
-  lines.push('FORMA DE PAGAMENTO: '+(o.customer?.payment||''));
+  lines.push('FORMA DE PAGAMENTO: '+(o.customer?.payment||''));if(o.customer?.payment==='Dinheiro')lines.push(o.customer.needsChange?'TROCO PARA: R$ '+Number(o.customer.changeFor).toFixed(2)+' · TROCO: R$ '+Number(o.customer.changeDue).toFixed(2):'SEM TROCO');
   if(o.customer?.delivery!=='Entrega')lines.push('TIPO: '+(o.customer?.address||o.customer?.delivery));
   else {
     const printAddress=String(o.customer?.address||'').replace(/,?\s*Refer[eê]ncia:\s*.*$/i,'').trim();
@@ -904,6 +905,7 @@ async function api(req,res,pathname){
         const street=String(customer.street||'').trim(), number=String(customer.number||'').trim(), complement=String(customer.complement||'').trim(), neighborhood=String(customer.neighborhood||'').trim(), reference=String(customer.reference||'').trim();
         customer.address=[street,number&&('Nº '+number),neighborhood,complement,reference&&('Referência: '+reference)].filter(Boolean).join(', ');
       }else customer.address=customer.delivery==='Retirada'?'Retirada na loja':'Consumir no local'+(customer.table?' · Mesa/identificação: '+String(customer.table).slice(0,80):'');
+      if(customer.payment==='Dinheiro'){customer.needsChange=customer.needsChange===true||customer.needsChange==='Sim';if(customer.needsChange){const value=Number(customer.changeFor),total=Math.round((subtotal+deliveryFee)*100)/100;if(!Number.isFinite(value)||value<total)return send(res,400,{error:'O valor para troco deve ser igual ou maior que o total do pedido.'});customer.changeFor=Math.round(value*100)/100;customer.changeDue=Math.round((customer.changeFor-total)*100)/100}else{customer.changeFor=null;customer.changeDue=0}}else{customer.needsChange=false;customer.changeFor=null;customer.changeDue=0}
       const createdAt=new Date().toISOString();
       const createdAtText=new Date(createdAt).toLocaleString('pt-BR',{timeZone:'America/Sao_Paulo',day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'});
       const prepRange=preparation.range(d.settings);
@@ -916,7 +918,7 @@ async function api(req,res,pathname){
       const d=await read(),o=d.orders.find(x=>String(x.trackingToken||'')===tm[1]);
       if(!o)return send(res,404,{error:'Pedido não encontrado'});
       const driver=(d.drivers||[]).find(x=>String(x.id)===String(o.driverId||''));
-      return send(res,200,{number:o.number,status:o.status||'Novo',createdAt:o.createdAt,createdAtText:o.createdAtText,estimatedMinutes:Number(o.estimatedMinutes||0),preparationMinMinutes:preparation.range(o).min,preparationMaxMinutes:preparation.range(o).max,preparationEndedAt:['Pronto','Saiu para entrega','Entregue','Cancelado'].includes(o.status)?(o.statusHistory||[]).find(h=>['Pronto','Saiu para entrega','Entregue','Cancelado'].includes(h.status))?.at:null,customer:{name:o.customer?.name||'',delivery:o.customer?.delivery||'',address:o.customer?.address||'',payment:o.customer?.payment||''},items:o.items||[],subtotal:Number(o.subtotal||0),deliveryFee:Number(o.deliveryFee||0),total:Number(o.total||0),driver:driver?{name:driver.name||'',phone:driver.phone||''}:null});
+      return send(res,200,{number:o.number,status:o.status||'Novo',createdAt:o.createdAt,createdAtText:o.createdAtText,estimatedMinutes:Number(o.estimatedMinutes||0),preparationMinMinutes:preparation.range(o).min,preparationMaxMinutes:preparation.range(o).max,preparationEndedAt:['Pronto','Saiu para entrega','Entregue','Cancelado'].includes(o.status)?(o.statusHistory||[]).find(h=>['Pronto','Saiu para entrega','Entregue','Cancelado'].includes(h.status))?.at:null,customer:{name:o.customer?.name||'',delivery:o.customer?.delivery||'',address:o.customer?.address||'',payment:o.customer?.payment||'',needsChange:!!o.customer?.needsChange,changeFor:o.customer?.changeFor,changeDue:o.customer?.changeDue},items:o.items||[],subtotal:Number(o.subtotal||0),deliveryFee:Number(o.deliveryFee||0),total:Number(o.total||0),driver:driver?{name:driver.name||'',phone:driver.phone||''}:null});
     }
 
     if(!auth(req)) return send(res,401,{error:'Não autorizado'});
@@ -1000,7 +1002,8 @@ async function api(req,res,pathname){
 }
 
 const server=http.createServer(async(req,res)=>{
-  const pathname = decodeURIComponent(new URL(req.url, 'http://localhost').pathname);
+  let pathname;try{pathname=decodeURIComponent(new URL(req.url,'http://localhost').pathname)}catch{return send(res,400,{error:'Endereço inválido'})}
+  if(['/data.json','/server.js','/launcher.js','/package.json','/INICIAR.bat','/store-features.js.map'].includes(pathname)||pathname.split('/').some(p=>p.startsWith('.')))return send(res,404,'Arquivo não encontrado','text/plain; charset=utf-8');
   await printEndpoint(req,res,pathname);
   if(res.writableEnded)return;
   if(pathname.startsWith('/api/'))return api(req,res,pathname);
