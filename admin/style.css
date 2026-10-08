@@ -20,3 +20,6 @@
  .order-actions.order-manage{align-items:stretch}
  .order-manage select[data-status]{display:block;min-width:0}
 }
+.feature-hours{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;align-items:center;margin:12px 0}.feature-hours input[type=checkbox]{width:auto}.feature-hours input[type=time]{min-width:0;padding:10px}#featureAdmin input[type=color]{height:45px}#featureAdmin article{padding:18px;border-bottom:1px solid #444;display:flex;justify-content:space-between;gap:10px}@media(max-width:600px){.feature-hours{grid-template-columns:100px 1fr 1fr}#featureAdmin article{display:block}}
+
+[hidden]{display:none!important}
