@@ -329,24 +329,22 @@ async function setConfirmedPoint(lat,lng,fromDrag=false){
   const st=document.querySelector('#gpsStatus');
   if(st)st.textContent=fromDrag?'Pino ajustado. Recalculando rota...':'Ponto localizado. Calculando rota...';
   clearTimeout(mapQuoteTimer);
-  mapQuoteTimer=setTimeout(async()=>{
-    try{
-      const q=await quoteRoadDelivery(lat,lng,autoQuoteController.signal);
-      if(seq!==autoDeliverySeq || document.querySelector('#deliveryType')?.value!=='Entrega')return;
-      confirmedQuote=q;lastAutoAddress=currentAddressKey();
-      document.querySelector('#deliveryFee').value=q.deliveryFee;
-      document.querySelector('#deliveryFeePreview').textContent=money(q.deliveryFee);
-      if(st)st.textContent=`Ponto localizado • rota ${Number(q.distanceKm).toFixed(1)} km • taxa ${money(q.deliveryFee)}`;
-      const rs=document.querySelector('#routeSummary');
-      if(rs){rs.style.display='block';rs.innerHTML=`<b>Entrega calculada pela rota</b><span>${Number(q.distanceKm).toFixed(2)} km → ${money(q.deliveryFee)}</span>`;}
-    }catch(e){
-      if(seq!==autoDeliverySeq)return;
-      document.querySelector('#deliveryFee').value='';
-      document.querySelector('#deliveryFeePreview').textContent='Aguardando rota válida';
-      const rs=document.querySelector('#routeSummary');if(rs)rs.style.display='none';
-      if(st)st.textContent=e.message||'Confirme um ponto válido no mapa.';
-    }
-  },250);
+  try{
+    const q=await quoteRoadDelivery(lat,lng,autoQuoteController.signal);
+    if(seq!==autoDeliverySeq||document.querySelector('#deliveryType')?.value!=='Entrega')return null;
+    confirmedQuote=q;lastAutoAddress=currentAddressKey();
+    document.querySelector('#deliveryFee').value=q.deliveryFee;
+    document.querySelector('#deliveryFeePreview').textContent=money(q.deliveryFee);
+    if(st)st.textContent=`Ponto localizado • rota ${Number(q.distanceKm).toFixed(1)} km • taxa ${money(q.deliveryFee)}`;
+    const rs=document.querySelector('#routeSummary');if(rs){rs.style.display='block';rs.innerHTML=`<b>Entrega calculada pela rota</b><span>${Number(q.distanceKm).toFixed(2)} km → ${money(q.deliveryFee)}</span>`;}
+    return q;
+  }catch(e){
+    if(seq!==autoDeliverySeq)return null;
+    confirmedQuote=null;document.querySelector('#deliveryFee').value='';document.querySelector('#deliveryFeePreview').textContent='Aguardando rota válida';
+    const rs=document.querySelector('#routeSummary');if(rs)rs.style.display='none';
+    if(st)st.textContent=e.message||'Confirme um ponto válido no mapa.';
+    return null;
+  }
 }
 
 async function refreshAddressFromPoint(lat,lng){
@@ -524,33 +522,20 @@ document.querySelector('#toggleAddressSearch')?.addEventListener('click',()=>{
 });
 
 document.querySelector('#useLocationTop')?.addEventListener('click',()=>{
-  renderAddressResults([]);selectedManualAddress=false;clearAddressQuote();
-  const st=document.querySelector('#gpsStatus');
+  renderAddressResults([]);selectedManualAddress=false;invalidateAutomaticAddress();clearAddressQuote();
+  const st=document.querySelector('#gpsStatus'),btn=document.querySelector('#useLocationTop');
   if(!window.isSecureContext){if(st)st.textContent='A localização exige HTTPS.';return;}
   if(!navigator.geolocation){if(st)st.textContent='GPS não disponível neste aparelho.';return;}
-  if(st)st.textContent='Obtendo sua localização e preenchendo o endereço...';
+  btn.disabled=true;if(st)st.textContent='Obtendo sua localização...';
   navigator.geolocation.getCurrentPosition(async pos=>{
     const lat=pos.coords.latitude,lng=pos.coords.longitude,accuracy=pos.coords.accuracy;
-    document.querySelector('#customerLat').value=Number(lat).toFixed(7);
-    document.querySelector('#customerLng').value=Number(lng).toFixed(7);
-    ensureDeliveryMap(lat,lng);
     try{
-      const rev=await reverseCustomerPoint(lat,lng);
-      fillCustomerAddressFromReverse(rev);
-      await setConfirmedPoint(lat,lng,false);
-      setTimeout(()=>{
-        const street=document.querySelector('#street')?.value.trim()||'';
-        const nb=document.querySelector('#neighborhood')?.value.trim()||'';
-        if(st)st.textContent=(street||nb)
-          ?`✓ Localização preenchida • precisão GPS ±${Math.round(accuracy)} m. Confira rua e bairro.`
-          :`GPS encontrado (±${Math.round(accuracy)} m), mas o serviço não informou rua/bairro. Você pode preencher esses dados sem perder a rota.`;
-      },450);
-    }catch(e){
-      await setConfirmedPoint(lat,lng,false);
-      setTimeout(()=>{if(st)st.textContent=`GPS encontrado (±${Math.round(accuracy)} m). A rota foi mantida; preencha somente rua/bairro se estiverem vazios.`;},450);
-    }
-  },()=>{if(st)st.textContent='Não foi possível acessar sua localização. Permita o GPS ou use Buscar endereço.';},
-  {enableHighAccuracy:true,timeout:20000,maximumAge:0});
+      const routePromise=setConfirmedPoint(lat,lng,false);
+      let reverseOk=false;try{const rev=await reverseCustomerPoint(lat,lng);fillCustomerAddressFromReverse(rev);reverseOk=true;}catch{}
+      const q=await routePromise;
+      if(q){lastAutoAddress=currentAddressKey();if(st)st.textContent=`Rota calculada • ${Number(q.distanceKm).toFixed(1)} km • taxa ${money(q.deliveryFee)} • precisão GPS ±${Math.round(accuracy)} m. `+(reverseOk?'Confira rua, bairro e pino.':'O serviço não informou o endereço; preencha rua e bairro e confira o pino.');}
+    }catch(e){if(st)st.textContent=e.message||'Não foi possível calcular a rota deste ponto.';}finally{btn.disabled=false}
+  },e=>{btn.disabled=false;if(st)st.textContent=e.code===1?'Localização bloqueada. Autorize a localização deste site ou use Buscar endereço.':e.code===2?'O aparelho não conseguiu determinar sua posição. Tente no celular com o GPS ativo ou use Buscar endereço.':'O GPS demorou para responder. Tente novamente ou use Buscar endereço.';},{enableHighAccuracy:true,timeout:20000,maximumAge:30000});
 });
 
 document.addEventListener('DOMContentLoaded',()=>setTimeout(syncOrderTypeUI,0));

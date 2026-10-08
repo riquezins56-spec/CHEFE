@@ -107,10 +107,11 @@ function pickDirectoryRow(rows,street,number){
 async function enrichJequieAddress(x){
   const city=String(x.city||'Jequié').trim(),state=String(x.state||'BA').trim();if(normAddress(city)!=='jequie'||normAddress(state)!=='ba')return {...x};
   const rows=await loadJequieNeighborhood(x.neighborhood);const row=pickDirectoryRow(rows,x.street,x.number);if(!row)return {...x,city:'Jequié',state:'BA'};
-  return {...x,street:row.street||x.street,neighborhood:row.neighborhood||x.neighborhood,cep:String(row.cep||'').replace(/\D/g,''),city:'Jequié',state:'BA',directoryMatch:true,directoryLat:Number.isFinite(Number(row.lat))?Number(row.lat):null,directoryLng:Number.isFinite(Number(row.lng))?Number(row.lng):null};
+  return {...x,street:row.street||x.street,neighborhood:row.neighborhood||x.neighborhood,cep:String(row.cep||'').replace(/\D/g,''),city:'Jequié',state:'BA',directoryMatch:true,directoryLat:validPoint(row.lat,row.lng)?Number(row.lat):null,directoryLng:validPoint(row.lat,row.lng)?Number(row.lng):null};
 }
 
 
+function validPoint(lat,lng){return lat!==null&&lng!==null&&String(lat??'').trim()!==''&&String(lng??'').trim()!==''&&Number.isFinite(Number(lat))&&Number.isFinite(Number(lng))&&Math.abs(Number(lat))<=90&&Math.abs(Number(lng))<=180&&Number(lat)!==0&&Number(lng)!==0;}
 const seed = {
   categories: ['Hambúrgueres','Pizzas','Combos','Bebidas','Açaí na Garrafa'],
   settings: {
@@ -405,6 +406,8 @@ function findCachedAddress(cache,x){
   const wantedCity=normalizeDeliveryText(x.city), wantedState=normalizeDeliveryText(x.state);
   const wantedNum=normalizeDeliveryText(x.number);
   const rows=(cache||[]).filter(c=>{
+    if(!validPoint(c.lat,c.lng))return false;
+    if(normAddress(c.street)==='rua professor sa nunes'&&Math.abs(Number(c.lat)+13.861195)<.000001&&Math.abs(Number(c.lng)+40.1003255)<.000001)return false;
     if(wantedCity&&normalizeDeliveryText(c.city)!==wantedCity)return false;
     if(wantedState&&normalizeDeliveryText(c.state)!==wantedState)return false;
     if(wantedStreet&&searchSimilarity(wantedStreet,c.street)<.96)return false;
@@ -420,7 +423,7 @@ function findCachedAddress(cache,x){
   return {lat:Number(c.lat),lng:Number(c.lng),displayName:c.displayName||[c.street,c.number,c.neighborhood,c.city,c.state].filter(Boolean).join(', '),precision:'cache'};
 }
 function learnAddress(d,input,geo){
-  if(!d||!geo||!Number.isFinite(Number(geo.lat))||!Number.isFinite(Number(geo.lng)))return;
+  if(!d||!geo||!validPoint(geo.lat,geo.lng))return;
   d.addressCache=Array.isArray(d.addressCache)?d.addressCache:[];
   const row={street:String(input.street||'').trim(),number:String(input.number||'').trim(),neighborhood:String(input.neighborhood||'').trim(),city:String(input.city||'').trim(),state:String(input.state||'').trim().toUpperCase(),cep:String(input.cep||'').replace(/\D/g,''),lat:Number(geo.lat),lng:Number(geo.lng),displayName:String(geo.displayName||''),updatedAt:new Date().toISOString()};
   if(!row.street||!row.city)return;
@@ -485,7 +488,7 @@ async function geocodeBrazilAddress(x,cache=[]){
   }
   if(!candidates.length){
     const dl=Number(x.directoryLat),dn=Number(x.directoryLng);
-    if(Number.isFinite(dl)&&Number.isFinite(dn))return {lat:dl,lng:dn,displayName:[street,neighborhood,city,state].filter(Boolean).join(', '),precision:'street-reference'};
+    if(validPoint(x.directoryLat,x.directoryLng))return {lat:dl,lng:dn,displayName:[street,neighborhood,city,state].filter(Boolean).join(', '),precision:'street-reference'};
     if(cepPoint)return {lat:cepPoint.lat,lng:cepPoint.lng,displayName:[street,neighborhood,city,state,cep].filter(Boolean).join(', '),precision:'cep-reference'};
     throw Error('Não conseguimos localizar essa rua no mapa. Use Minha localização ou confirme o ponto no mapa.');
   }
@@ -502,7 +505,7 @@ async function geocodeBrazilAddress(x,cache=[]){
     const stateOk=!state||!cs||gotState===wantedState||gotState.endsWith('-'+wantedState);
     return cityOk&&stateOk;
   });
-  if(!candidates.length){const dl=Number(x.directoryLat),dn=Number(x.directoryLng);if(Number.isFinite(dl)&&Number.isFinite(dn))return {lat:dl,lng:dn,displayName:[street,neighborhood,city,state].filter(Boolean).join(', '),precision:'street-reference'};if(cepPoint)return {lat:cepPoint.lat,lng:cepPoint.lng,displayName:[street,neighborhood,city,state,cep].filter(Boolean).join(', '),precision:'cep-reference'};throw Error('Não conseguimos localizar essa rua no mapa. Use Minha localização ou confirme o ponto no mapa.');}
+  if(!candidates.length){const dl=Number(x.directoryLat),dn=Number(x.directoryLng);if(validPoint(x.directoryLat,x.directoryLng))return {lat:dl,lng:dn,displayName:[street,neighborhood,city,state].filter(Boolean).join(', '),precision:'street-reference'};if(cepPoint)return {lat:cepPoint.lat,lng:cepPoint.lng,displayName:[street,neighborhood,city,state,cep].filter(Boolean).join(', '),precision:'cep-reference'};throw Error('Não conseguimos localizar essa rua no mapa. Use Minha localização ou confirme o ponto no mapa.');}
 
   const scored=candidates.map(c=>{
     const a=c.address||{}; let score=0;
@@ -528,10 +531,13 @@ async function geocodeBrazilAddress(x,cache=[]){
   const bestCity=ba.city||ba.town||ba.municipality||ba.village||'';
   const bestRoad=ba.road||ba.pedestrian||ba.residential||'';
   const bestPost=String(ba.postcode||'').replace(/\D/g,'');
+  const bestNeighborhood=ba.suburb||ba.neighbourhood||ba.quarter||ba.city_district||'';
+  if(neighborhood&&bestNeighborhood&&searchSimilarity(bestNeighborhoodName(neighborhood),bestNeighborhoodName(bestNeighborhood))<.68)throw Error('O mapa associou a rua a outro bairro. Confira o ponto no mapa ou use Minha localização.');
+  if(!validPoint(best.lat,best.lon))throw Error('O mapa não retornou um ponto válido. Use Minha localização.');
   if(city && bestCity && norm(bestCity)!==norm(city))throw Error('O endereço encontrado pertence a outra cidade. Confira os dados ou confirme no mapa.');
   if(street && bestRoad && searchSimilarity(street,bestRoad)<.60 && !norm(best.display_name).includes(norm(street))){
     const dl=Number(x.directoryLat),dn=Number(x.directoryLng);
-    if(Number.isFinite(dl)&&Number.isFinite(dn))return {lat:dl,lng:dn,displayName:[street,neighborhood,city,state].filter(Boolean).join(', '),precision:'street-reference'};
+    if(validPoint(x.directoryLat,x.directoryLng))return {lat:dl,lng:dn,displayName:[street,neighborhood,city,state].filter(Boolean).join(', '),precision:'street-reference'};
     if(cepPoint)return {lat:cepPoint.lat,lng:cepPoint.lng,displayName:[street,neighborhood,city,state,cep].filter(Boolean).join(', '),precision:'cep-reference'};
     throw Error('O mapa encontrou outra rua. Use Minha localização ou confirme o ponto correto no mapa.');
   }
@@ -571,9 +577,10 @@ async function googleReverseGeocodeBrazil(lat,lng){
   }
 }
 
+function canonicalReverseNeighborhood(a){const reported=a.suburb||a.neighbourhood||a.quarter||a.city_district||'';const city=a.city||a.town||a.municipality||a.village||'';if(normAddress(city)!=='jequie')return reported;const road=a.road||a.pedestrian||a.residential||'';const matches=(jequieBase.entries||[]).filter(e=>normAddress(e.street)===normAddress(road));const nbs=[...new Set(matches.map(e=>e.neighborhood))];return nbs.length===1?nbs[0]:reported;}
 async function reverseGeocodeBrazil(lat,lng){
-  lat=Number(lat); lng=Number(lng);
-  if(!Number.isFinite(lat)||!Number.isFinite(lng)) throw Error('Coordenadas inválidas.');
+  if(!validPoint(lat,lng))throw Error('Coordenadas inválidas.');
+  lat=Number(lat);lng=Number(lng);
   const url='https://nominatim.openstreetmap.org/reverse?format=jsonv2&addressdetails=1&zoom=18&lat='+encodeURIComponent(lat)+'&lon='+encodeURIComponent(lng);
   const r=await fetch(url,{headers:{'User-Agent':'CHEFE-TELLES/9.5 (store reverse geocoder)','Accept-Language':'pt-BR'},signal:AbortSignal.timeout(6500)});
   if(!r.ok) throw Error('Não foi possível consultar o endereço desta localização.');
@@ -583,7 +590,7 @@ async function reverseGeocodeBrazil(lat,lng){
     cep:a.postcode||'',
     street:a.road||a.pedestrian||a.residential||a.footway||'',
     number:a.house_number||'',
-    neighborhood:a.suburb||a.neighbourhood||a.quarter||a.city_district||'',
+    neighborhood:canonicalReverseNeighborhood(a),
     city:a.city||a.town||a.municipality||a.village||'',
     state:a.state_code||a['ISO3166-2-lvl4']?.split('-').pop()||a.state||'',
     addressFound:j.display_name||''
