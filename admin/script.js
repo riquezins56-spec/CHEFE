@@ -27,7 +27,7 @@ $('#loginForm').onsubmit=async e=>{e.preventDefault();$('#loginError').textConte
 $('#viewStore').onclick=e=>{if(location.protocol==='file:'){e.preventDefault();discoverBase().then(base=>window.open(base+'/','_blank')).catch(()=>{})}};$('#logout').onclick=async()=>{try{await api('/api/logout',{method:'POST'})}catch{}token='';localStorage.removeItem('chefeAdminToken');showLogin()};
 function openTab(id){$$('.tab').forEach(x=>x.classList.toggle('active',x.id===id));$$('.nav').forEach(x=>x.classList.toggle('active',x.dataset.tab===id));if(id==='orders')loadOrders();if(id==='products')loadProducts();if(id==='categories')loadCategories();if(id==='delivery')renderV9()}
 $$('.nav').forEach(b=>b.onclick=()=>openTab(b.dataset.tab));$$('[data-go]').forEach(b=>b.onclick=()=>openTab(b.dataset.go));$('#refresh').onclick=refreshAll;$('#refreshOrders').onclick=loadOrders;
-async function refreshAll(){state=await api('/api/admin');renderDashboard();renderSettings();await loadOrders();await loadCategories();await loadProducts();renderV9();$('#serverAddress').textContent=location.origin+'/'; await loadNetworkLinks();}
+async function refreshAll(){state=await api('/api/admin');renderDashboard();renderSettings();await loadOrders();await loadCategories();await loadProducts();renderV9();$('#serverAddress').textContent=location.origin+'/'; await loadNetworkLinks();if(typeof featureRender==='function')featureRender();}
 
 async function loadNetworkLinks(){
  const box=$('#serverLinks');if(!box)return;
