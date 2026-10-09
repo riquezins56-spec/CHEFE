@@ -160,6 +160,8 @@ const seed = {
 
 const pool = process.env.DATABASE_URL ? new Pool({
   connectionString: process.env.DATABASE_URL,
+  connectionTimeoutMillis:10000,
+  query_timeout:20000,
   ssl: process.env.DATABASE_URL.includes('localhost') ? false : {rejectUnauthorized:false}
 }) : null;
 
@@ -178,7 +180,7 @@ async function ensureDb(){
       'INSERT INTO chefe_telles_state(id,data) VALUES(1,$1::jsonb)',
       [JSON.stringify(seed)]
     );
-  })();
+  })().catch(e=>{dbReadyPromise=null;throw e});
   return dbReadyPromise;
 }
 function normalizeData(d){
@@ -221,19 +223,29 @@ async function read(){
     return n.d;
   }catch(e){
     console.error('Falha ao ler dados:',e.message);
+    if(pool){const err=new Error('Não foi possível consultar o banco agora. Tente novamente em instantes.');err.code='DB_UNAVAILABLE';throw err;}
     return JSON.parse(JSON.stringify(seed));
   }
 }
 async function write(d){
   if(pool){
     await ensureDb();
-    await pool.query('INSERT INTO chefe_telles_backups(data) VALUES($1::jsonb)',[JSON.stringify(d)]);
-    await pool.query('DELETE FROM chefe_telles_backups WHERE id NOT IN (SELECT id FROM chefe_telles_backups ORDER BY id DESC LIMIT 200)');
+    const payload=JSON.stringify(d);
+    // Retém as três cópias mais recentes; os dados atuais ficam em outra tabela.
+    try{await pool.query('DELETE FROM chefe_telles_backups WHERE id NOT IN (SELECT id FROM chefe_telles_backups ORDER BY id DESC LIMIT 3)');}
+    catch(e){console.error('Não foi possível limitar as cópias de segurança:',e.message);}
     await pool.query(
       `INSERT INTO chefe_telles_state(id,data,updated_at) VALUES(1,$1::jsonb,NOW())
        ON CONFLICT(id) DO UPDATE SET data=EXCLUDED.data, updated_at=NOW()`,
-      [JSON.stringify(d)]
+      [payload]
     );
+    // Uma cópia por 24 horas, em vez de duplicar todas as fotos a cada alteração.
+    try{
+      await pool.query(`INSERT INTO chefe_telles_backups(data)
+        SELECT $1::jsonb WHERE NOT EXISTS
+        (SELECT 1 FROM chefe_telles_backups WHERE created_at >= NOW() - INTERVAL '24 hours')`,[payload]);
+      await pool.query('DELETE FROM chefe_telles_backups WHERE id NOT IN (SELECT id FROM chefe_telles_backups ORDER BY id DESC LIMIT 3)');
+    }catch(e){console.error('Dados salvos, mas a cópia de segurança não foi criada:',e.message);}
     return;
   }
   fs.writeFileSync(DB,JSON.stringify(d,null,2));
@@ -684,8 +696,10 @@ async function api(req,res,pathname){
       return send(res,200,{settings:{defaultPrepMinMinutes:d.settings.defaultPrepMinMinutes,defaultPrepMaxMinutes:d.settings.defaultPrepMaxMinutes,defaultEtaMinutes:d.settings.defaultEtaMinutes,appearance:d.settings.appearance||{},business:d.settings.business||null,dineInEnabled:d.settings.dineInEnabled===true,addons:d.settings.addons||[],promotions:d.settings.promotions||[],isOpen:features.open(d.settings),name:d.settings.name,whatsapp:d.settings.whatsapp,pixKey:d.settings.pixKey||'',pixRecipient:d.settings.pixRecipient||'',pixType:d.settings.pixType||'',pixQr:d.settings.pixQr||'',botWhatsapp:d.settings.botWhatsapp||d.settings.whatsapp,botMessage:d.settings.botMessage||'',deliveryMode:'route',storeLat:d.settings.storeLat||'',storeLng:d.settings.storeLng||'',storeCity:d.settings.storeCity||'',storeState:d.settings.storeState||'',storeNeighborhood:d.settings.storeNeighborhood||'',extraKmFee:Number(d.settings.extraKmFee)||0,maxDeliveryKm:Number(d.settings.maxDeliveryKm)||0},categories:d.categories,products:d.products.filter(p=>p.active&&p.paused!==true),deliveryZones:[],addressHints:(d.addressCache||[]).slice(-300).map(a=>({street:a.street,neighborhood:a.neighborhood,city:a.city,state:a.state})),deliveryKmRanges:(d.deliveryKmRanges||[]).filter(z=>z.active!==false)});
     }
     if(req.method==='POST'&&pathname==='/api/login'){
-      const b=await body(req),d=await read();
-      if(String(b.password||'')!==String(d.settings.adminPassword)) return send(res,401,{ok:false,error:'Senha incorreta'});
+      const b=await body(req);let password;
+      if(pool){await ensureDb();const r=await pool.query("SELECT data->'settings'->>'adminPassword' AS password FROM chefe_telles_state WHERE id=1");password=r.rows[0]?.password;}else password=(await read()).settings.adminPassword;
+      if(password===undefined||password===null)throw Error('Não foi possível carregar o acesso do painel.');
+      if(String(b.password||'')!==String(password)) return send(res,401,{ok:false,error:'Senha incorreta'});
       const token=crypto.randomBytes(24).toString('hex'); adminTokens.add(token); return send(res,200,{ok:true,token});
     }
     if(req.method==='POST'&&pathname==='/api/logout'){const h=req.headers.authorization||''; if(h.startsWith('Bearer '))adminTokens.delete(h.slice(7)); return send(res,200,{ok:true});}
@@ -1002,7 +1016,7 @@ async function api(req,res,pathname){
     if(zm&&req.method==='DELETE'){const d=await read();d.deliveryZones=d.deliveryZones.filter(x=>String(x.id)!==zm[1]);await write(d);return send(res,200,{ok:true});}
 
     return send(res,404,{error:'API não encontrada'});
-  }catch(e){console.error(e);return send(res,500,{error:'Erro no servidor',detail:e.message});}
+  }catch(e){console.error(e);return send(res,503,{error:e.code==='DB_UNAVAILABLE'?e.message:'Não foi possível concluir a consulta ou gravação. Tente novamente em instantes.'});}
 }
 
 const server=http.createServer(async(req,res)=>{
