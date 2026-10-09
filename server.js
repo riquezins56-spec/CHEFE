@@ -113,7 +113,7 @@ async function enrichJequieAddress(x){
 
 function validPoint(lat,lng){return lat!==null&&lng!==null&&String(lat??'').trim()!==''&&String(lng??'').trim()!==''&&Number.isFinite(Number(lat))&&Number.isFinite(Number(lng))&&Math.abs(Number(lat))<=90&&Math.abs(Number(lng))<=180&&Number(lat)!==0&&Number(lng)!==0;}
 const seed = {
-  categories: ['Hambúrgueres','Pizzas','Combos','Bebidas','Açaí na Garrafa'],
+  categories: ['Hambúrgueres','Pizzas','Petiscos','Bebidas','Combos','Açaí na Garrafa'],
   settings: {
     name: 'Cheff Telles',
     whatsapp: '5573982451160',
@@ -183,8 +183,13 @@ async function ensureDb(){
 }
 function normalizeData(d){
   let changed=false;
-  if(!Array.isArray(d.categories)){d.categories=['Hambúrgueres','Pizzas','Combos','Bebidas','Açaí na Garrafa'];changed=true;}
-  if(!d.categories.includes('Açaí na Garrafa')){d.categories.push('Açaí na Garrafa');changed=true;}
+  if(!Array.isArray(d.categories)){d.categories=[];changed=true;}
+  if(d.settings.menuCategoriesVersion!==1){
+    for(const category of ['Hambúrgueres','Pizzas','Petiscos','Bebidas','Combos','Açaí na Garrafa']){
+      if(!d.categories.some(c=>normAddress(c)===normAddress(category))){d.categories.push(category);changed=true;}
+    }
+    d.settings.menuCategoriesVersion=1;changed=true;
+  }
   if(!Array.isArray(d.deliveryZones)){d.deliveryZones=[];changed=true;}
   if(!Array.isArray(d.addressCache)){d.addressCache=[];changed=true;}
   if(!Array.isArray(d.deliveryKmRanges)){d.deliveryKmRanges=[];changed=true;}
@@ -199,7 +204,6 @@ function normalizeData(d){
   if(!Array.isArray(d.orders)){d.orders=[];changed=true;}
   if(!Array.isArray(d.customers)){d.customers=[];changed=true;}
   if(!Array.isArray(d.products))d.products=[];
-  if(!d.products.some(p=>p.cat==='Açaí na Garrafa')){d.products.push({id:Date.now()+17,name:'Açaí na Garrafa 300ml',cat:'Açaí na Garrafa',price:12,emoji:'',desc:'Açaí cremoso servido na garrafa.',image:'',active:true});changed=true;}
   return {d,changed};
 }
 async function read(){
