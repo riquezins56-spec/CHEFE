@@ -166,6 +166,8 @@ const pool = process.env.DATABASE_URL ? new Pool({
 }) : null;
 
 let dbReadyPromise=null;
+let stateCache=null, stateCacheVersion=null;
+let stateReadPending=null;
 async function ensureDb(){
   if(!pool)return;
   if(!dbReadyPromise)dbReadyPromise=(async()=>{
@@ -212,8 +214,18 @@ async function read(){
   try{
     if(pool){
       await ensureDb();
-      const r=await pool.query('SELECT data FROM chefe_telles_state WHERE id=1');
-      const n=normalizeData(r.rows[0]?.data || JSON.parse(JSON.stringify(seed)));
+      // Consulta a versão; transfere fotos apenas quando os dados mudam.
+      if(!stateReadPending)stateReadPending=(async()=>{
+        const r=await pool.query(`SELECT updated_at::text AS version,
+          CASE WHEN updated_at::text IS DISTINCT FROM $1::text THEN data ELSE NULL END AS data
+          FROM chefe_telles_state WHERE id=1`,[stateCache?stateCacheVersion:null]);
+        const row=r.rows[0];
+        if(!row)throw new Error('Dados da loja não encontrados no banco.');
+        if(row.data){stateCache=row.data;stateCacheVersion=row.version;}
+        if(!stateCache)throw new Error('Dados da loja indisponíveis.');
+        return structuredClone(stateCache);
+      })().finally(()=>{stateReadPending=null;});
+      const n=normalizeData(structuredClone(await stateReadPending));
       if(n.changed)await write(n.d);
       return n.d;
     }
@@ -234,11 +246,12 @@ async function write(d){
     // Retém as três cópias mais recentes; os dados atuais ficam em outra tabela.
     try{await pool.query('DELETE FROM chefe_telles_backups WHERE id NOT IN (SELECT id FROM chefe_telles_backups ORDER BY id DESC LIMIT 3)');}
     catch(e){console.error('Não foi possível limitar as cópias de segurança:',e.message);}
-    await pool.query(
+    const saved=await pool.query(
       `INSERT INTO chefe_telles_state(id,data,updated_at) VALUES(1,$1::jsonb,NOW())
-       ON CONFLICT(id) DO UPDATE SET data=EXCLUDED.data, updated_at=NOW()`,
+       ON CONFLICT(id) DO UPDATE SET data=EXCLUDED.data, updated_at=NOW() RETURNING updated_at::text AS version`,
       [payload]
     );
+    stateCache=JSON.parse(payload);stateCacheVersion=saved.rows[0].version;
     // Uma cópia por 24 horas, em vez de duplicar todas as fotos a cada alteração.
     try{
       await pool.query(`INSERT INTO chefe_telles_backups(data)
@@ -249,6 +262,19 @@ async function write(d){
     return;
   }
   fs.writeFileSync(DB,JSON.stringify(d,null,2));
+}
+// Leituras frequentes não precisam de produtos, fotos ou configurações.
+async function readFields(fields){
+  if(!pool){const d=await read();return Object.fromEntries(fields.map(k=>[k,d[k]||[]]));}
+  await ensureDb();
+  const allowed=new Set(['orders','drivers','categories']);
+  if(fields.some(k=>!allowed.has(k)))throw new Error('Consulta inválida.');
+  const columns=fields.map(k=>`COALESCE(data->'${k}', '[]'::jsonb) AS "${k}"`).join(', ');
+  try{
+    const r=await pool.query(`SELECT ${columns} FROM chefe_telles_state WHERE id=1`);
+    if(!r.rows[0])throw new Error('Dados da loja não encontrados.');
+    return r.rows[0];
+  }catch(e){const err=new Error('Não foi possível consultar o banco agora. Tente novamente em instantes.');err.code='DB_UNAVAILABLE';throw err;}
 }
 function normalizeSearchText(v){
   return String(v||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9\s]/g,' ').replace(/\s+/g,' ').trim();
@@ -641,7 +667,7 @@ async function printEndpoint(req,res,pathname){
     ]));
   }
   const m=pathname.match(/^\/print\/(\d+)$/); if(!m)return false;
-  const d=await read(),o=d.orders.find(x=>String(x.id)===m[1]); if(!o)return send(res,404,{error:'Pedido nao encontrado'});
+  const d=await readFields(['orders']),o=d.orders.find(x=>String(x.id)===m[1]); if(!o)return send(res,404,{error:'Pedido nao encontrado'});
   const lines=[];
   lines.push('Cheff Telles');
   lines.push('PEDIDO '+String(o.number).padStart(2,'0'));
@@ -681,7 +707,7 @@ async function api(req,res,pathname){
     // Cheff Telles Print Android: leitura segura de pedidos para impressão.
     if(req.method==='GET'&&pathname==='/api/print-agent/orders'){
       if(!printAgentAuthorized(req))return send(res,401,{error:'Agente de impressão não autorizado'});
-      const d=await read();
+      const d=await readFields(['orders']);
       return send(res,200,d.orders.filter(o=>(o.status||'Novo')==='Novo').slice().reverse());
     }
 
@@ -933,7 +959,7 @@ async function api(req,res,pathname){
 
     const tm=pathname.match(/^\/api\/track\/([a-f0-9]{32})$/i);
     if(tm&&req.method==='GET'){
-      const d=await read(),o=d.orders.find(x=>String(x.trackingToken||'')===tm[1]);
+      const d=await readFields(['orders','drivers']),o=d.orders.find(x=>String(x.trackingToken||'')===tm[1]);
       if(!o)return send(res,404,{error:'Pedido não encontrado'});
       const driver=(d.drivers||[]).find(x=>String(x.id)===String(o.driverId||''));
       return send(res,200,{number:o.number,status:o.status||'Novo',createdAt:o.createdAt,createdAtText:o.createdAtText,estimatedMinutes:Number(o.estimatedMinutes||0),preparationMinMinutes:preparation.range(o).min,preparationMaxMinutes:preparation.range(o).max,preparationEndedAt:['Pronto','Saiu para entrega','Entregue','Cancelado'].includes(o.status)?(o.statusHistory||[]).find(h=>['Pronto','Saiu para entrega','Entregue','Cancelado'].includes(h.status))?.at:null,customer:{name:o.customer?.name||'',delivery:o.customer?.delivery||'',address:o.customer?.address||'',payment:o.customer?.payment||'',needsChange:!!o.customer?.needsChange,changeFor:o.customer?.changeFor,changeDue:o.customer?.changeDue},items:o.items||[],subtotal:Number(o.subtotal||0),deliveryFee:Number(o.deliveryFee||0),total:Number(o.total||0),driver:driver?{name:driver.name||'',phone:driver.phone||''}:null});
@@ -958,7 +984,7 @@ async function api(req,res,pathname){
     if(req.method==='PUT'&&pathname==='/api/settings'){
       const b=await body(req),d=await read();delete b.copyright;delete b.creator;try{features.validate(b,d)}catch(e){return send(res,400,{error:e.message})}if(b.defaultPrepMinMinutes!==undefined||b.defaultPrepMaxMinutes!==undefined){const min=Number(b.defaultPrepMinMinutes??d.settings.defaultPrepMinMinutes??30),max=Number(b.defaultPrepMaxMinutes??d.settings.defaultPrepMaxMinutes??40);if(!Number.isFinite(min)||!Number.isFinite(max)||min<=0||max<min)return send(res,400,{error:'Informe tempos positivos, com o máximo maior ou igual ao mínimo.'});b.defaultPrepMinMinutes=min;b.defaultPrepMaxMinutes=max;b.defaultEtaMinutes=max;}if(b.adminPassword!==undefined&&String(b.adminPassword).trim()==='') delete b.adminPassword; d.settings={...d.settings,...b,deliveryMode:'route'}; await write(d); return send(res,200,{ok:true});
     }
-    if(req.method==='GET'&&pathname==='/api/orders')return send(res,200,(await read()).orders.slice().reverse());
+    if(req.method==='GET'&&pathname==='/api/orders')return send(res,200,(await readFields(['orders'])).orders.slice().reverse());
     const om=pathname.match(/^\/api\/orders\/(\d+)$/);
     if(om&&req.method==='PUT'){const b=await body(req),d=await read(),o=d.orders.find(x=>String(x.id)===om[1]);if(!o)return send(res,404,{error:'Pedido não encontrado'});if(b.status&&b.status!==o.status){o.status=b.status;o.statusHistory=Array.isArray(o.statusHistory)?o.statusHistory:[];o.statusHistory.push({status:b.status,at:new Date().toISOString()});} if(b.driverId!==undefined)o.driverId=b.driverId||null;if(b.estimatedMinutes!==undefined)o.estimatedMinutes=Number(b.estimatedMinutes)||0;await write(d);return send(res,200,o);}
     if(om&&req.method==='DELETE'){
@@ -969,7 +995,7 @@ async function api(req,res,pathname){
       return send(res,200,{ok:true,id:removed.id});
     }
 
-    if(req.method==='GET'&&pathname==='/api/categories') return send(res,200,(await read()).categories||[]);
+    if(req.method==='GET'&&pathname==='/api/categories') return send(res,200,(await readFields(['categories'])).categories||[]);
     if(req.method==='POST'&&pathname==='/api/categories'){
       const b=await body(req),d=await read(); const name=String(b.name||'').trim();
       if(!name)return send(res,400,{error:'Informe o nome da categoria'});
