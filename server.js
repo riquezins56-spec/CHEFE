@@ -158,12 +158,32 @@ const seed = {
   customers: []
 };
 
-const pool = process.env.DATABASE_URL ? new Pool({
-  connectionString: process.env.DATABASE_URL,
-  connectionTimeoutMillis:10000,
-  query_timeout:20000,
-  ssl: process.env.DATABASE_URL.includes('localhost') ? false : {rejectUnauthorized:false}
-}) : null;
+// Use the Aiven CA and prevent URL SSL parameters from replacing this configuration.
+function postgresConfig(databaseUrl) {
+  const connection = new URL(databaseUrl);
+  const local = ['localhost', '127.0.0.1', '[::1]'].includes(connection.hostname);
+  const sslMode = connection.searchParams.get('sslmode');
+  if (!local && sslMode === 'disable') {
+    throw new Error('A conexão remota PostgreSQL precisa de SSL. Remova sslmode=disable.');
+  }
+  const caPath = process.env.PGSSLROOTCERT || path.join(ROOT, 'ca.pem');
+  const ca = process.env.DATABASE_CA_CERT
+    ? process.env.DATABASE_CA_CERT.replace(/\\n/g, '\n')
+    : (fs.existsSync(caPath) ? fs.readFileSync(caPath, 'utf8') : undefined);
+  if (!local && !ca) {
+    throw new Error('Certificado CA ausente. Configure DATABASE_CA_CERT ou forneça ca.pem.');
+  }
+  for (const key of ['sslmode', 'sslcert', 'sslkey', 'sslrootcert', 'uselibpqcompat']) {
+    connection.searchParams.delete(key);
+  }
+  return {
+    connectionString: connection.toString(),
+    connectionTimeoutMillis: 10000,
+    query_timeout: 20000,
+    ssl: local ? false : { rejectUnauthorized: true, ca }
+  };
+}
+const pool = process.env.DATABASE_URL ? new Pool(postgresConfig(process.env.DATABASE_URL)) : null;
 
 let dbReadyPromise=null;
 let stateCache=null, stateCacheVersion=null;
